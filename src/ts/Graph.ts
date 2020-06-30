@@ -25,6 +25,8 @@ export class LabeledNode extends Node {
 
 export class Edge implements ILabel {
 
+	get isNode(): boolean { return this.v == this.w }
+	
 	public label(): string { return `(${this.v}>${this.w})` }
 
 	constructor(public v: number, public w: number) {
@@ -77,7 +79,7 @@ abstract class BaseGraph implements IGraph, ILabel {
 		this.nodes = new Map();
 	}
 
-	public isNode(node: number) { return node > 0 && node <= this.size }
+	public validNode(node: number) { return node > 0 && node <= this.size }
 
 	protected createNode(label?: string): Node {
 		return new Node(this.nextNodeId)
@@ -156,7 +158,7 @@ abstract class BaseGraph implements IGraph, ILabel {
 			timings = new Map<number, number>(),
 			discovered = (node: number) => timings.has(node),
 			stack = new Stack<number>();
-		if (!this.isNode(start))
+		if (!this.validNode(start))
 			return;
 		stack.push(start);
 		while (!stack.empty) {
@@ -193,7 +195,7 @@ abstract class BaseGraph implements IGraph, ILabel {
 			discovered = (node: number) => timings.has(node),
 			getTiming = (node: number) => timings.get(node) || 0,
 			queue = new Queue<number>();
-		if (!this.isNode(start))
+		if (!this.validNode(start))
 			return;
 		queue.enqueue(start);
 		timings.set(start, 0);
