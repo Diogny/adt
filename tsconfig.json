@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"target": "es2015",
+		"module": "commonjs",
+		"noImplicitAny": true,
+		"suppressImplicitAnyIndexErrors": true,
+		"allowSyntheticDefaultImports": true,
+		"moduleResolution": "node",
+		"strictNullChecks": true,
+		"sourceMap": true,
+		"removeComments": false,
+		"noEmitOnError": true,
+		"outDir": "./dist",
+		"baseUrl": ".",
+		"paths": {
+			"src/*": [
+				"src/*"
+			],
+			"*": [
+				"node_modules/*"
+			]
+		}
+	},
+	"include": [
+		"src/**/*"
+	]
+}

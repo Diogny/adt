@@ -1,0 +1,50 @@
+{
+	"name": "adts",
+	"author": "Diogny A. B. <diognyab@outlook.com>",
+	"version": "0.0.2",
+	"description": "Javascript Abstract Data Types",
+	"license": "MIT",
+	"main": "./dist/index.js",
+	"homepage": "https://github.com/Diogny/electric-circuits",
+	"bugs": {
+		"url": "https://github.com/Diogny/adt/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Diogny/adt.git"
+	},
+	"keywords": [
+		"ADT",
+		"Abstract",
+		"Data",
+		"Data Types",
+		"package",
+		"dabberio"
+	],
+	"scripts": {
+		"no-test": "echo \"Error: no test specified\" && exit 1",
+		"test": "mocha --reporter spec",
+		"test-ts": "mocha --require ts-node/register test/**/*.ts",
+		"preinstall": "node -e \"!process.env.npm_config_user_agent.startsWith('pnpm/') && !console.log('Use \\`npx pnpm install\\` to install dependencies in this repository\\n') && process.exit(1)\"",
+		"build-ts": "tsc --noEmitHelpers --importHelpers",
+		"watch": "tsc -w --noEmitHelpers --importHelpers",
+		"eslint": "eslint \"./src/*.ts\" \"./src/**/*.ts\" --report-unused-disable-directives",
+		"build-dev": "pnpm run build-ts && webpack --config webpack.dev.js",
+		"start": "pnpm run build-dev && pnpm run app",
+		"app": "electron ./dist/main.js",
+		"webpack-watch": "webpack --watch",
+		"serve": "npm run build:main && electron ./dist/main.js --serve",
+		"build:main": "tsc && webpack --config webpack.dev.js"
+	},
+	"files": [],
+	"devDependencies": {
+		"@types/chai": "^4.2.11",
+		"@types/mocha": "^7.0.2",
+		"@types/node": "12.12.21",
+		"chai": "^4.2.0",
+		"eslint": "^7.3.1",
+		"mocha": "^8.0.1",
+		"ts-node": "^8.10.2",
+		"typescript": "^3.9.5"
+	}
+}
