@@ -11,8 +11,8 @@ const t = new Tree<string>(
 );
 
 describe('Tree', () => {
-	it('t.root.data = "A"', () => {
-		expect(t.root.data).to.equal("A");
+	it('t.root.value = "A"', () => {
+		expect(t.root.value).to.equal("A");
 	});
 	it('t.depth() = 2', () => {
 		expect(t.depth()).to.equal(2);

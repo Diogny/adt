@@ -1,12 +1,16 @@
 import Queue from "./Queue";
+import Stack from "./Stack";
 
-export abstract class DataNode<T> {
-	constructor(public data: T) { }
+export abstract class ValueNode<T> {
 
-	abstract children: DataNode<T>[];
+	abstract children: ValueNode<T>[];
+
+	abstract isLeaf: boolean;
+
+	constructor(public value: T) { }
 }
 
-export class TreeNode<T> extends DataNode<T> {
+export class TreeNode<T> extends ValueNode<T> {
 
 	protected __children: TreeNode<T>[];
 
@@ -14,21 +18,23 @@ export class TreeNode<T> extends DataNode<T> {
 
 	public get size(): number { return this.__children.length }
 
-	constructor(data: T, ...childrenNodes: TreeNode<T>[]) {
-		super(data);
+	public get isLeaf(): boolean { return this.size == 0 }
+	
+	constructor(value: T, ...childrenNodes: TreeNode<T>[]) {
+		super(value);
 		this.__children = new Array(...childrenNodes);
 	}
 
-	public add(data: T): TreeNode<T> {
+	public add(value: T): TreeNode<T> {
 		let
-			n = new TreeNode<T>(data);
+			n = new TreeNode<T>(value);
 		this.__children.push(n);
 		return n
 	}
 
-	public remove(data: T, comparer?: (item: TreeNode<T>, index: number) => boolean): TreeNode<T> | undefined {
+	public remove(value: T, comparer?: (item: TreeNode<T>, index: number) => boolean): TreeNode<T> | undefined {
 		let
-			defaultComparer = (item: TreeNode<T>) => item.data === data,
+			defaultComparer = (item: TreeNode<T>) => item.value === value,
 			n = this.__children.findIndex(comparer || defaultComparer);
 		return n != -1 ? this.__children.splice(n, 1)[0] : undefined
 	}
@@ -37,22 +43,22 @@ export class TreeNode<T> extends DataNode<T> {
 		return index >= 0 && index < this.size ? this.__children.splice(index, 1)[0] : undefined
 	}
 
-	public find(data: T, comparer?: (item: TreeNode<T>, index: number) => boolean): TreeNode<T> | undefined {
+	public find(value: T, comparer?: (item: TreeNode<T>, index: number) => boolean): TreeNode<T> | undefined {
 		let
-			defaultComparer = (item: TreeNode<T>) => item.data === data;
+			defaultComparer = (item: TreeNode<T>) => item.value === value;
 		return this.__children.find(comparer || defaultComparer)
 	}
 
 }
 
 export abstract class BaseTree<T> {
-	abstract root: DataNode<T>;
+	abstract root: ValueNode<T>;
 
 	public depth(): number {
 		let
-			queue = new Queue<DataNode<T>>(),
-			map = new Map<DataNode<T>, number>(),
-			node: DataNode<T> | undefined,
+			queue = new Queue<ValueNode<T>>(),
+			map = new Map<ValueNode<T>, number>(),
+			node: ValueNode<T> | undefined,
 			depth = 0;
 		queue.enqueue(this.root);
 		map.set(this.root, 0);
@@ -67,11 +73,48 @@ export abstract class BaseTree<T> {
 		}
 		return depth;
 	}
+
+	public preOrder(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number {
+		if (!node)
+			return -1;
+		let
+			stack = new Stack<ValueNode<T>>(),
+			count = 0;
+		stack.push(node);
+		while (!stack.empty) {
+			count++;
+			node = stack.pop() as ValueNode<T>;
+			callback(node);
+			for (let children = node.children, i = children.length - 1; i >= 0; i--) {
+				stack.push(children[i]);
+			}
+		}
+		return count;
+	}
+
+	public breathSearch(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number {
+		if (!node)
+			return -1;
+		let
+			queue = new Queue<ValueNode<T>>(),
+			count = 0;
+		queue.enqueue(node);
+		while (!queue.empty) {
+			node = queue.dequeue() as ValueNode<T>;
+			count++;
+			callback(node);
+			node.children.forEach(n => {
+				queue.enqueue(n);
+			})
+		}
+		return count;
+	}
+
 }
 
 export class Tree<T> extends BaseTree<T>{
 
-	public find(data: T): TreeNode<T>[] | undefined {
+	public find(value: T): TreeNode<T>[] | undefined {
 		return
 	}
 
