@@ -6,29 +6,28 @@ describe('Graph', () => {
 		const g = new Graph("my graph");
 		expect(g.name).to.equal("my graph");
 	});
-	it('g.addNode().id = 1', () => {
+	it('g.addNode().id = 0', () => {
 		const g = new Graph("my graph");
 		const n = g.addNode();
-		expect(n.id).to.equal(1);
+		expect(n.id).to.equal(0);
 	});
-	it('g.node(1).label() = "1"', () => {
+	it('g.node(0).label() = "0"', () => {
 		const g = new Graph("my graph");
 		g.addNode();
-		const n = g.node(1);
-		expect(n?.label()).to.equal("1");
+		const n = g.node(0);
+		expect(n?.label()).to.equal("0");
 	});
-	it('g.connect(1, 2) = true', () => {
-		const g = new Graph("my graph");
-		g.addNode();
-		g.addNode();
-		expect(g.connect(1, 2)).to.equal(true);
-	});
-	it('g.adjacent(1, 2) = true', () => {
+	it('g connect, adjacent, disconnect', () => {
 		const g = new Graph("my graph");
 		g.addNode();
 		g.addNode();
-		g.connect(1, 2);
-		expect(g.adjacent(1, 2)).to.equal(true);
+		expect(g.connect(0, 1)).to.equal(true);
+		let count = g.edgeCount();
+		expect(count).to.equal(2);
+		expect(g.adjacent(0, 1)).to.equal(true);
+		expect(g.disconnect(0, 1)).to.equal(true);
+		count = g.edgeCount();
+		expect(count).to.equal(0);
 	});
 });
 
@@ -41,18 +40,18 @@ describe('Weighted Graph', () => {
 		const g = new WeightedGraph('my weighted graph');
 		expect(g.weighted).to.equal(true);
 	});
-	it('g.connect(1, 2, 12.5) = true', () => {
+	it('g.connect(0, 1, 12.5) = true', () => {
 		const g = new WeightedGraph('my weighted graph');
 		g.addNode();
 		g.addNode();
-		expect(g.connect(1, 2, 12.5)).to.equal(true);
+		expect(g.connect(0, 1, 12.5)).to.equal(true);
 	});
-	it('g.edge(1, 2).weight = 12.5', () => {
+	it('g.edge(0, 1).weight = 12.5', () => {
 		const g = new WeightedGraph('my weighted graph');
 		g.addNode();
 		g.addNode();
-		g.connect(1, 2, 12.5);
-		const edge = g.edge(1, 2) as WeightedEdge;
+		g.connect(0, 1, 12.5);
+		const edge = g.edge(0, 1) as WeightedEdge;
 		expect(edge.weight).to.equal(12.5);
 	});
 });
@@ -66,18 +65,18 @@ describe('Weighted Graph', () => {
 		const g = new WeightedGraph('my weighted graph');
 		expect(g.weighted).to.equal(true);
 	});
-	it('g.connect(1, 2, 12.5) = true', () => {
+	it('g.connect(0, 1, 12.5) = true', () => {
 		const g = new WeightedGraph('my weighted graph');
 		g.addNode();
 		g.addNode();
-		expect(g.connect(1, 2, 12.5)).to.equal(true);
+		expect(g.connect(0, 1, 12.5)).to.equal(true);
 	});
-	it('g.edge(1, 2).weight = 12.5', () => {
+	it('g.edge(0, 1).weight = 12.5', () => {
 		const g = new WeightedGraph('my weighted graph');
 		g.addNode();
 		g.addNode();
-		g.connect(1, 2, 12.5);
-		const edge = g.edge(1, 2) as WeightedEdge;
+		g.connect(0, 1, 12.5);
+		const edge = g.edge(0, 1) as WeightedEdge;
 		expect(edge.weight).to.equal(12.5);
 	});
 });

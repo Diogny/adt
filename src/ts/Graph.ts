@@ -26,7 +26,7 @@ export class LabeledNode extends Node {
 export class Edge implements ILabel {
 
 	get isNode(): boolean { return this.v == this.w }
-	
+
 	public label(): string { return `(${this.v}>${this.w})` }
 
 	constructor(public v: number, public w: number) {
@@ -45,6 +45,7 @@ export class WeightedEdge extends Edge {
 
 }
 
+//[Obsolete]
 export enum GraphVisitEdge {
 	TreeNode = 1,
 	BackNode = 2,
@@ -52,15 +53,39 @@ export enum GraphVisitEdge {
 	BackEdge = 4
 }
 
+export enum DFSVisitEdge {
+	tree,
+	parent,
+	back,
+	down
+}
+
+export interface IDFSTask {
+	g: BaseGraph;
+	pre: number[];
+	st: number[];
+	cc(): number;
+	run: (start: number, callback: (v: number, w: number, e: DFSVisitEdge) => void) => void;
+}
+
+export interface IDFSAnalizer {
+	register(dfs: IDFSTask): void;
+	visit(v: number, w: number, e: DFSVisitEdge): void;
+	report(): void;
+}
+
 export interface IGraph {
 	name: string;
 	directed: boolean;
 	weighted: boolean;
+	modified: boolean;
 }
 
 abstract class BaseGraph implements IGraph, ILabel {
 
 	public label(): string { return this.name }
+
+	modified: boolean;
 
 	protected nodes: Map<number, {
 		node: Node,
@@ -69,7 +94,7 @@ abstract class BaseGraph implements IGraph, ILabel {
 
 	public get size(): number { return this.nodes.size }
 
-	public get nextNodeId(): number { return this.size + 1 }
+	public get nextNodeId(): number { return this.size }
 
 	public node(id: number): Node | undefined { return this.nodes.get(id)?.node }
 
@@ -77,9 +102,10 @@ abstract class BaseGraph implements IGraph, ILabel {
 
 	constructor(public name: string, public directed: boolean, public weighted: boolean) {
 		this.nodes = new Map();
+		this.modified = false;
 	}
 
-	public validNode(node: number) { return node > 0 && node <= this.size }
+	public validNode(node: number) { return node >= 0 && node < this.size }
 
 	protected createNode(label?: string): Node {
 		return new Node(this.nextNodeId)
@@ -88,12 +114,13 @@ abstract class BaseGraph implements IGraph, ILabel {
 	public addNode(label?: string): Node {
 		let
 			node = this.createNode(label);
-		if (node.id <= 0)
+		if (node.id < 0)
 			throw 'invalid node index';
 		this.nodes.set(node.id, {
 			node: node,
 			edges: new Array()
 		});
+		this.modified = true;
 		return node;
 	}
 
@@ -110,8 +137,23 @@ abstract class BaseGraph implements IGraph, ILabel {
 		if (startNode.edges.some(e => e.w == w))
 			return false;
 		startNode.edges.push(this.createEdge(v, w, weight));
+		this.modified = true;
 		!this.directed
 			&& endNode.edges.push(this.createEdge(w, v, weight));
+		return true;
+	}
+
+	public disconnect(v: number, w: number): boolean {
+		let
+			e = edge.call(this, v, w) as { node: Node, edges: Edge[], index: number };
+		if (!e || e.index < 0)
+			return false;
+		e.edges.splice(e.index, 1);
+		this.modified = true;
+		if (!this.directed) {
+			e = edge.call(this, w, v);
+			e.edges.splice(e.index, 1);
+		}
 		return true;
 	}
 
@@ -135,8 +177,8 @@ abstract class BaseGraph implements IGraph, ILabel {
 
 	public edge(v: number, w: number): Edge | undefined {
 		let
-			vNode = this.nodes.get(v);
-		return vNode?.edges.find(e => e.w == w)
+			e = edge.call(this, v, w) as { node: Node, edges: Edge[], index: number } | undefined;
+		return e?.edges[e.index]
 	}
 
 	public edgeCount(): number {
@@ -152,39 +194,84 @@ abstract class BaseGraph implements IGraph, ILabel {
 		return 2 * this.edgeCount() / (this.size * (this.size - 1))
 	}
 
-	public depthFirstSearch(start: number, callback: (v: number, w: number, t: number, e: GraphVisitEdge) => void, verbose?: boolean) {
+	public dfsAnalysis(start: number, analizers: IDFSAnalizer[]) {
 		let
-			currentTiming = -1,
-			timings = new Map<number, number>(),
-			discovered = (node: number) => timings.has(node),
-			stack = new Stack<number>();
-		if (!this.validNode(start))
-			return;
-		stack.push(start);
-		while (!stack.empty) {
-			let
-				v = <number>stack.pop();
-			if (!discovered(v)) {
-				timings.set(v, ++currentTiming);
-				//node
-				callback(v, v, currentTiming, GraphVisitEdge.TreeNode);
-				//for all edges from v to w in G.adjacentEdges(v) do 
+			callback = (v: number, w: number, e: DFSVisitEdge) => {
+				analizers
+					.forEach(a => a.visit(v, w, e))
+			},
+			dfs = this.dfs();
+		analizers.forEach(a => a.register(dfs));
+		dfs.run(start, callback);
+	}
+
+	public dfs(): IDFSTask {
+		let
+			ranges: number[] = [],
+			timing = 0,
+			pre = new Array<number>(this.size).fill(-1),
+			st = new Array<number>(this.size).fill(-1),
+			component = 0,
+			discovered = (node: number) => pre[node] >= 0,
+			stack = new Stack<{ v: number, w: number }>(),
+			findAdjacents = (v: number, callback: (v: number, w: number, e: DFSVisitEdge) => void) => {
 				for (let array = this.adjacentEdges(v), i = array.length - 1; i >= 0; i--) {
 					let
 						w = array[i];
-					if (discovered(w)) {
-						//back-edge for directed graph or verbose
-						if (this.directed || verbose)
-							callback(v, w, currentTiming, GraphVisitEdge.BackEdge);
+					if (discovered(w))
+						processNonTreeEdge(v, w, callback);
+					else
+						stack.push({ v: v, w: w });
+				}
+			},
+			processNonTreeEdge = (v: number, w: number, callback: (v: number, w: number, e: DFSVisitEdge) => void) => {
+				if (st[v] == w)
+					callback(v, w, DFSVisitEdge.parent)
+				else if (pre[w] < pre[v])
+					callback(v, w, DFSVisitEdge.back)
+				else if (pre[w] > pre[v])
+					callback(v, w, DFSVisitEdge.down)
+				else
+					console.log(v, w, 'Ooopsie!')
+			},
+			dfs = (startNode: number, callback: (v: number, w: number, e: DFSVisitEdge) => void) => {
+				++component;
+				st[startNode] = startNode;
+				pre[startNode] = timing++;
+				findAdjacents(startNode, callback);
+				while (!stack.empty) {
+					let
+						edge = stack.pop() as { v: number, w: number };
+					if (discovered(edge.w)) {
+						processNonTreeEdge(edge.v, edge.w, callback);
 					} else {
-						//forward-edge
-						callback(v, w, currentTiming, GraphVisitEdge.ForwardEdge);
-						stack.push(w)
+						pre[edge.w] = timing++;
+						st[edge.w] = edge.v;
+						callback(edge.v, edge.w, DFSVisitEdge.tree);
+						findAdjacents(edge.w, callback);
 					}
 				}
-			} else if (this.directed || verbose) {
-				//back-node for directed graphs or verbose
-				callback(v, v, currentTiming, GraphVisitEdge.BackNode);
+			};
+		return {
+			g: this,
+			pre: pre,
+			st: st,
+			cc: () => component,
+			run: (start: number, callback: (v: number, w: number, e: DFSVisitEdge) => void) => {
+				if (!this.validNode(start))
+					return;
+				if (start - 1 >= 0)
+					ranges.push(start - 1);
+				ranges.push(this.size - 1);
+				while (ranges.length) {
+					timing = 0;
+					dfs(start, callback);
+					while (++start <= ranges[ranges.length - 1] && pre[start] >= 0);
+					if (start > ranges[ranges.length - 1]) {
+						ranges.pop();
+						start = 0;
+					}
+				}
 			}
 		}
 	}
@@ -219,6 +306,20 @@ abstract class BaseGraph implements IGraph, ILabel {
 			})
 		}
 	}
+}
+
+function edge(v: number, w: number): { node: Node, edges: Edge[], index: number } | undefined {
+	let
+		vNode = this.nodes.get(v) as {
+			node: Node,
+			edges: Edge[]
+		} | undefined;
+	return vNode ? { node: vNode.node, edges: vNode.edges, index: vNode.edges.findIndex(e => e.w == w) }
+		: undefined
+}
+
+function dfs() {
+
 }
 
 export class Graph extends BaseGraph {
