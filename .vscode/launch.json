@@ -42,7 +42,7 @@
 				"ts-node/register"
 			],
 			"args": [
-				"${workspaceFolder}/test/graph-create.ts"
+				"${workspaceFolder}/test/graph-directed-create.ts"
 			]
 		}
 	]

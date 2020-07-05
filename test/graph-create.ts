@@ -52,6 +52,6 @@ let
 	start = 0,
 	analizers = [
 		new EdgeAnalizer(true, true, true),
-		new BridgeAnalizer(),
+		//new BridgeAnalizer(), check
 	];
 g.dfsAnalysis(start, analizers, true);

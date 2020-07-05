@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { DiGraph, GraphVisitEdge } from '../src/ts/Graph';
-import { EdgeAnalizer, CyclesAnalizer } from '../src/ts/Graph-Analizers';
+import { DiGraph } from '../src/ts/Graph';
+import { DirectedEdgeAnalizer } from '../src/ts/Graph-Directed-Analizers';
 
 //run as Task launch.json
 //or	node node_modules/mocha/bin/_mocha --require ts-node/register test/graph-directed-visit.ts
@@ -32,9 +32,9 @@ describe('DiGraph Visits', () => {
 		let
 			start = 0,
 			analizers = [
-				new EdgeAnalizer()
+				new DirectedEdgeAnalizer()
 			];
-		//g.dfsAnalysis(start, analizers);
+		g.dfsAnalysis(start, analizers);
 		expect(1).to.equal(1);
 	});
 	/*it('Breath First Search', () => {

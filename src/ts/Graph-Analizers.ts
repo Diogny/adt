@@ -2,7 +2,10 @@ import { IDFSAnalizer, ISearchTask, DFSVisitEdge } from "./Graph";
 import { padStr, pad, range } from "./Utils";
 
 export abstract class BaseAnalizer implements IDFSAnalizer {
-	dfs: ISearchTask;
+
+	protected dfs: ISearchTask;
+
+	abstract directed: boolean;
 
 	constructor(public name: string) {
 	}
@@ -21,7 +24,16 @@ export abstract class BaseAnalizer implements IDFSAnalizer {
 
 }
 
-export class EdgeAnalizer extends BaseAnalizer {
+export abstract class UndirectedBaseAnalizer extends BaseAnalizer {
+
+	public get directed(): boolean { return false }
+
+	constructor(name: string) {
+		super(name);
+	}
+}
+
+export class EdgeAnalizer extends UndirectedBaseAnalizer {
 
 	edgeList: string[];
 	stackTrace: string[];
@@ -52,7 +64,7 @@ export class EdgeAnalizer extends BaseAnalizer {
 			if (this.showTreeEnd) {
 				let
 					s = this.colSpaces[w] * this.tabs;
-				this.edgeList.push(`${padStr(' ', s)}[${w}] tree analized`);
+				this.edgeList.push(`${padStr(' ', s)}[${w}] tree analized as:(${v}-${w})`);
 				this.showStack
 					&& this.stackTrace.push('');
 			}
@@ -68,7 +80,7 @@ export class EdgeAnalizer extends BaseAnalizer {
 			labeled = this.dfs.g.labeled,
 			g = this.dfs.g,
 			nv = labeled ? g.node(v)?.label() : v,
-			nw = labeled ? g.node(w)?.label() : v;
+			nw = labeled ? g.node(w)?.label() : w;
 		this.edgeList.push(`${padStr(' ', this.spaces)}(${nv}-${nw}) ${DFSVisitEdge[e]}`);
 		if (this.showStack) {
 			this.stackTrace.push(`[${this.dfs.stack.items.map(e => `${e.v}-${e.w}`).join(', ')}]`)
@@ -100,7 +112,7 @@ export class EdgeAnalizer extends BaseAnalizer {
 	}
 }
 
-export class BridgeAnalizer extends BaseAnalizer {
+export class BridgeAnalizer extends UndirectedBaseAnalizer {
 
 	low: number[];
 	edgeList: string[];
@@ -156,7 +168,7 @@ export class BridgeAnalizer extends BaseAnalizer {
 }
 
 //bug for DiGraphs
-export class CyclesAnalizer extends BaseAnalizer {
+export class CyclesAnalizer extends UndirectedBaseAnalizer {
 
 	cycles: number[][];
 

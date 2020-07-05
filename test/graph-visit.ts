@@ -2,6 +2,9 @@ import { expect } from 'chai';
 import { LabeledGraph, GraphVisitEdge } from '../src/ts/Graph';
 import { EdgeAnalizer, CyclesAnalizer } from '../src/ts/Graph-Analizers';
 
+//run as Task launch.json
+//or	node node_modules/mocha/bin/_mocha --require ts-node/register test/graph-visit.ts
+
 const g = new LabeledGraph('my labeled graph');
 g.addNode("A");		// 0
 g.addNode("B");		// 1
@@ -29,7 +32,7 @@ describe('Graph Visits', () => {
 				new EdgeAnalizer(),
 				new CyclesAnalizer()
 			];
-		//g.dfsAnalysis(start, analizers);
+		g.dfsAnalysis(start, analizers);
 		expect(1).to.equal(1);
 	});
 	/*it('Breath First Search', () => {
