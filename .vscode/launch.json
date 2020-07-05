@@ -7,7 +7,7 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Mocha Tests",
+			"name": "Mocha/Chai Tests",
 			"program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
 			"args": [
 				"-r",
@@ -31,6 +31,18 @@
 			"preLaunchTask": "tsc: build - tsconfig.json",
 			"outFiles": [
 				"${workspaceFolder}/dist/**/*.js"
+			]
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Graph create",
+			"runtimeArgs": [
+				"-r",
+				"ts-node/register"
+			],
+			"args": [
+				"${workspaceFolder}/test/graph-create.ts"
 			]
 		}
 	]

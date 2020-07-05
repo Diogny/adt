@@ -2,6 +2,9 @@ import { expect } from 'chai';
 import { DiGraph, GraphVisitEdge } from '../src/ts/Graph';
 import { EdgeAnalizer, CyclesAnalizer } from '../src/ts/Graph-Analizers';
 
+//run as Task launch.json
+//or	node node_modules/mocha/bin/_mocha --require ts-node/register test/graph-directed-visit.ts
+
 const g = new DiGraph('my DiGraph');
 g.addNode();		// 0
 g.addNode();		// 1

@@ -1,16 +1,13 @@
-import { IDFSAnalizer, IDFSTask, DFSVisitEdge } from "./Graph";
-
-const padStr = (ch: string, len: number) => new Array(len).join(ch);
-const pad = (s: string, width: number) => new Array(width - s.length).join(' ') + s;
-export const range = (s: number, e: number) => Array.from('x'.repeat(e - s), (_, i) => s + i);
+import { IDFSAnalizer, ISearchTask, DFSVisitEdge } from "./Graph";
+import { padStr, pad, range } from "./Utils";
 
 export abstract class BaseAnalizer implements IDFSAnalizer {
-	dfs: IDFSTask;
+	dfs: ISearchTask;
 
 	constructor(public name: string) {
 	}
 
-	public register(dfs: IDFSTask): void {
+	public register(dfs: ISearchTask): void {
 		this.dfs = dfs;
 	}
 
@@ -21,7 +18,6 @@ export abstract class BaseAnalizer implements IDFSAnalizer {
 	public end() {
 		console.log(this.name)
 	}
-
 
 }
 
@@ -40,7 +36,7 @@ export class EdgeAnalizer extends BaseAnalizer {
 		this.stackTrace = [];
 	}
 
-	public register(dfs: IDFSTask): void {
+	public register(dfs: ISearchTask): void {
 		super.register(dfs);
 		this.colSpaces = new Array(this.dfs.g.size).fill(-1);
 	}
@@ -62,14 +58,18 @@ export class EdgeAnalizer extends BaseAnalizer {
 			}
 			return;
 		}
-
 		if (this.colSpaces[v] < 0)
 			this.colSpaces[v] = 0;
 		if (e == DFSVisitEdge.tree) {
 			this.colSpaces[w] = this.colSpaces[v] + 1;
 		}
 		this.spaces = this.colSpaces[v] * this.tabs;
-		this.edgeList.push(`${padStr(' ', this.spaces)}${v}-${w} ${DFSVisitEdge[e]}`);
+		let
+			labeled = this.dfs.g.labeled,
+			g = this.dfs.g,
+			nv = labeled ? g.node(v)?.label() : v,
+			nw = labeled ? g.node(w)?.label() : v;
+		this.edgeList.push(`${padStr(' ', this.spaces)}(${nv}-${nw}) ${DFSVisitEdge[e]}`);
 		if (this.showStack) {
 			this.stackTrace.push(`[${this.dfs.stack.items.map(e => `${e.v}-${e.w}`).join(', ')}]`)
 		}
@@ -110,7 +110,7 @@ export class BridgeAnalizer extends BaseAnalizer {
 		this.edgeList = [];
 	}
 
-	public register(dfs: IDFSTask): void {
+	public register(dfs: ISearchTask): void {
 		super.register(dfs);
 		this.low = new Array<number>(this.dfs.nodes).fill(-1)
 	}

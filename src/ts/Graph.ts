@@ -1,5 +1,6 @@
 import Stack from "./Stack";
 import Queue from "./Queue";
+import { toBool, range } from "./Utils";
 
 interface ILabel {
 	label(): string;
@@ -55,13 +56,15 @@ export enum GraphVisitEdge {
 
 export enum DFSVisitEdge {
 	tree,
+	treeEnd,
 	parent,
 	back,
 	down,
-	treeEnd
+	//DiGraphs DAGs
+	cross
 }
 
-export interface IDFSTask {
+export interface ISearchTask {
 	g: BaseGraph;
 	pre: number[];
 	st: number[];
@@ -73,9 +76,34 @@ export interface IDFSTask {
 	run: (start: number, callback: (v: number, w: number, e: DFSVisitEdge) => void) => void;
 }
 
+export interface IGraphStructureNode {
+
+}
+
+export interface IPoint2D {
+	x: number;
+	y: number;
+}
+
+export interface IGraphStructureEdge {
+	from: string;
+	to: string;
+	w?: number;
+}
+
+export interface IGraphStructure {
+	name: string;
+	directed: boolean;
+	weighted: boolean;
+	labeled: boolean;
+	nodes: (number | string)[];
+	edges: IGraphStructureEdge[];
+	layout: Map<number, IPoint2D>;
+}
+
 export interface IDFSAnalizer {
 	name: string;
-	register(dfs: IDFSTask): void;
+	register(dfs: ISearchTask): void;
 	start(node: number): void;
 	visit(v: number, w: number, e: DFSVisitEdge): void;
 	end(): void;
@@ -85,10 +113,11 @@ export interface IGraph {
 	name: string;
 	directed: boolean;
 	weighted: boolean;
+	labeled: boolean;
 	modified: boolean;
 }
 
-abstract class BaseGraph implements IGraph, ILabel {
+export abstract class BaseGraph implements IGraph, ILabel {
 
 	public label(): string { return this.name }
 
@@ -105,26 +134,24 @@ abstract class BaseGraph implements IGraph, ILabel {
 
 	public node(id: number): Node | undefined { return this.nodes.get(id)?.node }
 
+	public hasNode(id: number): boolean { return !!this.nodes.get(id)?.node }
+
 	public nodeList(): Node[] { return Array.from(this.nodes.values()).map(n => n.node) }
 
 	public edges(id: number): Edge[] | undefined { return this.nodes.get(id)?.edges }
 
-	constructor(public name: string, public directed: boolean, public weighted: boolean) {
+	constructor(public name: string, public directed: boolean, public weighted: boolean, public labeled: boolean) {
 		this.nodes = new Map();
 		this.modified = false;
 	}
 
 	public validNode(node: number) { return node >= 0 && node < this.size }
 
-	protected createNode(label?: string): Node {
-		return new Node(this.nextNodeId)
-	}
-
 	public addNode(label?: string): Node {
 		let
-			node = this.createNode(label);
-		if (node.id < 0)
-			throw 'invalid node index';
+			node = this.labeled ?
+				new LabeledNode(this.nextNodeId, <string>label) :
+				new Node(this.nextNodeId);
 		this.nodes.set(node.id, {
 			node: node,
 			edges: new Array()
@@ -133,22 +160,22 @@ abstract class BaseGraph implements IGraph, ILabel {
 		return node;
 	}
 
-	protected createEdge(v: number, w: number, weight?: number): Edge {
-		return new Edge(v, w)
-	}
-
 	public connect(v: number, w: number, weight?: number): boolean {
 		let
 			startNode = this.nodes.get(v),
-			endNode = this.nodes.get(w);
+			endNode = this.nodes.get(w),
+			createEdge = (nv: number, nw: number): Edge =>
+				this.weighted ?
+					new WeightedEdge(nv, nw, <any>weight) :
+					new Edge(nv, nw);
 		if (!startNode || !endNode)
 			return false;
 		if (startNode.edges.some(e => e.w == w))
 			return false;
-		startNode.edges.push(this.createEdge(v, w, weight));
+		startNode.edges.push(createEdge(v, w));
 		this.modified = true;
 		!this.directed
-			&& endNode.edges.push(this.createEdge(w, v, weight));
+			&& endNode.edges.push(createEdge(w, v));
 		return true;
 	}
 
@@ -205,7 +232,7 @@ abstract class BaseGraph implements IGraph, ILabel {
 
 	public dfs(start: number, callback: (v: number, w: number, e: DFSVisitEdge) => void, full?: boolean) {
 		let
-			dfs = dfsAnalysis.call(this, start, 0, full) as IDFSTask;
+			dfs = depthFirstSearch.call(this, start, 0, full) as ISearchTask;
 		while ((start = dfs.getStart()) != -1) {
 			dfs.run(start, callback);
 		}
@@ -217,7 +244,7 @@ abstract class BaseGraph implements IGraph, ILabel {
 				analizers
 					.forEach(a => a.visit(v, w, e))
 			},
-			dfs = dfsAnalysis.call(this, start, 0, full) as IDFSTask;
+			dfs = depthFirstSearch.call(this, start, 0, full) as ISearchTask;
 		analizers
 			.forEach(a => a.register(dfs));
 		while ((start = dfs.getStart()) != -1) {
@@ -227,6 +254,7 @@ abstract class BaseGraph implements IGraph, ILabel {
 		analizers.forEach(a => a.end());
 	}
 
+	//[Obsolete]
 	public breadthFirstSearch(start: number, callback: (v: number, e: GraphVisitEdge, wd: number) => void, verbose?: boolean) {
 		let
 			timings = new Map<number, number>(),
@@ -258,42 +286,77 @@ abstract class BaseGraph implements IGraph, ILabel {
 		}
 	}
 
-	public static create(name: string, content: string): BaseGraph {
-		let
-			regex = /(?:\()([^\>\-])([\>\-])([^\)])(?:\))/g,
-			match: RegExpMatchArray,
-			dic = {},
-			edgeDirection: string = <any>void 0,
-			labelIsNumber: true,
-			selfLoops = false,
-			multipleEdges = false,
-			processVertex = function (label: string) {
-				var entry = dic[label];
-				if (entry == null) {
-					entry = {
-						label: label,
-						vertex: undefined,
-						neighbors: []
-					}
-					dic[label] = entry;
-				}
-				return entry;
-			};
-		while ((match = <RegExpMatchArray>regex.exec(content)) !== null) {
-			var direction = match[2];
-			if (!edgeDirection)
-				edgeDirection = direction;
-			else if (edgeDirection != direction)
-				throw 'Graph contains mixed edge directions';
-
-			var tail = processVertex(match[1]),
-				head = processVertex(match[3]);
-
-			if (selfLoops = selfLoops || (tail.label === head.label))
-				throw `self-loops not supported: ${match[0]}`
-
+	public static create(name: string, directed: boolean, weighted: boolean, labeled: boolean): BaseGraph {
+		if (labeled) {
+			if (weighted)
+				throw `weighted labeled graph not supported yet!`
+			else
+				return directed ? new LabeledDiGraph(name) : new LabeledGraph(name);
+		} else {
+			if (weighted)
+				return directed ? new WeightedDiGraph(name) : new WeightedGraph(name);
+			else
+				return directed ? new DiGraph(name) : new Graph(name);
 		}
-		return new Graph(name)
+	}
+
+	public static fromJSON(content: { [x: string]: any }): BaseGraph {
+		let
+			name = content["name"],
+			directed = toBool(content["directed"]),
+			weighted = toBool(content["weighted"]),
+			labeled = !!content["labels"],
+			labels = (labeled ? Array.from(content["labels"]) : undefined) as string[],
+			labelMap = new Map<string, number>(),
+			nodes = labeled ? 0 : parseInt(content["nodes"]),
+			edges = Array.from(content["edges"]) as { from: number | string, to: number | string, w?: number }[],
+			getNode = (nodeOrLabel: number | string): { node: number, label?: string } => {
+				if (labeled) {
+					let
+						n = labelMap.get(<string>nodeOrLabel);
+					return {
+						node: n != undefined ? <number>n : -1,
+						label: <string>nodeOrLabel
+					}
+				} else
+					return { node: g.hasNode(<number>nodeOrLabel) ? <number>nodeOrLabel : -1 }
+			},
+			getEdge = (e: { from: number | string, to: number | string, w?: number }): {
+				v: { node: number, label?: string },
+				w: { node: number, label?: string },
+				weight?: number
+			} => ({
+				v: getNode(e.from),
+				w: getNode(e.to),
+				weight: e.w
+			}),
+			g = BaseGraph.create(name, directed, weighted, labeled);
+
+		if (labeled) {
+			if (!labels)
+				throw `invalid graph labels`
+			labels.forEach((label: string, node: number) => {
+				g.addNode(label);
+				labelMap.set(label, node)
+			})
+		} else {
+			range(0, nodes).forEach(n => g.addNode())
+		}
+
+		if (!edges)
+			throw `invalid edges`;
+		edges.forEach((e) => {
+			let
+				edge = getEdge(e);
+			if (edge.v.node == -1 || edge.w.node == -1)
+				throw `invalid edge: ${e}`;
+			if (weighted) {
+				!edge.weight && (edge.weight = 0);
+				g.connect(edge.v.node, edge.w.node, edge.weight)
+			} else
+				g.connect(edge.v.node, edge.w.node)
+		});
+		return g
 	}
 }
 
@@ -307,7 +370,7 @@ function edge(v: number, w: number): { node: Node, edges: Edge[], index: number 
 		: undefined
 }
 
-function dfsAnalysis(entryNode: number, startTiming: number, full?: boolean): IDFSTask {
+function depthFirstSearch(entryNode: number, startTiming: number, full?: boolean): ISearchTask {
 	let
 		nodes = (this as BaseGraph).size,
 		currentNode = -1,
@@ -341,35 +404,8 @@ function dfsAnalysis(entryNode: number, startTiming: number, full?: boolean): ID
 				else
 					console.log(v, w, 'Ooopsie!');
 			}
-		};
-
-
-
-	return {
-		g: (this as BaseGraph),
-		pre: pre,
-		st: st,
-		nodes: nodes,
-		stack: stack,
-		cc: () => component,
-		timing: () => timing,
-		getStart: () => {
-			if (currentNode == -1) {
-				if (full && (entryNode - 1) >= 0)
-					ranges.push(entryNode - 1);
-				ranges.push(this.size - 1);
-				return currentNode = entryNode;
-			}
-			if (!full)
-				return currentNode = -1;
-			while (++currentNode <= ranges[ranges.length - 1] && pre[currentNode] >= 0);
-			if (currentNode > ranges[ranges.length - 1]) {
-				ranges.pop();
-				currentNode = ranges.length ? 0 : -1;
-			}
-			return currentNode
 		},
-		run: (startNode: number, callback: (v: number, w: number, e: DFSVisitEdge) => void) => {
+		dfs = (startNode: number, callback: (v: number, w: number, e: DFSVisitEdge) => void) => {
 			if (!(this as BaseGraph).validNode(startNode))
 				return;
 			timing = startTiming;
@@ -397,19 +433,47 @@ function dfsAnalysis(entryNode: number, startTiming: number, full?: boolean): ID
 				}
 			}
 			callback(startNode, startNode, DFSVisitEdge.treeEnd);
-		}
+		},
+		dfsDirect = (startNode: number, callback: (v: number, w: number, e: DFSVisitEdge) => void) => {
+		};
+
+	return {
+		g: (this as BaseGraph),
+		pre: pre,
+		st: st,
+		nodes: nodes,
+		stack: stack,
+		cc: () => component,
+		timing: () => timing,
+		getStart: () => {
+			if (currentNode == -1) {
+				if (full && (entryNode - 1) >= 0)
+					ranges.push(entryNode - 1);
+				ranges.push(this.size - 1);
+				return currentNode = entryNode;
+			}
+			if (!full)
+				return currentNode = -1;
+			while (++currentNode <= ranges[ranges.length - 1] && pre[currentNode] >= 0);
+			if (currentNode > ranges[ranges.length - 1]) {
+				ranges.pop();
+				currentNode = ranges.length ? 0 : -1;
+			}
+			return currentNode
+		},
+		run: (this as BaseGraph).directed ? dfsDirect : dfs
 	}
 }
 
 export class Graph extends BaseGraph {
 	constructor(name: string) {
-		super(name, false, false)
+		super(name, false, false, false)
 	}
 }
 
 export class DiGraph extends BaseGraph {
 	constructor(name: string) {
-		super(name, true, false)
+		super(name, true, false, false)
 	}
 }
 
@@ -418,11 +482,7 @@ abstract class BaseWeightedGraph extends BaseGraph {
 	public edges(id: number): WeightedEdge[] | undefined { return this.nodes.get(id)?.edges as WeightedEdge[] }
 
 	constructor(name: string, directed: boolean) {
-		super(name, directed, true)
-	}
-
-	protected createEdge(v: number, w: number, weight?: number): WeightedEdge {
-		return new WeightedEdge(v, w, <any>weight)
+		super(name, directed, true, false)
 	}
 }
 
@@ -442,12 +502,8 @@ abstract class BaseLabeledGraph extends BaseGraph {
 
 	public node(id: number): LabeledNode | undefined { return this.nodes.get(id)?.node as LabeledNode }
 
-	protected createNode(label?: string): LabeledNode {
-		return new LabeledNode(this.nextNodeId, <any>label)
-	}
-
 	constructor(name: string, directed: boolean, weighted: boolean) {
-		super(name, directed, weighted)
+		super(name, directed, weighted, true)
 	}
 }
 
@@ -470,9 +526,4 @@ class BaseLabeledWeightedGraph extends BaseLabeledGraph {
 	constructor(name: string, directed: boolean) {
 		super(name, directed, true)
 	}
-
-	protected createEdge(v: number, w: number, weight?: number): WeightedEdge {
-		return new WeightedEdge(v, w, <any>weight)
-	}
-
 }
