@@ -1,7 +1,7 @@
 {
 	"name": "adts",
 	"author": "Diogny A. B. <diognyab@outlook.com>",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"description": "Javascript Abstract Data Types",
 	"license": "MIT",
 	"main": "./dist/index.js",
@@ -24,17 +24,11 @@
 	"scripts": {
 		"no-test": "echo \"Error: no test specified\" && exit 1",
 		"test": "mocha --reporter spec",
-		"test-ts": "mocha --require ts-node/register test/**/*.ts",
+		"test-ts": "mocha --require ts-node/register --watch --watch-files src test/**/*.ts",
 		"preinstall": "node -e \"!process.env.npm_config_user_agent.startsWith('pnpm/') && !console.log('Use \\`npx pnpm install\\` to install dependencies in this repository\\n') && process.exit(1)\"",
 		"build-ts": "tsc --noEmitHelpers --importHelpers",
 		"watch": "tsc -w --noEmitHelpers --importHelpers",
-		"eslint": "eslint \"./src/*.ts\" \"./src/**/*.ts\" --report-unused-disable-directives",
-		"build-dev": "pnpm run build-ts && webpack --config webpack.dev.js",
-		"start": "pnpm run build-dev && pnpm run app",
-		"app": "electron ./dist/main.js",
-		"webpack-watch": "webpack --watch",
-		"serve": "npm run build:main && electron ./dist/main.js --serve",
-		"build:main": "tsc && webpack --config webpack.dev.js"
+		"eslint": "eslint \"./src/*.ts\" \"./src/**/*.ts\" --report-unused-disable-directives"
 	},
 	"files": [],
 	"devDependencies": {

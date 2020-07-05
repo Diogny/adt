@@ -29,11 +29,10 @@ describe('Graph Visits', () => {
 				new EdgeAnalizer(),
 				new CyclesAnalizer()
 			];
-		g.dfsAnalysis(start, analizers);
-		analizers.forEach(a => a.report());
+		//g.dfsAnalysis(start, analizers);
 		expect(1).to.equal(1);
 	});
-	it('Breath First Search', () => {
+	/*it('Breath First Search', () => {
 		g.breadthFirstSearch(1, (v, e, wd) => {
 			const
 				vn = g.node(v)?.label();
@@ -50,5 +49,5 @@ describe('Graph Visits', () => {
 			}
 		});
 		expect(1).to.equal(1);
-	});
+	});*/
 });
