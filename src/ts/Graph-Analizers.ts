@@ -40,7 +40,7 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 	colSpaces: number[];
 	spaces = 0;
 	components = 0;
-	walkTreeWidth = 0;
+	maxLabelWidth = 0;
 
 	constructor(name: string, public showStack?: boolean, public showInternals?: boolean, public showTreeEnd?: boolean) {
 		super(name);
@@ -96,13 +96,13 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 		})
 			.forEach(s => console.log(s))
 		if (this.showInternals) {
-			this.walkTreeWidth = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1;
+			this.maxLabelWidth = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1;
 			let
-				header = `node: ${range(0, this.dfs.nodes).map(n => formatNumber(n, this.walkTreeWidth)).join('  ')}`;
+				header = `node: ${range(0, this.dfs.nodes).map(n => formatNumber(n, this.maxLabelWidth)).join('  ')}`;
 			console.log(header);
 			console.log(padStr('-', header.length + 1));
-			console.log(`pre:  ${this.dfs.pre.map(n => formatNumber(n, this.walkTreeWidth)).join('  ')}`);
-			console.log(`st:   ${this.dfs.st.map(n => formatNumber(n, this.walkTreeWidth)).join('  ')}`);
+			console.log(`pre:  ${this.dfs.pre.map(n => formatNumber(n, this.maxLabelWidth)).join('  ')}`);
+			console.log(`st:   ${this.dfs.st.map(n => formatNumber(n, this.maxLabelWidth)).join('  ')}`);
 		}
 	}
 
@@ -173,7 +173,6 @@ export class BridgeAnalizer extends UndirectedBaseAnalizer {
 	}
 }
 
-//bug for DiGraphs
 export class CyclesAnalizer extends UndirectedBaseAnalizer {
 
 	cycles: number[][];
@@ -186,7 +185,6 @@ export class CyclesAnalizer extends UndirectedBaseAnalizer {
 	}
 
 	public start(node: number) {
-
 	}
 
 	public visit(v: number, w: number, e: DFSVisitEdge) {

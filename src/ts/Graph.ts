@@ -242,8 +242,7 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public dfs(start: number, callback: SearchCallback, full?: boolean) {
 		let
-			dfs = dfsEngine//(this.directed ? depthFirstSearchDirected : depthFirstSearch)
-				.call(this, start, 0, full) as ISearchTask;
+			dfs = dfsEngine.call(this, start, 0, full) as ISearchTask;
 		while ((start = dfs.getStart()) != -1) {
 			dfs.run(start, callback);
 		}
@@ -255,8 +254,7 @@ export abstract class BaseGraph implements IGraph, ILabel {
 				analizers
 					.forEach(a => a.visit(v, w, e))
 			},
-			dfs = dfsEngine//(this.directed ? depthFirstSearchDirected : depthFirstSearch)
-				.call(this, start, 0, full) as ISearchTask;
+			dfs = dfsEngine.call(this, start, 0, full) as ISearchTask;
 		analizers.forEach(a => {
 			if (this.directed != a.directed)
 				throw `edge analizer direction does not match the graph`
