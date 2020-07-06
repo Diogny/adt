@@ -1,5 +1,5 @@
 import { IDFSAnalizer, ISearchTask, DFSVisitEdge } from "./Graph";
-import { padStr, pad, range } from "./Utils";
+import { padStr, pad, range, formatNumber } from "./Utils";
 
 export abstract class BaseAnalizer implements IDFSAnalizer {
 
@@ -7,8 +7,7 @@ export abstract class BaseAnalizer implements IDFSAnalizer {
 
 	abstract directed: boolean;
 
-	constructor(public name: string) {
-	}
+	constructor(public name: string) { }
 
 	public register(dfs: ISearchTask): void {
 		this.dfs = dfs;
@@ -33,7 +32,7 @@ export abstract class UndirectedBaseAnalizer extends BaseAnalizer {
 	}
 }
 
-export class EdgeAnalizer extends UndirectedBaseAnalizer {
+export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 
 	edgeList: string[];
 	stackTrace: string[];
@@ -41,9 +40,10 @@ export class EdgeAnalizer extends UndirectedBaseAnalizer {
 	colSpaces: number[];
 	spaces = 0;
 	components = 0;
+	walkTreeWidth = 0;
 
-	constructor(public showStack?: boolean, public showInternals?: boolean, public showTreeEnd?: boolean) {
-		super("Edge Analizer");
+	constructor(name: string, public showStack?: boolean, public showInternals?: boolean, public showTreeEnd?: boolean) {
+		super(name);
 		this.edgeList = [];
 		this.stackTrace = [];
 	}
@@ -77,10 +77,8 @@ export class EdgeAnalizer extends UndirectedBaseAnalizer {
 		}
 		this.spaces = this.colSpaces[v] * this.tabs;
 		let
-			labeled = this.dfs.g.labeled,
-			g = this.dfs.g,
-			nv = labeled ? g.node(v)?.label() : v,
-			nw = labeled ? g.node(w)?.label() : w;
+			nv = this.dfs.g.nodeLabel(v),
+			nw = this.dfs.g.nodeLabel(w);
 		this.edgeList.push(`${padStr(' ', this.spaces)}(${nv}-${nw}) ${DFSVisitEdge[e]}`);
 		if (this.showStack) {
 			this.stackTrace.push(`[${this.dfs.stack.items.map(e => `${e.v}-${e.w}`).join(', ')}]`)
@@ -98,18 +96,26 @@ export class EdgeAnalizer extends UndirectedBaseAnalizer {
 		})
 			.forEach(s => console.log(s))
 		if (this.showInternals) {
+			this.walkTreeWidth = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1;
 			let
-				s = pad("0", 2),
-				formatNumber = (n: number) => pad(n + "", biggest),
-				biggest = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1,
-				header = `node: ${range(0, this.dfs.nodes).map(formatNumber).join('  ')}`;
-
+				header = `node: ${range(0, this.dfs.nodes).map(n => formatNumber(n, this.walkTreeWidth)).join('  ')}`;
 			console.log(header);
 			console.log(padStr('-', header.length + 1));
-			console.log(`pre:  ${this.dfs.pre.map(formatNumber).join('  ')}`);
-			console.log(`st:   ${this.dfs.st.map(formatNumber).join('  ')}`);
+			console.log(`pre:  ${this.dfs.pre.map(n => formatNumber(n, this.walkTreeWidth)).join('  ')}`);
+			console.log(`st:   ${this.dfs.st.map(n => formatNumber(n, this.walkTreeWidth)).join('  ')}`);
 		}
 	}
+
+}
+
+export class EdgeAnalizer extends BaseEdgeAnalizer {
+
+	public get directed(): boolean { return false }
+
+	constructor(public showStack?: boolean, public showInternals?: boolean, public showTreeEnd?: boolean) {
+		super("Edge Analizer", showStack, showInternals, showTreeEnd);
+	}
+
 }
 
 export class BridgeAnalizer extends UndirectedBaseAnalizer {

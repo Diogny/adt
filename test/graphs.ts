@@ -1,6 +1,9 @@
 import { expect } from 'chai';
 import { Graph, WeightedGraph, WeightedEdge, LabeledGraph } from '../src/ts/Graph';
 
+//run as Task launch.json
+//or	node node_modules/mocha/bin/_mocha --require ts-node/register test/graphs.ts
+
 describe('Graph', () => {
 	it('create Graph', () => {
 		const g = new Graph("my graph");

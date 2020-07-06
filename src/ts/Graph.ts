@@ -8,41 +8,41 @@ interface ILabel {
 
 export class Node implements ILabel {
 
+	constructor(public id: number) { }
+
 	public label(): string { return String(this.id) }
 
-	constructor(public id: number) { }
 }
 
 export class LabeledNode extends Node {
-
-	public label(): string { return this.__label }
 
 	constructor(id: number, public __label: string) {
 		super(id);
 		if (!__label)
 			throw `empty node label`
 	}
+
+	public label(): string { return this.__label }
+
 }
 
 export class Edge implements ILabel {
 
-	get isNode(): boolean { return this.v == this.w }
-
 	public label(): string { return `(${this.v}>${this.w})` }
 
-	constructor(public v: number, public w: number) {
-	}
+	constructor(public v: number, public w: number) { }
+
 }
 
 export class WeightedEdge extends Edge {
-
-	public label(): string { return `(${this.v}>${this.w})::${this.weight}` }
 
 	constructor(v: number, w: number, public weight: number) {
 		super(v, w);
 		if (Number.isNaN(weight))
 			throw `invalid edge weight`
 	}
+
+	public label(): string { return `(${this.v}>${this.w})::${this.weight}` }
 
 }
 
@@ -72,16 +72,13 @@ export interface ISearchTask {
 	g: BaseGraph;
 	pre: number[];
 	st: number[];
+	post: number[];
 	stack: Stack<{ v: number, w: number }>;
 	nodes: number;
 	getStart(): number;
 	cc(): number;
 	timing(): number;
 	run: (start: number, callback: SearchCallback) => void;
-}
-
-export interface IDirectedSearchTask extends ISearchTask {
-	post: number[];
 }
 
 export interface IDFSAnalizer {
@@ -91,10 +88,6 @@ export interface IDFSAnalizer {
 	start(node: number): void;
 	visit(v: number, w: number, e: DFSVisitEdge): void;
 	end(): void;
-}
-
-export interface ISearchTaskDirected extends ISearchTask {
-	post: number[];
 }
 
 export interface IPoint2D {
@@ -148,6 +141,8 @@ export abstract class BaseGraph implements IGraph, ILabel {
 	public get nextNodeId(): number { return this.size }
 
 	public node(id: number): Node | undefined { return this.nodes.get(id)?.node }
+
+	public nodeLabel(id: number): string { return this.node(id)?.label() || "" }
 
 	public hasNode(id: number): boolean { return !!this.nodes.get(id)?.node }
 
@@ -247,7 +242,7 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public dfs(start: number, callback: SearchCallback, full?: boolean) {
 		let
-			dfs = (this.directed ? depthFirstSearchDirected : depthFirstSearch)
+			dfs = dfsEngine//(this.directed ? depthFirstSearchDirected : depthFirstSearch)
 				.call(this, start, 0, full) as ISearchTask;
 		while ((start = dfs.getStart()) != -1) {
 			dfs.run(start, callback);
@@ -260,7 +255,7 @@ export abstract class BaseGraph implements IGraph, ILabel {
 				analizers
 					.forEach(a => a.visit(v, w, e))
 			},
-			dfs = (this.directed ? depthFirstSearchDirected : depthFirstSearch)
+			dfs = dfsEngine//(this.directed ? depthFirstSearchDirected : depthFirstSearch)
 				.call(this, start, 0, full) as ISearchTask;
 		analizers.forEach(a => {
 			if (this.directed != a.directed)
@@ -451,16 +446,14 @@ function edge(v: number, w: number): NodeInternalIndex | undefined {
 		: undefined
 }
 
-//later after debugging and testing make both search one
-//for directed:
-//	add postTiming & post
-function depthFirstSearchDirected(entryNode: number, startTiming: number, full?: boolean): ISearchTaskDirected {
+function dfsEngine(entryNode: number, startTiming: number, full?: boolean): ISearchTask {
 	let
-		nodes = (this as BaseGraph).size,
+		g = (this as BaseGraph),
+		nodes = g.size,
 		currentNode = -1,
 		ranges: number[] = [],
 		pre = new Array<number>(nodes).fill(-1),
-		post = new Array<number>(nodes).fill(-1),
+		post: number[] = <any>void 0,
 		st = new Array<number>(nodes).fill(-1),
 		component = 0,
 		timing = startTiming,
@@ -468,7 +461,7 @@ function depthFirstSearchDirected(entryNode: number, startTiming: number, full?:
 		discovered = (node: number) => pre[node] >= 0,
 		stack = new Stack<{ v: number, w: number, t: boolean }>(),
 		findAdjacents = (v: number, callback: SearchCallback, processEdge: (v: number, w: number, callback: SearchCallback) => void) => {
-			for (let array = (this as BaseGraph).adjacentEdges(v), i = array.length - 1; i >= 0; i--) {
+			for (let array = g.adjacentEdges(v), i = array.length - 1; i >= 0; i--) {
 				let
 					w = array[i];
 				if (discovered(w))
@@ -478,6 +471,19 @@ function depthFirstSearchDirected(entryNode: number, startTiming: number, full?:
 				}
 			}
 		},
+		processNonTreeEdge = (v: number, w: number, callback: SearchCallback) => {
+			if (st[v] == w)
+				callback(v, w, DFSVisitEdge.parent)
+			else {
+				if (pre[w] < pre[v]) {
+					callback(v, w, DFSVisitEdge.back)
+				}
+				else if (pre[w] > pre[v])
+					callback(v, w, DFSVisitEdge.down)
+				else
+					console.log(v, w, 'Ooopsie!');
+			}
+		},
 		processNonTreeDirectedEdge = (v: number, w: number, callback: SearchCallback) => {
 			if (pre[v] < pre[w])
 				callback(v, w, DFSVisitEdge.down)
@@ -485,34 +491,34 @@ function depthFirstSearchDirected(entryNode: number, startTiming: number, full?:
 				callback(v, w, DFSVisitEdge.back)
 			else
 				callback(v, w, DFSVisitEdge.cross)
-		};
-
-	return {
-		g: (this as BaseGraph),
-		pre: pre,
-		post: post,
-		st: st,
-		nodes: nodes,
-		stack: stack,
-		cc: () => component,
-		timing: () => timing,
-		getStart: () => {
-			if (currentNode == -1) {
-				if (full && (entryNode - 1) >= 0)
-					ranges.push(entryNode - 1);
-				ranges.push(this.size - 1);
-				return currentNode = entryNode;
-			}
-			if (!full)
-				return currentNode = -1;
-			while (++currentNode <= ranges[ranges.length - 1] && pre[currentNode] >= 0);
-			if (currentNode > ranges[ranges.length - 1]) {
-				ranges.pop();
-				currentNode = ranges.length ? 0 : -1;
-			}
-			return currentNode
 		},
-		run: (startNode: number, callback: SearchCallback) => {
+		dfs = (startNode: number, callback: SearchCallback) => {
+			++component;
+			st[startNode] = startNode;
+			pre[startNode] = timing++;
+			findAdjacents(startNode, callback, processNonTreeEdge);
+			while (!stack.empty) {
+				let
+					edge = stack.peek() as { v: number, w: number, t: boolean };
+				if (edge.t) {
+					callback(edge.v, edge.w, DFSVisitEdge.treeEnd);
+					stack.pop();
+				} else {
+					if (discovered(edge.w)) {
+						processNonTreeEdge(edge.v, edge.w, callback);
+						stack.pop();
+					} else {
+						edge.t = true;
+						pre[edge.w] = timing++;
+						st[edge.w] = edge.v;
+						callback(edge.v, edge.w, DFSVisitEdge.tree);
+						findAdjacents(edge.w, callback, processNonTreeEdge);
+					}
+				}
+			}
+			callback(startNode, startNode, DFSVisitEdge.treeEnd);
+		},
+		dfsDirected = (startNode: number, callback: SearchCallback) => {
 			++component;
 			st[startNode] = startNode;
 			pre[startNode] = timing++;
@@ -539,49 +545,12 @@ function depthFirstSearchDirected(entryNode: number, startTiming: number, full?:
 			}
 			post[startNode] = postTiming++;
 			callback(startNode, startNode, DFSVisitEdge.treeEnd);
-		}
-	}
-}
-
-function depthFirstSearch(entryNode: number, startTiming: number, full?: boolean): ISearchTask {
-	let
-		nodes = (this as BaseGraph).size,
-		currentNode = -1,
-		ranges: number[] = [],
-		pre = new Array<number>(nodes).fill(-1),
-		st = new Array<number>(nodes).fill(-1),
-		component = 0,
-		timing = startTiming,
-		discovered = (node: number) => pre[node] >= 0,
-		stack = new Stack<{ v: number, w: number, t: boolean }>(),
-		findAdjacents = (v: number, callback: SearchCallback, processEdge: (v: number, w: number, callback: SearchCallback) => void) => {
-			for (let array = (this as BaseGraph).adjacentEdges(v), i = array.length - 1; i >= 0; i--) {
-				let
-					w = array[i];
-				if (discovered(w))
-					processEdge(v, w, callback);
-				else {
-					stack.push({ v: v, w: w, t: false });
-				}
-			}
-		},
-		processNonTreeEdge = (v: number, w: number, callback: SearchCallback) => {
-			if (st[v] == w)
-				callback(v, w, DFSVisitEdge.parent)
-			else {
-				if (pre[w] < pre[v]) {
-					callback(v, w, DFSVisitEdge.back)
-				}
-				else if (pre[w] > pre[v])
-					callback(v, w, DFSVisitEdge.down)
-				else
-					console.log(v, w, 'Ooopsie!');
-			}
 		};
-
+	g.directed && (post = new Array<number>(nodes).fill(-1));
 	return {
-		g: (this as BaseGraph),
+		g: g,
 		pre: pre,
+		post: post,
 		st: st,
 		nodes: nodes,
 		stack: stack,
@@ -603,31 +572,6 @@ function depthFirstSearch(entryNode: number, startTiming: number, full?: boolean
 			}
 			return currentNode
 		},
-		run: (startNode: number, callback: SearchCallback) => {
-			++component;
-			st[startNode] = startNode;
-			pre[startNode] = timing++;
-			findAdjacents(startNode, callback, processNonTreeEdge);
-			while (!stack.empty) {
-				let
-					edge = stack.peek() as { v: number, w: number, t: boolean };
-				if (edge.t) {
-					callback(edge.v, edge.w, DFSVisitEdge.treeEnd);
-					stack.pop();
-				} else {
-					if (discovered(edge.w)) {
-						processNonTreeEdge(edge.v, edge.w, callback);
-						stack.pop();
-					} else {
-						edge.t = true;
-						pre[edge.w] = timing++;
-						st[edge.w] = edge.v;
-						callback(edge.v, edge.w, DFSVisitEdge.tree);
-						findAdjacents(edge.w, callback, processNonTreeEdge);
-					}
-				}
-			}
-			callback(startNode, startNode, DFSVisitEdge.treeEnd);
-		}
+		run: g.directed ? dfsDirected : dfs
 	}
 }
