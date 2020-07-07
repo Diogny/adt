@@ -52,7 +52,7 @@ describe('Graph Bridges and Articulation Points', () => {
 				new EdgeAnalizer(true, true, true),
 				new BridgeAnalizer(),
 			];
-		g.dfsAnalysis(start, analizers, true);
+		g.dfsAnalysis(start, analizers);
 		expect(1).to.equal(1);
 	});
 });

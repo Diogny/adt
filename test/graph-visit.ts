@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { LabeledGraph, GraphVisitEdge } from '../src/ts/Graph';
+import { LabeledGraph } from '../src/ts/Graph';
 import { EdgeAnalizer, CyclesAnalizer } from '../src/ts/Graph-Analizers';
 
 //run as Task launch.json
@@ -29,28 +29,10 @@ describe('Graph Visits', () => {
 		let
 			start = 0,
 			analizers = [
-				new EdgeAnalizer(),
+				new EdgeAnalizer(true, true, true),
 				new CyclesAnalizer()
 			];
 		g.dfsAnalysis(start, analizers);
 		expect(1).to.equal(1);
 	});
-	/*it('Breath First Search', () => {
-		g.breadthFirstSearch(1, (v, e, wd) => {
-			const
-				vn = g.node(v)?.label();
-			switch (e) {
-				case GraphVisitEdge.TreeNode:
-				case GraphVisitEdge.BackNode:
-					console.log(`[${vn}] d:${wd} ${GraphVisitEdge[e]}`)
-					break;
-				case GraphVisitEdge.ForwardEdge:
-				case GraphVisitEdge.BackEdge:
-					const wdn = g.node(wd)?.label();
-					console.log(`(${vn}>${wdn}) ${GraphVisitEdge[e]}`)
-					break;
-			}
-		});
-		expect(1).to.equal(1);
-	});*/
 });

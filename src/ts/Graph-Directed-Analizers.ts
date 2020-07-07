@@ -15,8 +15,8 @@ export class DirectedEdgeAnalizer extends BaseEdgeAnalizer {
 		super("Directed Edge Analizer", showStack, showInternals, showTreeEnd);
 	}
 
-	public end() {
-		super.end();
+	public report() {
+		super.report();
 		if (this.showInternals) {
 			console.log(`post: ${this.dfs.post.map(n => formatNumber(n, this.maxLabelWidth)).join('  ')}`);
 		}

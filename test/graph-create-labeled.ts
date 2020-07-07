@@ -150,12 +150,12 @@ console.log('g.node(12)', g.node(12));
 console.log('g.edgeCount: ', g.edgeCount());
 console.log('Edges');
 g.nodeList().forEach(n => {
-	(g.edges(n.id) as Edge[]).forEach(e => {
+	console.log((g.edges(n.id) as Edge[]).map(e => {
 		let
 			nv = g.node(e.v) as GraphNode,
 			nw = g.node(e.w) as GraphNode;
-		console.log(`(${nv.label()}-${nw.label()}${g.weighted ? ` @${(e as WeightedEdge).weight}` : ''})`)
-	})
+		return `(${nv.label()}-${nw.label()}${g.weighted ? ` @${(e as WeightedEdge).weight}` : ''})`
+	}).join(' '))
 });
 let
 	start = 0,
@@ -163,4 +163,4 @@ let
 		new EdgeAnalizer(false, true, true),
 		new BridgeAnalizer(),
 	];
-g.dfsAnalysis(start, analizers, true);
+g.dfsAnalysis(start, analizers);

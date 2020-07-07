@@ -5,6 +5,7 @@ import { DirectedEdgeAnalizer } from '../src/ts/Graph-Directed-Analizers';
 //run as Task launch.json
 //or	node node_modules/mocha/bin/_mocha --require ts-node/register test/graph-directed-visit.ts
 
+//check later
 const g = new DiGraph('my DiGraph');
 g.addNode();		// 0
 g.addNode();		// 1
@@ -32,27 +33,9 @@ describe('DiGraph Visits', () => {
 		let
 			start = 0,
 			analizers = [
-				new DirectedEdgeAnalizer()
+				new DirectedEdgeAnalizer(true, true, true)
 			];
 		g.dfsAnalysis(start, analizers);
 		expect(1).to.equal(1);
 	});
-	/*it('Breath First Search', () => {
-		g.breadthFirstSearch(1, (v, e, wd) => {
-			const
-				vn = g.node(v)?.label();
-			switch (e) {
-				case GraphVisitEdge.TreeNode:
-				case GraphVisitEdge.BackNode:
-					console.log(`[${vn}] d:${wd} ${GraphVisitEdge[e]}`)
-					break;
-				case GraphVisitEdge.ForwardEdge:
-				case GraphVisitEdge.BackEdge:
-					const wdn = g.node(wd)?.label();
-					console.log(`(${vn}>${wdn}) ${GraphVisitEdge[e]}`)
-					break;
-			}
-		});
-		expect(1).to.equal(1);
-	});*/
 });

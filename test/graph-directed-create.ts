@@ -56,9 +56,9 @@ console.log('g.directed: ', g.directed);
 console.log('g.edgeCount: ', g.edgeCount());
 console.log('Edges');
 g.nodeList().forEach(n => {
-	(g.edges(n.id) as Edge[]).forEach(e => {
-		console.log(`(${e.v}>${e.w}${g.weighted ? ` @${(e as WeightedEdge).weight}` : ''})`)
-	})
+	console.log((g.edges(n.id) as Edge[]).map(e => {
+		return `(${e.v}>${e.w}${g.weighted ? ` @${(e as WeightedEdge).weight}` : ''})`
+	}).join(' '))
 });
 
 let
@@ -66,4 +66,4 @@ let
 	analizers = [
 		new DirectedEdgeAnalizer(true, true, true),
 	];
-g.dfsAnalysis(start, analizers, true);
+g.dfsAnalysis(start, analizers);
