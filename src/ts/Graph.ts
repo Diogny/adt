@@ -231,15 +231,9 @@ export abstract class BaseGraph implements IGraph, ILabel {
 		return 2 * this.edgeCount() / (this.size * (this.size - 1))
 	}
 
-	public dfs(start: number, callback: EdgeSearchCallback, treeEndCallback: EdgeCallback): number {
-		let
-			dfs = dfsEngine.call(this, start, 0) as ISearchTask,
-			count = 0;
-		while (dfs.next()) {
-			count++;
-			dfs.run(start = dfs.current(), callback, treeEndCallback);
-		}
-		return count
+	public dfs(start: number, edgeCallback: EdgeSearchCallback, treeStartCallback: (n: number) => void, treeEndCallback: EdgeCallback): number {
+		return graphSearch.call(this, start, dfsEngine.call(this, start, 0) as ISearchTask,
+			edgeCallback, treeStartCallback, treeEndCallback)
 	}
 
 	public dfsAnalysis(start: number, analizers: IDFSAnalizer[]): number {
@@ -247,15 +241,9 @@ export abstract class BaseGraph implements IGraph, ILabel {
 			analizers, this.directed)
 	}
 
-	public bfs(start: number, callback: EdgeSearchCallback, treeEndCallback: EdgeCallback): number {
-		let
-			bfs = bfsEngine.call(this, start, 0) as ISearchTask,
-			count = 0;
-		while (bfs.next()) {
-			count++;
-			bfs.run(start = bfs.current(), callback, treeEndCallback);
-		}
-		return count
+	public bfs(start: number, edgeCallback: EdgeSearchCallback, treeStartCallback: (n: number) => void, treeEndCallback: EdgeCallback): number {
+		return graphSearch.call(this, start, bfsEngine.call(this, start, 0) as ISearchTask,
+			edgeCallback, treeStartCallback, treeEndCallback)
 	}
 
 	public bfsAnalysis(start: number, analizers: IDFSAnalizer[]): number {
@@ -406,6 +394,18 @@ function edge(v: number, w: number): NodeInternalIndex | undefined {
 	return n ?
 		{ node: n.node, edges: n.edges, index: n.edges.findIndex(e => e.w == w) }
 		: undefined
+}
+
+function graphSearch(start: number, engine: ISearchTask, edgeCallback: EdgeSearchCallback,
+	treeStartCallback: (n: number) => void, treeEndCallback: EdgeCallback): number {
+	let
+		count = 0;
+	while (engine.next()) {
+		treeStartCallback(start = engine.current());
+		count++;
+		engine.run(start, edgeCallback, treeEndCallback);
+	}
+	return count
 }
 
 function graphAnalysis(start: number, engine: ISearchTask, analizers: IDFSAnalizer[], directed: boolean): number {
@@ -615,7 +615,7 @@ function dfsEngine(entryNode: number, startTiming: number): ISearchTask {
 		nodes: nodes,
 		pre: pre,
 		st: st,
-		post: post,	
+		post: post,
 		timing: () => timing,
 		next: () => enumerator.next(),
 		current: () => enumerator.current(),

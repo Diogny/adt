@@ -83,11 +83,10 @@ export class BridgeAnalizer extends UndirectedBaseAnalizer {
 		this.edgeList.forEach(s => console.log(s));
 		let
 			biggest = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1,
-			formatNumber = (n: number) => pad(n + "", biggest),
-			header = `node: ${range(0, this.dfs.nodes).map(formatNumber).join('  ')}`;
+			header = `node: ${range(0, this.dfs.nodes).map(n => formatNumber(n, biggest)).join('  ')}`;
 		console.log(header);
 		console.log(padStr('-', header.length + 1));
-		console.log(`low:  ${this.low.map(formatNumber).join('  ')}`)
+		console.log(`low:  ${this.low.map(n => formatNumber(n, biggest)).join('  ')}`)
 	}
 }
 
@@ -148,10 +147,15 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 		this.colSpaces = new Array(this.dfs.g.size).fill(-1);
 	}
 
-	public startTree(node: number) {
-		this.edgeList.push(`component: ${this.components++}, start: ${node}`);
+	protected appendLine(edgeStr: string, stackStr: string) {
+		this.edgeList.push(edgeStr);
 		this.showStack
-			&& this.stackTrace.push('');
+			&& this.stackTrace.push(stackStr);
+	}
+
+	public startTree(node: number) {
+		this.appendLine(`component: ${++this.components}`, '');
+		this.appendLine(`[${node}] start tree`, '');
 	}
 
 	public endTree(v: number, w: number) {
@@ -159,9 +163,7 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 		if (this.showTreeEnd) {
 			let
 				s = this.colSpaces[w] * this.tabs;
-			this.edgeList.push(`${padStr(' ', s)}[${w}] tree analized as:(${v}-${w})`);
-			this.showStack
-				&& this.stackTrace.push('');
+			this.appendLine(`${padStr(' ', s)}[${w}] tree analized as:(${v}-${w})`, '');
 		}
 	}
 
@@ -175,10 +177,8 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 		let
 			nv = this.dfs.g.nodeLabel(v),
 			nw = this.dfs.g.nodeLabel(w);
-		this.edgeList.push(`${padStr(' ', this.spaces)}(${nv}-${nw}) ${DFSVisitEdge[e]}`);
-		if (this.showStack) {
-			this.stackTrace.push(`[${this.dfs.edgePipe().map(e => `${e.v}-${e.w}`).join(', ')}]`)
-		}
+		this.appendLine(`${padStr(' ', this.spaces)}(${nv}-${nw}) ${DFSVisitEdge[e]}`,
+			this.showStack ? `[${this.dfs.edgePipe().map(e => `${e.v}-${e.w}`).join(', ')}]` : '');
 	}
 
 	public report() {
