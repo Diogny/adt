@@ -60,8 +60,8 @@ pnpm install --save-dev @types/chai @types/mocha
 	 B   E  I
 	┌┴┐  │
 	C D  F
-		┌┴┐
-		G H
+	    ┌┴┐
+	    G H
 	
 	     +
 	   ┌─┴──┐
