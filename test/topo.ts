@@ -1,4 +1,6 @@
-import { BaseGraph, Edge, WeightedEdge } from "../src/ts/Graph";
+import { Edge, WeightedEdge } from "../src/ts/Graph";
+import { displayMatrix, toMatrix, transposeMatrix, fromJSON } from "../src/ts/Graph-Utils";
+import { dfsAnalysis } from "../src/ts/Graph-Search";
 import { DirectedEdgeAnalizer, ToposortAnalizer } from "../src/ts/Graph-Directed-Analizers";
 
 //independent run
@@ -7,7 +9,7 @@ import { DirectedEdgeAnalizer, ToposortAnalizer } from "../src/ts/Graph-Directed
 //in this case it's itself in Run Task as "Graph create"
 //remember to change the name in launch.json
 
-const g = BaseGraph.fromJSON({
+const g = fromJSON({
 	name: "Topological Sort of a DiGraph",
 	directed: true,
 	weighted: false,
@@ -48,7 +50,7 @@ console.log('g.directed: ', g.directed);
 console.log('g.edgeCount: ', g.edgeCount());
 console.log('Edges');
 g.nodeList().forEach(n => {
-	console.log((g.edges(n.id) as Edge[]).map(e => {
+	console.log((g.nodeEdges(n.id) as Edge[]).map(e => {
 		return `(${e.v}>${e.w}${g.weighted ? ` @${(e as WeightedEdge).weight}` : ''})`
 	}).join(' '))
 });
@@ -59,4 +61,15 @@ let
 		new DirectedEdgeAnalizer(true, true, true),
 		new ToposortAnalizer(),
 	];
-g.dfsAnalysis(start, analizers);
+console.log('Degree or Source');
+console.log(g.degrees().join(" "));
+console.log('InDegree or Sink');
+console.log(g.indegrees().join(" "));
+
+dfsAnalysis(g, start, analizers);
+
+console.log('Matrix');
+displayMatrix(toMatrix(g));
+
+console.log('Transpose');
+displayMatrix(transposeMatrix(g));

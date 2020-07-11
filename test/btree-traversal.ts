@@ -1,6 +1,9 @@
 import { expect } from 'chai';
 import { BTree, BTreeNode } from '../src/ts/BTree';
 
+//independent run
+//	node node_modules/mocha/bin/_mocha --require ts-node/register test/btree-traversal.ts
+
 const t = new BTree<string>(
 	new BTreeNode("+",
 		new BTreeNode("*",

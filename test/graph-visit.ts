@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { LabeledGraph } from '../src/ts/Graph';
 import { EdgeAnalizer, CyclesAnalizer } from '../src/ts/Graph-Analizers';
+import { dfsAnalysis } from "../src/ts/Graph-Search";
 
 //run as Task launch.json
 //or	node node_modules/mocha/bin/_mocha --require ts-node/register test/graph-visit.ts
@@ -32,7 +33,7 @@ describe('Graph Visits', () => {
 				new EdgeAnalizer(true, true, true),
 				new CyclesAnalizer()
 			];
-		g.dfsAnalysis(start, analizers);
+		dfsAnalysis(g, start, analizers);
 		expect(1).to.equal(1);
 	});
 });

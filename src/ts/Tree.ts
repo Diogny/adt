@@ -19,7 +19,7 @@ export class TreeNode<T> extends ValueNode<T> {
 	public get size(): number { return this.__children.length }
 
 	public get isLeaf(): boolean { return this.size == 0 }
-	
+
 	constructor(value: T, ...childrenNodes: TreeNode<T>[]) {
 		super(value);
 		this.__children = new Array(...childrenNodes);
@@ -71,7 +71,7 @@ export abstract class BaseTree<T> {
 			});
 			depth = Math.max(depth, d)
 		}
-		return depth;
+		return depth + (this.root ? 1 : 0)
 	}
 
 	public preOrder(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number {
@@ -89,7 +89,49 @@ export abstract class BaseTree<T> {
 				stack.push(children[i]);
 			}
 		}
-		return count;
+		return count
+	}
+
+	//it's breadthSearch with level value
+	public levelOrder(node: ValueNode<T>, callback: (node: ValueNode<T>, level: number) => void): number {
+		if (!node)
+			return -1;
+		let
+			queue = new Queue<{ node: ValueNode<T>, level: number }>(),
+			maxLevel = 0;
+		queue.enqueue({ node: node, level: 1 });
+		while (!queue.empty) {
+			let n = queue.dequeue() as { node: ValueNode<T>, level: number };
+			maxLevel = Math.max(maxLevel, n.level);
+			callback(n.node, n.level);
+			for (let children = n.node.children, i = 0; i < children.length; i++) {
+				queue.enqueue({ node: children[i], level: n.level + 1 })
+			}
+		}
+		return maxLevel
+	}
+
+	public postOrder(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number {
+		if (!node)
+			return -1;
+		let
+			stack = new Stack<{ n: ValueNode<T>, t: boolean }>(),
+			count = 0;
+		stack.push({ n: node, t: false });
+		while (!stack.empty) {
+			let
+				n = stack.peek();
+			if (n.t) {
+				callback(n.n);
+				stack.pop();
+			} else {
+				n.t = true;
+				for (let children = n.n.children, i = children.length - 1; i >= 0; i--) {
+					stack.push({ n: children[i], t: false })
+				}
+			}
+		}
+		return count
 	}
 
 	public breathSearch(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number {

@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { Graph } from '../src/ts/Graph';
+import { dfsAnalysis } from "../src/ts/Graph-Search";
 import { BridgeAnalizer, EdgeAnalizer } from '../src/ts/Graph-Analizers'
 
 //run as Task launch.json
@@ -52,7 +53,7 @@ describe('Graph Bridges and Articulation Points', () => {
 				new EdgeAnalizer(true, true, true),
 				new BridgeAnalizer(),
 			];
-		g.dfsAnalysis(start, analizers);
+		dfsAnalysis(g, start, analizers);
 		expect(1).to.equal(1);
 	});
 });

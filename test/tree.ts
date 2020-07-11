@@ -1,6 +1,9 @@
 import { expect } from 'chai';
 import { Tree, TreeNode } from '../src/ts/Tree';
 
+//independent run
+//node node_modules/mocha/bin/_mocha --require ts-node/register test/tree.ts
+
 const t = new Tree<string>(
 	new TreeNode("A",
 		new TreeNode("B",

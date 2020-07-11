@@ -1,5 +1,7 @@
-import { BaseGraph, WeightedEdge, Edge, Node as GraphNode } from '../src/ts/Graph';
+import { WeightedEdge, Edge, Node as GraphNode } from '../src/ts/Graph';
 import { EdgeAnalizer, BridgeAnalizer } from '../src/ts/Graph-Analizers';
+import { fromJSON } from "../src/ts/Graph-Utils";
+import { dfsAnalysis } from "../src/ts/Graph-Search";
 
 //independent run
 //	node --require ts-node/register --trace-uncaught test/graph-create-labeled.ts
@@ -7,7 +9,7 @@ import { EdgeAnalizer, BridgeAnalizer } from '../src/ts/Graph-Analizers';
 //in this case it's itself in Run Task as "Graph create"
 //remember to change the name in launch.json
 
-const g = BaseGraph.fromJSON({
+const g = fromJSON({
 	name: "A graph map of United States of America",
 	directed: false,
 	weighted: false,
@@ -150,7 +152,7 @@ console.log('g.node(12)', g.node(12));
 console.log('g.edgeCount: ', g.edgeCount());
 console.log('Edges');
 g.nodeList().forEach(n => {
-	console.log((g.edges(n.id) as Edge[]).map(e => {
+	console.log((g.nodeEdges(n.id) as Edge[]).map(e => {
 		let
 			nv = g.node(e.v) as GraphNode,
 			nw = g.node(e.w) as GraphNode;
@@ -163,4 +165,4 @@ let
 		new EdgeAnalizer(false, true, true),
 		new BridgeAnalizer(),
 	];
-g.dfsAnalysis(start, analizers);
+dfsAnalysis(g, start, analizers);

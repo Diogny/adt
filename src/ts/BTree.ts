@@ -25,6 +25,7 @@ export class BTree<T> extends BaseTree<T>{
 		super()
 	}
 
+	//(LNR)
 	public inOrder(node: BTreeNode<T>, callback: (node: BTreeNode<T>) => void): number {
 		let
 			stack = new Stack<BTreeNode<T>>(),

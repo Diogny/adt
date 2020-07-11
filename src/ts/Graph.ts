@@ -1,6 +1,4 @@
-import Stack from "./Stack";
-import Queue from "./Queue";
-import { toBool, range } from "./Utils";
+import { selectMany } from "./Utils";
 
 interface ILabel {
 	label(): string;
@@ -139,11 +137,24 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public nodeList(): Node[] { return Array.from(this.nodes.values()).map(n => n.node) }
 
-	public edges(id: number): Edge[] | undefined { return this.nodes.get(id)?.edges }
+	public nodeEdges(id: number): Edge[] | undefined { return this.nodes.get(id)?.edges }
+
+	public edges(): Edge[] { return selectMany<NodeInternal, Edge>(Array.from(this.nodes.values()), (n) => n.edges) }
 
 	constructor(public name: string, public directed: boolean, public weighted: boolean, public labeled: boolean) {
 		this.nodes = new Map();
 		this.modified = false;
+	}
+
+	public nodeDegree(node: number): number { return this.nodeEdges(node)?.length || 0 }
+
+	public degrees(): number[] { return Array.from({ length: this.size }, (n, ndx) => this.nodeDegree(ndx)) }
+
+	public indegrees(): number[] {
+		let
+			array = new Array(this.size).fill(0);
+		this.edges().forEach(edge => array[edge.w]++)
+		return array
 	}
 
 	public validNode(node: number) { return node >= 0 && node < this.size }
@@ -182,13 +193,13 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public disconnect(v: number, w: number): boolean {
 		let
-			e = edge.call(this, v, w) as NodeInternalIndex;
+			e = getInternalEdge.call(this, v, w) as NodeInternalIndex;
 		if (!e || e.index < 0)
 			return false;
 		e.edges.splice(e.index, 1);
 		this.modified = true;
 		if (!this.directed) {
-			e = edge.call(this, w, v);
+			e = getInternalEdge.call(this, w, v);
 			e.edges.splice(e.index, 1);
 		}
 		return true;
@@ -200,12 +211,6 @@ export abstract class BaseGraph implements IGraph, ILabel {
 		return !!vNode?.edges.some(n => n.w == w)
 	}
 
-	public degree(node: number): number {
-		let
-			vNode = this.nodes.get(node);
-		return <any>vNode?.edges.length || 0
-	}
-
 	public adjacentEdges(node: number): number[] {
 		let
 			vNode = this.nodes.get(node);
@@ -214,7 +219,7 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public edge(v: number, w: number): Edge | undefined {
 		let
-			e = edge.call(this, v, w) as { node: Node, edges: Edge[], index: number } | undefined;
+			e = getInternalEdge.call(this, v, w) as { node: Node, edges: Edge[], index: number } | undefined;
 		return e?.edges[e.index]
 	}
 
@@ -231,26 +236,6 @@ export abstract class BaseGraph implements IGraph, ILabel {
 		return 2 * this.edgeCount() / (this.size * (this.size - 1))
 	}
 
-	public dfs(start: number, edgeCallback: EdgeSearchCallback, treeStartCallback: (n: number) => void, treeEndCallback: EdgeCallback): number {
-		return graphSearch.call(this, start, dfsEngine.call(this, start, 0) as ISearchTask,
-			edgeCallback, treeStartCallback, treeEndCallback)
-	}
-
-	public dfsAnalysis(start: number, analizers: IDFSAnalizer[]): number {
-		return graphAnalysis.call(this, start, dfsEngine.call(this, start, 0) as ISearchTask,
-			analizers, this.directed)
-	}
-
-	public bfs(start: number, edgeCallback: EdgeSearchCallback, treeStartCallback: (n: number) => void, treeEndCallback: EdgeCallback): number {
-		return graphSearch.call(this, start, bfsEngine.call(this, start, 0) as ISearchTask,
-			edgeCallback, treeStartCallback, treeEndCallback)
-	}
-
-	public bfsAnalysis(start: number, analizers: IDFSAnalizer[]): number {
-		return graphAnalysis.call(this, start, bfsEngine.call(this, start, 0) as ISearchTask,
-			analizers, this.directed)
-	}
-
 	public static create(name: string, directed: boolean, weighted: boolean, labeled: boolean): BaseGraph {
 		if (labeled) {
 			if (weighted)
@@ -265,64 +250,6 @@ export abstract class BaseGraph implements IGraph, ILabel {
 		}
 	}
 
-	public static fromJSON(content: { [x: string]: any }): BaseGraph {
-		let
-			name = content["name"],
-			directed = toBool(content["directed"]),
-			weighted = toBool(content["weighted"]),
-			labeled = !!content["labels"],
-			labels = (labeled ? Array.from(content["labels"]) : undefined) as string[],
-			labelMap = new Map<string, number>(),
-			nodes = labeled ? 0 : parseInt(content["nodes"]),
-			edges = Array.from(content["edges"]) as { from: number | string, to: number | string, w?: number }[],
-			getNode = (nodeOrLabel: number | string): { node: number, label?: string } => {
-				if (labeled) {
-					let
-						n = labelMap.get(<string>nodeOrLabel);
-					return {
-						node: n != undefined ? <number>n : -1,
-						label: <string>nodeOrLabel
-					}
-				} else
-					return { node: g.hasNode(<number>nodeOrLabel) ? <number>nodeOrLabel : -1 }
-			},
-			getEdge = (e: { from: number | string, to: number | string, w?: number }): {
-				v: { node: number, label?: string },
-				w: { node: number, label?: string },
-				weight?: number
-			} => ({
-				v: getNode(e.from),
-				w: getNode(e.to),
-				weight: e.w
-			}),
-			g = BaseGraph.create(name, directed, weighted, labeled);
-
-		if (labeled) {
-			if (!labels)
-				throw `invalid graph labels`
-			labels.forEach((label: string, node: number) => {
-				g.addNode(label);
-				labelMap.set(label, node)
-			})
-		} else {
-			range(0, nodes).forEach(n => g.addNode())
-		}
-
-		if (!edges)
-			throw `invalid edges`;
-		edges.forEach((e) => {
-			let
-				edge = getEdge(e);
-			if (edge.v.node == -1 || edge.w.node == -1)
-				throw `invalid edge: ${e}`;
-			if (weighted) {
-				!edge.weight && (edge.weight = 0);
-				g.connect(edge.v.node, edge.w.node, edge.weight)
-			} else
-				g.connect(edge.v.node, edge.w.node)
-		});
-		return g
-	}
 }
 
 export class Graph extends BaseGraph {
@@ -339,7 +266,7 @@ export class DiGraph extends BaseGraph {
 
 abstract class BaseWeightedGraph extends BaseGraph {
 
-	public edges(id: number): WeightedEdge[] | undefined { return this.nodes.get(id)?.edges as WeightedEdge[] }
+	public nodeEdges(id: number): WeightedEdge[] | undefined { return this.nodes.get(id)?.edges as WeightedEdge[] }
 
 	constructor(name: string, directed: boolean) {
 		super(name, directed, true, false)
@@ -381,266 +308,17 @@ export class LabeledDiGraph extends BaseLabeledGraph {
 
 class BaseLabeledWeightedGraph extends BaseLabeledGraph {
 
-	public edges(id: number): WeightedEdge[] | undefined { return this.nodes.get(id)?.edges as WeightedEdge[] }
+	public nodeEdges(id: number): WeightedEdge[] | undefined { return this.nodes.get(id)?.edges as WeightedEdge[] }
 
 	constructor(name: string, directed: boolean) {
 		super(name, directed, true)
 	}
 }
 
-function edge(v: number, w: number): NodeInternalIndex | undefined {
+function getInternalEdge(v: number, w: number): NodeInternalIndex | undefined {
 	let
 		n = this.nodes.get(v) as NodeInternal | undefined;
 	return n ?
 		{ node: n.node, edges: n.edges, index: n.edges.findIndex(e => e.w == w) }
 		: undefined
-}
-
-function graphSearch(start: number, engine: ISearchTask, edgeCallback: EdgeSearchCallback,
-	treeStartCallback: (n: number) => void, treeEndCallback: EdgeCallback): number {
-	let
-		count = 0;
-	while (engine.next()) {
-		treeStartCallback(start = engine.current());
-		count++;
-		engine.run(start, edgeCallback, treeEndCallback);
-	}
-	return count
-}
-
-function graphAnalysis(start: number, engine: ISearchTask, analizers: IDFSAnalizer[], directed: boolean): number {
-	let
-		edgeCallback = (v: number, w: number, e: DFSVisitEdge) =>
-			analizers.forEach(a => a.visit(v, w, e)),
-		endTreeCallback = (v: number, w: number) =>
-			analizers.forEach(a => a.endTree(v, w)),
-		count = 0;
-	analizers.forEach(a => {
-		if (directed != a.directed)
-			throw `edge analizer direction does not match graph`
-		a.register(engine)
-	});
-	while (engine.next()) {
-		count++;
-		analizers.forEach(a => a.startTree(start = engine.current()));
-		engine.run(start, edgeCallback, endTreeCallback);
-	}
-	analizers.forEach(a => a.report());
-	return count
-}
-
-function bfsEngine(entryNode: number, startTiming: number): ISearchTask {
-	let
-		g = (this as BaseGraph),
-		nodes = g.size,
-		pre = new Array<number>(nodes).fill(-1),
-		st = new Array<number>(nodes).fill(-1),
-		post: number[] = <any>void 0,
-		timing = startTiming,
-		postTiming = startTiming,
-		discovered = (node: number) => pre[node] >= 0,
-		enumerator = enumConditional(entryNode, nodes - 1, discovered),
-		queue = new Queue<{ v: number, w: number }>(),
-		bfsFindAdjacents = (v: number, edgeCallback: EdgeSearchCallback, processEdge: (v: number, w: number, edgeCallback: EdgeSearchCallback) => void) => {
-			let
-				empty = true;
-			for (let array = g.adjacentEdges(v), i = 0, count = array.length; i < count; i++) {
-				let
-					w = array[i];
-				if (discovered(w))
-					processEdge(v, w, edgeCallback);
-				else {
-					queue.enqueue({ v: v, w: w });
-					empty = false;
-				}
-			}
-			empty && (console.log(`leaf: ${v}`))
-		},
-		bfsProcessNonTreeEdge = (v: number, w: number, edgeCallback: EdgeSearchCallback) => {
-			if (st[v] == w)
-				edgeCallback(v, w, DFSVisitEdge.parent)
-			else {
-				if (pre[w] < pre[v]) {
-					edgeCallback(v, w, DFSVisitEdge.back)
-				}
-				else if (pre[w] > pre[v])
-					edgeCallback(v, w, DFSVisitEdge.down)
-				else
-					console.log(v, w, 'Ooopsie!');
-			}
-		},
-		bfsProcessNonTreeDirectedEdge = (v: number, w: number, edgeCallback: EdgeSearchCallback) => {
-		},
-		bfs = (startNode: number, edgeCallback: EdgeSearchCallback, treeEndCallback: EdgeCallback) => {
-			st[startNode] = startNode;
-			pre[startNode] = timing++;
-			bfsFindAdjacents(startNode, edgeCallback, bfsProcessNonTreeEdge);
-			while (!queue.empty) {
-				let
-					edge = queue.dequeue() as { v: number, w: number };
-
-				if (discovered(edge.w)) {
-					bfsProcessNonTreeEdge(edge.v, edge.w, edgeCallback);
-				} else {
-					pre[edge.w] = timing++;
-					st[edge.w] = edge.v;
-					edgeCallback(edge.v, edge.w, DFSVisitEdge.tree);
-					bfsFindAdjacents(edge.w, edgeCallback, bfsProcessNonTreeEdge);
-				}
-			}
-			treeEndCallback(startNode, startNode);
-		},
-		bfsDirected = (startNode: number, edgeCallback: EdgeSearchCallback, treeEndCallback: EdgeCallback) => {
-			st[startNode] = startNode;
-			pre[startNode] = timing++;
-			//
-			post[startNode] = postTiming++;
-			treeEndCallback(startNode, startNode);
-		};
-
-	g.directed && (post = new Array<number>(nodes).fill(-1));
-	return {
-		g: g,
-		nodes: nodes,
-		pre: pre,
-		st: st,
-		post: post,
-		timing: () => timing,
-		next: () => enumerator.next(),
-		current: () => enumerator.current(),
-		edgePipe: () => queue.items,
-		run: g.directed ? bfsDirected : bfs
-	}
-}
-
-function dfsEngine(entryNode: number, startTiming: number): ISearchTask {
-	let
-		g = (this as BaseGraph),
-		nodes = g.size,
-		pre = new Array<number>(nodes).fill(-1),
-		st = new Array<number>(nodes).fill(-1),
-		post: number[] = <any>void 0,
-		timing = startTiming,
-		postTiming = startTiming,
-		discovered = (node: number) => pre[node] >= 0,
-		enumerator = enumConditional(entryNode, nodes - 1, discovered),
-		stack = new Stack<{ v: number, w: number, t: boolean }>(),
-		dfsFindAdjacents = (v: number, edgeCallback: EdgeSearchCallback, processEdge: (v: number, w: number, edgeCallback: EdgeSearchCallback) => void) => {
-			for (let array = g.adjacentEdges(v), i = array.length - 1; i >= 0; i--) {
-				let
-					w = array[i];
-				if (discovered(w))
-					processEdge(v, w, edgeCallback);
-				else {
-					stack.push({ v: v, w: w, t: false });
-				}
-			}
-		},
-		dfsProcessNonTreeEdge = (v: number, w: number, edgeCallback: EdgeSearchCallback) => {
-			if (st[v] == w)
-				edgeCallback(v, w, DFSVisitEdge.parent)
-			else {
-				if (pre[w] < pre[v]) {
-					edgeCallback(v, w, DFSVisitEdge.back)
-				}
-				else if (pre[w] > pre[v])
-					edgeCallback(v, w, DFSVisitEdge.down)
-				else
-					console.log(v, w, 'Ooopsie!');
-			}
-		},
-		dfsProcessNonTreeDirectedEdge = (v: number, w: number, edgeCallback: EdgeSearchCallback) => {
-			if (pre[v] < pre[w])
-				edgeCallback(v, w, DFSVisitEdge.down)
-			else if (post[v] == -1 && post[w] == -1)
-				edgeCallback(v, w, DFSVisitEdge.back)
-			else
-				edgeCallback(v, w, DFSVisitEdge.cross)
-		},
-		dfs = (startNode: number, edgeCallback: EdgeSearchCallback, treeEndCallback: EdgeCallback) => {
-			st[startNode] = startNode;
-			pre[startNode] = timing++;
-			dfsFindAdjacents(startNode, edgeCallback, dfsProcessNonTreeEdge);
-			while (!stack.empty) {
-				let
-					edge = stack.peek() as { v: number, w: number, t: boolean };
-				if (edge.t) {
-					treeEndCallback(edge.v, edge.w);
-					stack.pop();
-				} else {
-					if (discovered(edge.w)) {
-						dfsProcessNonTreeEdge(edge.v, edge.w, edgeCallback);
-						stack.pop();
-					} else {
-						edge.t = true;
-						pre[edge.w] = timing++;
-						st[edge.w] = edge.v;
-						edgeCallback(edge.v, edge.w, DFSVisitEdge.tree);
-						dfsFindAdjacents(edge.w, edgeCallback, dfsProcessNonTreeEdge);
-					}
-				}
-			}
-			treeEndCallback(startNode, startNode);
-		},
-		dfsDirected = (startNode: number, edgeCallback: EdgeSearchCallback, treeEndCallback: EdgeCallback) => {
-			st[startNode] = startNode;
-			pre[startNode] = timing++;
-			dfsFindAdjacents(startNode, edgeCallback, dfsProcessNonTreeDirectedEdge);
-			while (!stack.empty) {
-				let
-					edge = stack.peek() as { v: number, w: number, t: boolean };
-				if (edge.t) {
-					post[edge.w] = postTiming++;
-					treeEndCallback(edge.v, edge.w);
-					stack.pop();
-				} else {
-					if (discovered(edge.w)) {
-						dfsProcessNonTreeDirectedEdge(edge.v, edge.w, edgeCallback);
-						stack.pop();
-					} else {
-						edge.t = true;
-						pre[edge.w] = timing++;
-						st[edge.w] = edge.v;
-						edgeCallback(edge.v, edge.w, DFSVisitEdge.tree);
-						dfsFindAdjacents(edge.w, edgeCallback, dfsProcessNonTreeDirectedEdge);
-					}
-				}
-			}
-			post[startNode] = postTiming++;
-			treeEndCallback(startNode, startNode);
-		};
-	g.directed && (post = new Array<number>(nodes).fill(-1));
-	return {
-		g: g,
-		nodes: nodes,
-		pre: pre,
-		st: st,
-		post: post,
-		timing: () => timing,
-		next: () => enumerator.next(),
-		current: () => enumerator.current(),
-		edgePipe: () => stack.items,
-		run: g.directed ? dfsDirected : dfs
-	}
-}
-
-function enumConditional(start: number, max: number, discovered: (ndx: number) => boolean) {
-	var
-		nextNdx = (ndx: number) => ndx >= max ? 0 : ++ndx,
-		curr = start < 0 || start > max ? -1 : start,
-		first = true;
-
-	return {
-		current: () => curr,
-		next: () => {
-			if (curr < 0)
-				return false;
-			if (first) {
-				return first = false, true
-			} else {
-				while (!((curr = nextNdx(curr)) == start || !discovered(curr)));
-				return curr != start;
-			}
-		}
-	}
 }

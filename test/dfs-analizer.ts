@@ -1,5 +1,6 @@
 import { expect } from 'chai';
 import { Graph } from '../src/ts/Graph';
+import { dfsAnalysis } from "../src/ts/Graph-Search";
 import { CyclesAnalizer, EdgeAnalizer } from '../src/ts/Graph-Analizers'
 
 //run as Task launch.json
@@ -36,7 +37,7 @@ describe('Graph DFS Analizer', () => {
 				new EdgeAnalizer(),
 				new CyclesAnalizer()
 			];
-		g.dfsAnalysis(start, analizers);
+		dfsAnalysis(g, start, analizers);
 		expect(1).to.equal(1);
 	});
 });

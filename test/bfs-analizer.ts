@@ -1,4 +1,6 @@
-import { BaseGraph, WeightedEdge, Edge } from '../src/ts/Graph';
+import { WeightedEdge, Edge } from '../src/ts/Graph';
+import { fromJSON } from "../src/ts/Graph-Utils";
+import { bfsAnalysis } from "../src/ts/Graph-Search";
 import { EdgeAnalizer } from '../src/ts/Graph-Analizers';
 
 //independent run
@@ -7,7 +9,7 @@ import { EdgeAnalizer } from '../src/ts/Graph-Analizers';
 //in this case it's itself in Run Task as "Graph create"
 //remember to change the name in launch.json
 
-const g = BaseGraph.fromJSON({
+const g = fromJSON({
 	name: "breadth first search graph",
 	directed: false,
 	weighted: false,
@@ -37,7 +39,7 @@ console.log('g.node(7)', g.node(7));
 console.log('g.edgeCount: ', g.edgeCount());
 console.log('Edges');
 g.nodeList().forEach(n => {
-	console.log((g.edges(n.id) as Edge[]).map(e => {
+	console.log((g.nodeEdges(n.id) as Edge[]).map(e => {
 		return `(${e.v}-${e.w}${g.weighted ? ` @${(e as WeightedEdge).weight}` : ''})`
 	}).join(' '))
 });
@@ -47,4 +49,4 @@ let
 	analizers = [
 		new EdgeAnalizer(true, true, true),
 	];
-g.bfsAnalysis(start, analizers);
+bfsAnalysis(g, start, analizers);
