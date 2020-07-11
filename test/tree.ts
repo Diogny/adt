@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 import { Tree, TreeNode } from '../src/ts/Tree';
+import { visulizeTree } from '../src/ts/Graph-Utils';
 
 //independent run
-//node node_modules/mocha/bin/_mocha --require ts-node/register test/tree.ts
+//	node node_modules/mocha/bin/_mocha --require ts-node/register test/tree.ts
 
 const t = new Tree<string>(
 	new TreeNode("A",
@@ -17,7 +18,12 @@ describe('Tree', () => {
 	it('t.root.value = "A"', () => {
 		expect(t.root.value).to.equal("A");
 	});
-	it('t.depth() = 2', () => {
-		expect(t.depth()).to.equal(2);
+	it('t.depth() = 3', () => {
+		expect(t.depth()).to.equal(3);
+	});
+	it('visulizeTree(t)', () => {
+		visulizeTree(t);
+		expect(1).to.equal(1);
 	});
 });
+

@@ -1,5 +1,5 @@
 import { IDFSAnalizer, ISearchTask, DFSVisitEdge } from "./Graph";
-import { padStr, pad, range, formatNumber } from "./Utils";
+import { fillChar, padStr, range, formatNumber } from "./Utils";
 
 export abstract class BaseAnalizer implements IDFSAnalizer {
 
@@ -85,7 +85,7 @@ export class BridgeAnalizer extends UndirectedBaseAnalizer {
 			biggest = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1,
 			header = `node: ${range(0, this.dfs.nodes).map(n => formatNumber(n, biggest)).join('  ')}`;
 		console.log(header);
-		console.log(padStr('-', header.length + 1));
+		console.log(fillChar('-', header.length + 1));
 		console.log(`low:  ${this.low.map(n => formatNumber(n, biggest)).join('  ')}`)
 	}
 }
@@ -163,7 +163,7 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 		if (this.showTreeEnd) {
 			let
 				s = this.colSpaces[w] * this.tabs;
-			this.appendLine(`${padStr(' ', s)}[${w}] tree analized as:(${v}-${w})`, '');
+			this.appendLine(`${fillChar(' ', s)}[${w}] tree analized as:(${v}-${w})`, '');
 		}
 	}
 
@@ -177,7 +177,7 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 		let
 			nv = this.dfs.g.nodeLabel(v),
 			nw = this.dfs.g.nodeLabel(w);
-		this.appendLine(`${padStr(' ', this.spaces)}(${nv}-${nw}) ${DFSVisitEdge[e]}`,
+		this.appendLine(`${fillChar(' ', this.spaces)}(${nv}-${nw}) ${DFSVisitEdge[e]}`,
 			this.showStack ? `[${this.dfs.edgePipe().map(e => `${e.v}-${e.w}`).join(', ')}]` : '');
 	}
 
@@ -188,7 +188,7 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 		this.edgeList.map((s, ndx) => {
 			if (!this.showStack)
 				return s;
-			return s + pad(' ', w - s.length + 5) + this.stackTrace[ndx]
+			return s + padStr(' ', w - s.length + 5) + this.stackTrace[ndx]
 		})
 			.forEach(s => console.log(s))
 		if (this.showInternals) {
@@ -196,7 +196,7 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 			let
 				header = `node: ${range(0, this.dfs.nodes).map(n => formatNumber(n, this.maxLabelWidth)).join('  ')}`;
 			console.log(header);
-			console.log(padStr('-', header.length + 1));
+			console.log(fillChar('-', header.length + 1));
 			console.log(`pre:  ${this.dfs.pre.map(n => formatNumber(n, this.maxLabelWidth)).join('  ')}`);
 			console.log(`st:   ${this.dfs.st.map(n => formatNumber(n, this.maxLabelWidth)).join('  ')}`);
 		}
