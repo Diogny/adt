@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { DiGraph } from '../src/ts/Graph';
-import { DirectedEdgeAnalizer } from '../src/ts/Graph-Directed-Analizers';
-import { dfsAnalysis } from "../src/ts/Graph-Search";
+import { DiGraph } from '../src/lib/Graph';
+import { DirectedEdgeAnalizer } from '../src/lib/Graph-Directed-Analizers';
+import { dfsAnalysis } from "../src/lib/Graph-Search";
 
 //run as Task launch.json
 //or	node node_modules/mocha/bin/_mocha --require ts-node/register test/graph-directed-visit.ts

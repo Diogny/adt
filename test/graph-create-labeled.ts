@@ -1,7 +1,7 @@
-import { WeightedEdge, Edge, Node as GraphNode } from '../src/ts/Graph';
-import { EdgeAnalizer, BridgeAnalizer } from '../src/ts/Graph-Analizers';
-import { fromJSON } from "../src/ts/Graph-Utils";
-import { dfsAnalysis } from "../src/ts/Graph-Search";
+import { WeightedEdge, Edge, GraphNode } from '../src/lib/Graph';
+import { EdgeAnalizer, BridgeAnalizer } from '../src/lib/Graph-Analizers';
+import { fromJSON } from "../src/lib/Graph-Utils";
+import { dfsAnalysis } from "../src/lib/Graph-Search";
 
 //independent run
 //	node --require ts-node/register --trace-uncaught test/graph-create-labeled.ts

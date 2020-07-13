@@ -1,7 +1,7 @@
-import { Edge, WeightedEdge } from "../src/ts/Graph";
-import { displayMatrix, toMatrix, transposeMatrix, fromJSON } from "../src/ts/Graph-Utils";
-import { dfsAnalysis } from "../src/ts/Graph-Search";
-import { DirectedEdgeAnalizer, ToposortAnalizer } from "../src/ts/Graph-Directed-Analizers";
+import { Edge, WeightedEdge } from "../src/lib/Graph";
+import { displayMatrix, toMatrix, transposeMatrix, fromJSON } from "../src/lib/Graph-Utils";
+import { dfsAnalysis } from "../src/lib/Graph-Search";
+import { DirectedEdgeAnalizer, ToposortAnalizer } from "../src/lib/Graph-Directed-Analizers";
 
 //independent run
 //	node --require ts-node/register --trace-uncaught test/topo.ts

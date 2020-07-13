@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { Tree, TreeNode } from '../src/ts/Tree';
-import { visulizeTree } from '../src/ts/Graph-Utils';
+import { Tree, TreeNode } from '../src/lib/Tree';
+import { visulizeTree } from '../src/lib/Graph-Utils';
 
 //independent run
 //	node node_modules/mocha/bin/_mocha --require ts-node/register test/tree.ts

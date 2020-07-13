@@ -1,5 +1,5 @@
-import { Tree, TreeNode } from '../src/ts/Tree';
-import { visulizeTree, searchTree } from '../src/ts/Graph-Utils';
+import { Tree, TreeNode } from '../src/lib/Tree';
+import { visulizeTree, searchTree } from '../src/lib/Graph-Utils';
 
 //independent run
 //	node --require ts-node/register --trace-uncaught test/tree-display.ts

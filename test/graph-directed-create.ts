@@ -1,7 +1,7 @@
-import { Edge, WeightedEdge } from "../src/ts/Graph";
-import { DirectedEdgeAnalizer } from "../src/ts/Graph-Directed-Analizers";
-import { fromJSON } from "../src/ts/Graph-Utils";
-import { dfsAnalysis } from "../src/ts/Graph-Search";
+import { Edge, WeightedEdge } from "../src/lib/Graph";
+import { DirectedEdgeAnalizer } from "../src/lib/Graph-Directed-Analizers";
+import { fromJSON } from "../src/lib/Graph-Utils";
+import { dfsAnalysis } from "../src/lib/Graph-Search";
 
 //independent run
 //	node --require ts-node/register --trace-uncaught test/graph-directed-create.ts

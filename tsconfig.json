@@ -7,21 +7,18 @@
 		"allowSyntheticDefaultImports": true,
 		"moduleResolution": "node",
 		"strictNullChecks": true,
-		"sourceMap": true,
+		"esModuleInterop": true,
 		"removeComments": false,
 		"noEmitOnError": true,
-		"outDir": "./dist",
-		"baseUrl": ".",
-		"paths": {
-			"src/*": [
-				"src/*"
-			],
-			"*": [
-				"node_modules/*"
-			]
-		}
+		"declaration": true,
+		"outDir": "./dist"
 	},
 	"include": [
 		"src/**/*"
+	],
+	"exclude": [
+		"node_modules",
+		"test",
+		"dist"
 	]
 }

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { BTree, BTreeNode } from '../src/ts/BTree';
-import { visulizeTree, searchTree } from '../src/ts/Graph-Utils';
+import { BTree, BTreeNode } from '../src/lib/BTree';
+import { visulizeTree, searchTree } from '../src/lib/Graph-Utils';
 
 //independent run
 //	node node_modules/mocha/bin/_mocha --require ts-node/register test/btree-traversal.ts

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import Stack from '../src/ts/Stack';
+import Stack from '../src/lib/Stack';
 
 describe('Stack', () => {
 	it('(new Stack()).length = 0', () => {

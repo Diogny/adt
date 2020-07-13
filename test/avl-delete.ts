@@ -1,5 +1,5 @@
-import { AVLTree } from '../src/ts/AVLTree';
-import { visulizeTree } from '../src/ts/Graph-Utils';
+import { AVLTree } from '../src/lib/AVLTree';
+import { visulizeTree } from '../src/lib/Graph-Utils';
 
 //independent run
 //	node --require ts-node/register --trace-uncaught test/avl-delete.ts

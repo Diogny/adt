@@ -1,10 +1,11 @@
 {
-	"name": "adts",
+	"name": "adtjs",
 	"author": "Diogny A. B. <diognyab@outlook.com>",
-	"version": "0.0.14",
+	"version": "0.0.15",
 	"description": "Javascript Abstract Data Types",
 	"license": "MIT",
-	"main": "./dist/index.js",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"homepage": "https://github.com/Diogny/electric-circuits",
 	"bugs": {
 		"url": "https://github.com/Diogny/adt/issues"
@@ -22,6 +23,7 @@
 		"dabberio"
 	],
 	"scripts": {
+		"prepublish": "pnpm run build-ts",
 		"no-test": "echo \"Error: no test specified\" && exit 1",
 		"test": "mocha --reporter spec",
 		"test-ts": "mocha --require ts-node/register --watch --watch-files src test/**/*.ts",

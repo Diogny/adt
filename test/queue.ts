@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import Queue from '../src/ts/Queue';
+import Queue from '../src/lib/Queue';
 
 describe('Queue', () => {
 	let

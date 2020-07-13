@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Graph, WeightedGraph, WeightedEdge, LabeledGraph } from '../src/ts/Graph';
+import { Graph, WeightedGraph, WeightedEdge, LabeledGraph } from '../src/lib/Graph';
 
 //run as Task launch.json
 //or	node node_modules/mocha/bin/_mocha --require ts-node/register test/graphs.ts

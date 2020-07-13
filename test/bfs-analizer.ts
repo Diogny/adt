@@ -1,7 +1,7 @@
-import { WeightedEdge, Edge } from '../src/ts/Graph';
-import { fromJSON } from "../src/ts/Graph-Utils";
-import { bfsAnalysis } from "../src/ts/Graph-Search";
-import { EdgeAnalizer } from '../src/ts/Graph-Analizers';
+import { WeightedEdge, Edge } from '../src/lib/Graph';
+import { fromJSON } from "../src/lib/Graph-Utils";
+import { bfsAnalysis } from "../src/lib/Graph-Search";
+import { EdgeAnalizer } from '../src/lib/Graph-Analizers';
 
 //independent run
 //	node --require ts-node/register --trace-uncaught test/bfs-analizer.ts

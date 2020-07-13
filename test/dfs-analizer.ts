@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { Graph } from '../src/ts/Graph';
-import { dfsAnalysis } from "../src/ts/Graph-Search";
-import { CyclesAnalizer, EdgeAnalizer } from '../src/ts/Graph-Analizers'
+import { Graph } from '../src/lib/Graph';
+import { dfsAnalysis } from "../src/lib/Graph-Search";
+import { CyclesAnalizer, EdgeAnalizer } from '../src/lib/Graph-Analizers'
 
 //run as Task launch.json
 //or	node node_modules/mocha/bin/_mocha --require ts-node/register test/dfs-analizer.ts

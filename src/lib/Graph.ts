@@ -4,14 +4,14 @@ interface ILabel {
 	label(): string;
 }
 
-export class Node implements ILabel {
+export class GraphNode implements ILabel {
 
 	constructor(public id: number) { }
 
 	public label(): string { return String(this.id) }
 }
 
-export class LabeledNode extends Node {
+export class LabeledNode extends GraphNode {
 
 	constructor(id: number, public __label: string) {
 		super(id);
@@ -109,7 +109,7 @@ export interface IGraph {
 }
 
 interface NodeInternal {
-	node: Node,
+	node: GraphNode,
 	edges: Edge[]
 }
 
@@ -129,13 +129,13 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public get nextNodeId(): number { return this.size }
 
-	public node(id: number): Node | undefined { return this.nodes.get(id)?.node }
+	public node(id: number): GraphNode | undefined { return this.nodes.get(id)?.node }
 
 	public nodeLabel(id: number): string { return this.node(id)?.label() || "" }
 
 	public hasNode(id: number): boolean { return !!this.nodes.get(id)?.node }
 
-	public nodeList(): Node[] { return Array.from(this.nodes.values()).map(n => n.node) }
+	public nodeList(): GraphNode[] { return Array.from(this.nodes.values()).map(n => n.node) }
 
 	public nodeEdges(id: number): Edge[] | undefined { return this.nodes.get(id)?.edges }
 
@@ -159,11 +159,11 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public validNode(node: number) { return node >= 0 && node < this.size }
 
-	public addNode(label?: string): Node {
+	public addNode(label?: string): GraphNode {
 		let
 			node = this.labeled ?
 				new LabeledNode(this.nextNodeId, <string>label) :
-				new Node(this.nextNodeId);
+				new GraphNode(this.nextNodeId);
 		this.nodes.set(node.id, <NodeInternal>{
 			node: node,
 			edges: new Array()
@@ -219,7 +219,7 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public edge(v: number, w: number): Edge | undefined {
 		let
-			e = getInternalEdge.call(this, v, w) as { node: Node, edges: Edge[], index: number } | undefined;
+			e = getInternalEdge.call(this, v, w) as { node: GraphNode, edges: Edge[], index: number } | undefined;
 		return e?.edges[e.index]
 	}
 
