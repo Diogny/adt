@@ -126,7 +126,7 @@ export abstract class SearchBTree<T> extends BTree<T> {
 
 	abstract insert(value: T): BTreeNode<T>;
 
-	abstract delete(value: T): boolean;
+	abstract delete(value: T): BTreeNode<T> | undefined;
 
 	public insertRange(values: T[]): BTreeNode<T>[] {
 		let

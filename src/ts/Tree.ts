@@ -55,6 +55,12 @@ export abstract class BaseTree<T> {
 
 	abstract root: ValueNode<T>;
 
+	public empty(): boolean { return this.root == undefined }
+
+	public clear() {
+		this.root = <any>void 0
+	}
+
 	abstract find(value: T): ValueNode<T> | undefined;
 
 	public comparer(a: T, b: T): number {
