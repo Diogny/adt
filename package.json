@@ -33,7 +33,7 @@
 	"files": [],
 	"devDependencies": {
 		"@types/chai": "^4.2.11",
-		"@types/mocha": "^7.0.2",
+		"@types/mocha": "^8.0.0",
 		"@types/node": "12.12.21",
 		"chai": "^4.2.0",
 		"eslint": "^7.4.0",

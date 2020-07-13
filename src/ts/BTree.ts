@@ -83,30 +83,6 @@ export class BTree<T> extends BaseTree<T>{
 		return new BTreeNode<T>(value)
 	}
 
-	public insert(value: T): BTreeNode<T> {
-		if (!this.root) {
-			return this.root = this.newNode(value)
-		}
-		let
-			key = this.findKey(value);
-		if (key.comp == 0)
-			return key.node;
-		key.node = this.newNode(value);
-		if (key.comp < 0) {
-			key.parent.left = key.node
-		} else {
-			key.parent.right = key.node
-		}
-		return key.node
-	}
-
-	public insertRange(values: T[]): BTreeNode<T>[] {
-		let
-			array: BTreeNode<T>[] = [];
-		values.forEach(value => array.push(this.insert(value)))
-		return array
-	}
-
 	protected findKey(value: T): { node: BTreeNode<T>, parent: BTreeNode<T>, comp: number } {
 		let
 			comp = 0,
@@ -144,9 +120,19 @@ export class BTree<T> extends BaseTree<T>{
 		return node
 	}
 
-	public delete(value: T): boolean {
-		//...
-		return false
+}
+
+export abstract class SearchBTree<T> extends BTree<T> {
+
+	abstract insert(value: T): BTreeNode<T>;
+
+	abstract delete(value: T): boolean;
+
+	public insertRange(values: T[]): BTreeNode<T>[] {
+		let
+			array: BTreeNode<T>[] = [];
+		values.forEach(value => array.push(this.insert(value)))
+		return array
 	}
 
 }

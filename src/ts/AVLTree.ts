@@ -1,4 +1,4 @@
-import { BTree, BTreeNode } from "./BTree";
+import { BTreeNode, SearchBTree } from "./BTree";
 import Stack from "./Stack";
 
 export class AVLTreeNode<T> extends BTreeNode<T>{
@@ -12,7 +12,7 @@ export class AVLTreeNode<T> extends BTreeNode<T>{
 
 }
 
-export class AVLTree<T> extends BTree<T> {
+export class AVLTree<T> extends SearchBTree<T> {
 
 	constructor() {
 		super(<any>undefined)
@@ -93,4 +93,9 @@ export class AVLTree<T> extends BTree<T> {
 		}
 		return node
 	}
+
+	public delete(value: T): boolean {
+		return false
+	}
+
 }
