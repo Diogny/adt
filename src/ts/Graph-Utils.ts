@@ -32,7 +32,6 @@ function displayMatrix(matrix: number[][]) {
 }
 
 //this displays labels
-
 function displayGraphMatrix(g: BaseGraph) {
 	let
 		matrix = toMatrix(g),
@@ -113,6 +112,10 @@ function visulizeTree<T>(tree: BaseTree<T>) {
 		cons: string[][] = [],
 		newRow = (): string[] => new Array(columns).fill(fillChar(' ', maxLabelWidth + 1));
 
+	if (!tree || !tree.root) {
+		console.log('no tree root provided');
+		return
+	}
 	tree.postOrder(tree.root, (node => {
 		maxLabelWidth = Math.max(maxLabelWidth, String(node.value).length);
 		let
@@ -120,7 +123,7 @@ function visulizeTree<T>(tree: BaseTree<T>) {
 		w = w || 2;
 		map.set(node, w)
 	}));
-	!(maxLabelWidth & 1) && (maxLabelWidth += 1);
+	!(maxLabelWidth & 1) && (maxLabelWidth++);
 	columns = <number>map.get(tree.root);
 
 	visulizeNode<T>(tree.root, 0, 0, columns - 1, cons, newRow, map, maxLabelWidth);

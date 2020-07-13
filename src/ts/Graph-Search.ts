@@ -23,8 +23,6 @@ function bfsAnalysis(g: BaseGraph, start: number, analizers: IDFSAnalizer[]): nu
 		analizers, g.directed)
 }
 
-export { dfs, dfsAnalysis, bfs, bfsAnalysis }
-
 function graphSearch(start: number, engine: ISearchTask, edgeCallback: EdgeSearchCallback,
 	treeStartCallback: (n: number) => void, treeEndCallback: EdgeCallback): number {
 	let
@@ -57,7 +55,6 @@ function graphAnalysis(start: number, engine: ISearchTask, analizers: IDFSAnaliz
 	analizers.forEach(a => a.report());
 	return count
 }
-
 
 function bfsEngine(entryNode: number, startTiming: number): ISearchTask {
 	let
@@ -253,3 +250,5 @@ function dfsEngine(entryNode: number, startTiming: number): ISearchTask {
 		run: g.directed ? dfsDirected : dfs
 	}
 }
+
+export { dfs, dfsAnalysis, bfs, bfsAnalysis }

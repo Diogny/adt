@@ -22,7 +22,8 @@ console.log('pre order:   ', searchTree(t.root, t.preOrder).join(', '));
 console.log('post order:  ', searchTree(t.root, t.postOrder).join(', '));
 
 let a = new Array<string>();
-t.levelOrder(t.root, (n, l) => a.push(`${n.value}:${l}`));
+let depth = t.levelOrder(t.root, (n, l) => a.push(`${n.value}::${l}`));
 console.log('level order: ', a.join(', '));
+console.log('level order depth: ', depth);
 
 visulizeTree(t);

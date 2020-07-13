@@ -15,14 +15,22 @@ export class BTreeNode<T> extends ValueNode<T>  {
 
 }
 
-export class BTree<T> extends BaseTree<T>{
+export enum SearchBTreeTraverse {
+	Root,
+	Left,
+	Right
+}
 
-	public find(value: T): BTreeNode<T>[] | undefined {
-		return
-	}
+export class BTree<T> extends BaseTree<T>{
 
 	constructor(public root: BTreeNode<T>) {
 		super()
+	}
+
+	public find(value: T): BTreeNode<T> | undefined {
+		let
+			key = this.findKey(value);
+		return key.comp == 0 ? key.node : undefined
 	}
 
 	//(LNR)
@@ -69,6 +77,76 @@ export class BTree<T> extends BaseTree<T>{
 			}
 		}
 		return count;
+	}
+
+	public newNode(value: T): BTreeNode<T> {
+		return new BTreeNode<T>(value)
+	}
+
+	public insert(value: T): BTreeNode<T> {
+		if (!this.root) {
+			return this.root = this.newNode(value)
+		}
+		let
+			key = this.findKey(value);
+		if (key.comp == 0)
+			return key.node;
+		key.node = this.newNode(value);
+		if (key.comp < 0) {
+			key.parent.left = key.node
+		} else {
+			key.parent.right = key.node
+		}
+		return key.node
+	}
+
+	public insertRange(values: T[]): BTreeNode<T>[] {
+		let
+			array: BTreeNode<T>[] = [];
+		values.forEach(value => array.push(this.insert(value)))
+		return array
+	}
+
+	protected findKey(value: T): { node: BTreeNode<T>, parent: BTreeNode<T>, comp: number } {
+		let
+			comp = 0,
+			parent: BTreeNode<T> = <any>void 0,
+			node = this.root;
+		while (node != undefined) {
+			parent = node;
+			comp = this.comparer(value, node.value);
+			if (comp == 0) {
+				return {
+					node: node,
+					parent: parent,
+					comp: comp
+				}
+			} else if (comp < 0) {
+				node = <BTreeNode<T>>node.left
+			} else {
+				node = <BTreeNode<T>>node.right
+			}
+		}
+		return { node: node, parent: parent, comp: comp }
+	}
+
+	public min(node: BTreeNode<T>): BTreeNode<T> {
+		if (node)
+			while (node.left != undefined)
+				node = node.left;
+		return node
+	}
+
+	public max(node: BTreeNode<T>): BTreeNode<T> {
+		if (node)
+			while (node.right != undefined)
+				node = node.right;
+		return node
+	}
+
+	public delete(value: T): boolean {
+		//...
+		return false
 	}
 
 }

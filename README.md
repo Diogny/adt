@@ -55,6 +55,8 @@ pnpm install --save-dev @types/chai @types/mocha
 
 ## trees
 
+	visulizeTree(t);
+
 	    A
 	 ┌──┴┬──┐
 	 B   E  I
@@ -63,6 +65,8 @@ pnpm install --save-dev @types/chai @types/mocha
 	    ┌┴┐
 	    G H
 	
+	visulizeTree(t);
+
 	     +
 	   ┌─┴──┐
 	   *    +
@@ -75,6 +79,8 @@ pnpm install --save-dev @types/chai @types/mocha
 	in-order:  A * B - C + D + E
 	post-order:  A B C - * D E + +
 	breathSearch:  + * + A - D E B C
+
+	visulizeTree(t);
 
 	           Art
        ┌────────┴──┬────────┐
