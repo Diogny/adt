@@ -1,7 +1,7 @@
 {
 	"name": "adtjs",
 	"author": "Diogny A. B. <diognyab@outlook.com>",
-	"version": "0.0.15",
+	"version": "0.0.17",
 	"description": "Javascript Abstract Data Types",
 	"license": "MIT",
 	"main": "dist/index.js",
@@ -23,7 +23,6 @@
 		"dabberio"
 	],
 	"scripts": {
-		"prepublish": "pnpm run build-ts",
 		"no-test": "echo \"Error: no test specified\" && exit 1",
 		"test": "mocha --reporter spec",
 		"test-ts": "mocha --require ts-node/register --watch --watch-files src test/**/*.ts",
@@ -32,7 +31,6 @@
 		"watch": "tsc -w --noEmitHelpers --importHelpers",
 		"eslint": "eslint \"./src/*.ts\" \"./src/**/*.ts\" --report-unused-disable-directives"
 	},
-	"files": [],
 	"devDependencies": {
 		"@types/chai": "^4.2.11",
 		"@types/mocha": "^8.0.0",

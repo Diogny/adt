@@ -8,6 +8,17 @@ export abstract class ValueNode<T> {
 	abstract isLeaf: boolean;
 
 	constructor(public value: T) { }
+
+	/**	
+	 * @description return the amount of children
+	 */
+	public get length(): number { return this.children.length }
+
+	/**
+	 * @description children indexer
+	 * @param index 0-based index of child
+	 */
+	public get(index: number): ValueNode<T> | undefined { return this.children[index] }
 }
 
 export class TreeNode<T> extends ValueNode<T> {
@@ -76,19 +87,24 @@ export abstract class BaseTree<T> {
 	 * @description it calls levelOrder from root, and returns it's result with empty callback.
 	 */
 	public depth(): number {
-		return this.levelOrder(this.root, (node, level) => 1);
+		let
+			result: IteratorResult<{ node: ValueNode<T>, level: number }, number>,
+			enumerator = this.levelOrderEnumerator();
+		while (!(result = enumerator.next()).done);
+		return <number>result.value
 	}
 
-	public preOrder(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number {
+	public *preOrderEnumerator(node?: ValueNode<T>) {
 		let
 			stack = new Stack<ValueNode<T>>(),
 			count = 0;
+		!node && (node = this.root);
 		if (node) {
 			stack.push(node);
 			while (!stack.empty) {
 				count++;
 				node = stack.pop() as ValueNode<T>;
-				callback(node);
+				yield node;
 				for (let children = node.children, i = children.length - 1; i >= 0; i--) {
 					stack.push(children[i]);
 				}
@@ -97,44 +113,66 @@ export abstract class BaseTree<T> {
 		return count
 	}
 
+	public preOrderIterator(node?: ValueNode<T>): IterableIterator<ValueNode<T>> {
+		let
+			enumerator = this.preOrderEnumerator(node),
+			iterator = {
+				//Iterator protocol
+				next: (): IteratorResult<ValueNode<T>, number> => {
+					return enumerator.next()
+				},
+				//Iterable protocol
+				[Symbol.iterator]() {
+					return iterator
+				}
+			};
+		return iterator
+	}
+
 	/**
 	 * @description it's an extended breadthSearch with a tree node level value
 	 * @param node root node to calculate level order
 	 * @param callback a function called for every tree node with it's level 1-based
 	 */
-	public levelOrder(node: ValueNode<T>, callback: (node: ValueNode<T>, level: number) => void): number {
+	public * levelOrderEnumerator(node?: ValueNode<T>) {
 		let
 			queue = new Queue<{ node: ValueNode<T>, level: number }>(),
 			maxLevel = 0;
+		!node && (node = this.root);
 		if (node) {
 			queue.enqueue({ node: node, level: 1 });
 			while (!queue.empty) {
 				let
 					father = queue.dequeue() as { node: ValueNode<T>, level: number };
 				maxLevel = Math.max(maxLevel, father.level);
-				callback(father.node, father.level);
+				yield {
+					node: father.node,
+					level: father.level
+				};
 				father.node.children.forEach((child) => queue.enqueue({ node: child, level: father.level + 1 }))
 			}
 		}
 		return maxLevel
 	}
 
-	public postOrder(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number {
+	public * postOrderEnumerator(node?: ValueNode<T>) {
 		let
-			stack = new Stack<{ n: ValueNode<T>, t: boolean }>(),
+			stack = new Stack<{ node: ValueNode<T>, t: boolean }>(),
 			count = 0;
+		!node && (node = this.root);
 		if (node) {
-			stack.push({ n: node, t: false });
+			stack.push({ node: node, t: false });
 			while (!stack.empty) {
 				let
 					n = stack.peek();
 				if (n.t) {
-					callback(n.n);
+					count++;
+					yield n.node
 					stack.pop();
 				} else {
 					n.t = true;
-					for (let children = n.n.children, i = children.length - 1; i >= 0; i--) {
-						stack.push({ n: children[i], t: false })
+					for (let children = n.node.children, i = children.length - 1; i >= 0; i--) {
+						stack.push({ node: children[i], t: false })
 					}
 				}
 			}
@@ -142,20 +180,21 @@ export abstract class BaseTree<T> {
 		return count
 	}
 
-	public breathSearch(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number {
+	public * breathSearchEnumerator(node?: ValueNode<T>) {
 		let
 			queue = new Queue<ValueNode<T>>(),
 			count = 0;
+		!node && (node = this.root);
 		if (node) {
 			queue.enqueue(node);
 			while (!queue.empty) {
 				node = queue.dequeue() as ValueNode<T>;
 				count++;
-				callback(node);
+				yield node;
 				node.children.forEach(child => queue.enqueue(child))
 			}
 		}
-		return count;
+		return count
 	}
 
 }

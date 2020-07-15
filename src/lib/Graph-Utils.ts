@@ -110,19 +110,24 @@ function visulizeTree<T>(tree: BaseTree<T>) {
 		map = new Map<ValueNode<T>, number>(),
 		maxLabelWidth = 0,
 		cons: string[][] = [],
-		newRow = (): string[] => new Array(columns).fill(fillChar(' ', maxLabelWidth + 1));
+		newRow = (): string[] => new Array(columns).fill(fillChar(' ', maxLabelWidth + 1)),
+		postOrder = tree.postOrderEnumerator(),
+		result: IteratorResult<ValueNode<T> | number, number>;
 
 	if (!tree || !tree.root) {
 		console.log('no tree root provided');
 		return
 	}
-	tree.postOrder(tree.root, (node => {
+	while (!(result = postOrder.next()).done) {
+		let
+			node = result.value as ValueNode<T>;
 		maxLabelWidth = Math.max(maxLabelWidth, String(node.value).length);
 		let
 			w = node.children.map(n => <number>map.get(n)).reduce((acc, val) => acc + val, 0);
 		w = w || 2;
 		map.set(node, w)
-	}));
+	}
+
 	!(maxLabelWidth & 1) && (maxLabelWidth++);
 	columns = <number>map.get(tree.root);
 
@@ -181,12 +186,37 @@ function visulizeNode<T>(node: ValueNode<T>, row: number, mincol: number, maxcol
 	}
 }
 
-export const searchTree = <T>(root: ValueNode<T>, fn: (node: ValueNode<T>, callback: (n: ValueNode<T>) => void) => number): T[] => {
+type TValue = number | string | boolean;
+
+function generatorValueToArray<TValue, TResult>(
+	enumerator: Generator<TValue, TResult>
+): { array: TValue[], value: TResult } {
 	let
-		array = new Array<T>(),
-		nodeValue = (node: ValueNode<T>) => array.push(node.value);
-	fn(root, nodeValue);
-	return array
+		array = new Array<TValue>(),
+		result: IteratorResult<TValue, TResult>;
+	while (!(result = enumerator.next()).done) {
+		array.push(<TValue>result.value)
+	}
+	return {
+		array: array,
+		value: <TResult>result.value
+	}
+}
+
+function generatorObjToArray<TValue, TValueOut, TResult>(
+	enumerator: Generator<TValue, TResult>,
+	transformer: (value: TValue) => TValueOut
+): { array: TValueOut[], value: TResult } {
+	let
+		array = new Array<TValueOut>(),
+		result: IteratorResult<TValue, TResult>;
+	while (!(result = enumerator.next()).done) {
+		array.push(transformer(<TValue>result.value))
+	}
+	return {
+		array: array,
+		value: <TResult>result.value
+	}
 }
 
 export {
@@ -195,5 +225,7 @@ export {
 	fromJSON,
 	displayMatrix,
 	displayGraphMatrix,
-	visulizeTree
+	visulizeTree,
+	generatorValueToArray,
+	generatorObjToArray
 }

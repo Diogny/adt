@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.visulizeTree = exports.displayGraphMatrix = exports.displayMatrix = exports.fromJSON = exports.toMatrix = exports.transposeMatrix = exports.searchTree = void 0;
+exports.generatorObjToArray = exports.generatorValueToArray = exports.visulizeTree = exports.displayGraphMatrix = exports.displayMatrix = exports.fromJSON = exports.toMatrix = exports.transposeMatrix = void 0;
 const Graph_1 = require("./Graph");
 const Utils_1 = require("./Utils");
 function toMatrix(g) {
@@ -84,17 +84,18 @@ function fromJSON(content) {
 }
 exports.fromJSON = fromJSON;
 function visulizeTree(tree) {
-    let columns = 0, map = new Map(), maxLabelWidth = 0, cons = [], newRow = () => new Array(columns).fill(Utils_1.fillChar(' ', maxLabelWidth + 1));
+    let columns = 0, map = new Map(), maxLabelWidth = 0, cons = [], newRow = () => new Array(columns).fill(Utils_1.fillChar(' ', maxLabelWidth + 1)), postOrder = tree.postOrderEnumerator(), result;
     if (!tree || !tree.root) {
         console.log('no tree root provided');
         return;
     }
-    tree.postOrder(tree.root, (node => {
+    while (!(result = postOrder.next()).done) {
+        let node = result.value;
         maxLabelWidth = Math.max(maxLabelWidth, String(node.value).length);
         let w = node.children.map(n => map.get(n)).reduce((acc, val) => acc + val, 0);
         w = w || 2;
         map.set(node, w);
-    }));
+    }
     !(maxLabelWidth & 1) && (maxLabelWidth++);
     columns = map.get(tree.root);
     visulizeNode(tree.root, 0, 0, columns - 1, cons, newRow, map, maxLabelWidth);
@@ -139,8 +140,25 @@ function visulizeNode(node, row, mincol, maxcol, cons, newRow, map, maxLabelWidt
         }
     }
 }
-exports.searchTree = (root, fn) => {
-    let array = new Array(), nodeValue = (node) => array.push(node.value);
-    fn(root, nodeValue);
-    return array;
-};
+function generatorValueToArray(enumerator) {
+    let array = new Array(), result;
+    while (!(result = enumerator.next()).done) {
+        array.push(result.value);
+    }
+    return {
+        array: array,
+        value: result.value
+    };
+}
+exports.generatorValueToArray = generatorValueToArray;
+function generatorObjToArray(enumerator, transformer) {
+    let array = new Array(), result;
+    while (!(result = enumerator.next()).done) {
+        array.push(transformer(result.value));
+    }
+    return {
+        array: array,
+        value: result.value
+    };
+}
+exports.generatorObjToArray = generatorObjToArray;

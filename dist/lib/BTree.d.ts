@@ -15,8 +15,8 @@ export declare class BTree<T> extends BaseTree<T> {
     root: BTreeNode<T>;
     constructor(root: BTreeNode<T>);
     find(value: T): BTreeNode<T> | undefined;
-    inOrder(node: BTreeNode<T>, callback: (node: BTreeNode<T>) => void): number;
-    postOrder(node: BTreeNode<T>, callback: (node: BTreeNode<T>) => void): number;
+    inOrderEnumerator(node?: BTreeNode<T>): Generator<BTreeNode<T>, number, unknown>;
+    postOrderEnumerator(node?: BTreeNode<T>): Generator<BTreeNode<T>, number, unknown>;
     newNode(value: T): BTreeNode<T>;
     protected findKey(value: T): {
         node: BTreeNode<T>;

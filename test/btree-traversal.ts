@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { BTree, BTreeNode } from '../src/lib/BTree';
-import { visulizeTree, searchTree } from '../src/lib/Graph-Utils';
+import { visulizeTree, generatorObjToArray } from '../src/lib/Graph-Utils';
 
 //independent run
 //	node node_modules/mocha/bin/_mocha --require ts-node/register test/btree-traversal.ts
@@ -23,19 +23,23 @@ describe('BTree traversal', () => {
 		expect(t.depth()).to.equal(4);
 	});
 	it('t.preOrder()', () => {
-		console.log('pre-order:   ', searchTree(t.root, t.preOrder).join(' '));
+		let pre = generatorObjToArray(t.preOrderEnumerator(), (value) => value.value);
+		console.log('pre-order:   ', pre.array.join(' '));
 		expect(1).to.equal(1);
 	});
 	it('t.inOrder()', () => {
-		console.log('in-order:   ', searchTree(t.root, t.inOrder).join(' '));
+		let ino = generatorObjToArray(t.inOrderEnumerator(), (value) => value.value);
+		console.log('in-order:   ', ino.array.join(' '));
 		expect(1).to.equal(1);
 	});
 	it('t.postOrder()', () => {
-		console.log('post-order:   ', searchTree(t.root, t.postOrder).join(' '));
+		let post = generatorObjToArray(t.postOrderEnumerator(), (value) => value.value);
+		console.log('post-order:   ', post.array.join(' '));
 		expect(1).to.equal(1);
 	});
 	it('t.breathSearch()', () => {
-		console.log('breathSearch:   ', searchTree(t.root, t.breathSearch).join(' '));
+		let bre = generatorObjToArray(t.breathSearchEnumerator(), (value) => value.value);
+		console.log('breathSearch:   ', bre.array.join(' '));
 		expect(1).to.equal(1);
 	});
 	it('visulizeTree(t)', () => {

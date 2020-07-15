@@ -8,6 +8,15 @@ class ValueNode {
     constructor(value) {
         this.value = value;
     }
+    /**
+     * @description return the amount of children
+     */
+    get length() { return this.children.length; }
+    /**
+     * @description children indexer
+     * @param index 0-based index of child
+     */
+    get(index) { return this.children[index]; }
 }
 exports.ValueNode = ValueNode;
 class TreeNode extends ValueNode {
@@ -53,16 +62,20 @@ class BaseTree {
      * @description it calls levelOrder from root, and returns it's result with empty callback.
      */
     depth() {
-        return this.levelOrder(this.root, (node, level) => 1);
+        let result, enumerator = this.levelOrderEnumerator();
+        while (!(result = enumerator.next()).done)
+            ;
+        return result.value;
     }
-    preOrder(node, callback) {
+    *preOrderEnumerator(node) {
         let stack = new Stack_1.default(), count = 0;
+        !node && (node = this.root);
         if (node) {
             stack.push(node);
             while (!stack.empty) {
                 count++;
                 node = stack.pop();
-                callback(node);
+                yield node;
                 for (let children = node.children, i = children.length - 1; i >= 0; i--) {
                     stack.push(children[i]);
                 }
@@ -70,52 +83,72 @@ class BaseTree {
         }
         return count;
     }
+    preOrderIterator(node) {
+        let enumerator = this.preOrderEnumerator(node), iterator = {
+            //Iterator protocol
+            next: () => {
+                return enumerator.next();
+            },
+            //Iterable protocol
+            [Symbol.iterator]() {
+                return iterator;
+            }
+        };
+        return iterator;
+    }
     /**
      * @description it's an extended breadthSearch with a tree node level value
      * @param node root node to calculate level order
      * @param callback a function called for every tree node with it's level 1-based
      */
-    levelOrder(node, callback) {
+    *levelOrderEnumerator(node) {
         let queue = new Queue_1.default(), maxLevel = 0;
+        !node && (node = this.root);
         if (node) {
             queue.enqueue({ node: node, level: 1 });
             while (!queue.empty) {
                 let father = queue.dequeue();
                 maxLevel = Math.max(maxLevel, father.level);
-                callback(father.node, father.level);
+                yield {
+                    node: father.node,
+                    level: father.level
+                };
                 father.node.children.forEach((child) => queue.enqueue({ node: child, level: father.level + 1 }));
             }
         }
         return maxLevel;
     }
-    postOrder(node, callback) {
+    *postOrderEnumerator(node) {
         let stack = new Stack_1.default(), count = 0;
+        !node && (node = this.root);
         if (node) {
-            stack.push({ n: node, t: false });
+            stack.push({ node: node, t: false });
             while (!stack.empty) {
                 let n = stack.peek();
                 if (n.t) {
-                    callback(n.n);
+                    count++;
+                    yield n.node;
                     stack.pop();
                 }
                 else {
                     n.t = true;
-                    for (let children = n.n.children, i = children.length - 1; i >= 0; i--) {
-                        stack.push({ n: children[i], t: false });
+                    for (let children = n.node.children, i = children.length - 1; i >= 0; i--) {
+                        stack.push({ node: children[i], t: false });
                     }
                 }
             }
         }
         return count;
     }
-    breathSearch(node, callback) {
+    *breathSearchEnumerator(node) {
         let queue = new Queue_1.default(), count = 0;
+        !node && (node = this.root);
         if (node) {
             queue.enqueue(node);
             while (!queue.empty) {
                 node = queue.dequeue();
                 count++;
-                callback(node);
+                yield node;
                 node.children.forEach(child => queue.enqueue(child));
             }
         }

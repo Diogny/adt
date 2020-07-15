@@ -3,6 +3,15 @@ export declare abstract class ValueNode<T> {
     abstract children: ValueNode<T>[];
     abstract isLeaf: boolean;
     constructor(value: T);
+    /**
+     * @description return the amount of children
+     */
+    get length(): number;
+    /**
+     * @description children indexer
+     * @param index 0-based index of child
+     */
+    get(index: number): ValueNode<T> | undefined;
 }
 export declare class TreeNode<T> extends ValueNode<T> {
     protected __children: TreeNode<T>[];
@@ -25,15 +34,19 @@ export declare abstract class BaseTree<T> {
      * @description it calls levelOrder from root, and returns it's result with empty callback.
      */
     depth(): number;
-    preOrder(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number;
+    preOrderEnumerator(node?: ValueNode<T>): Generator<ValueNode<T>, number, unknown>;
+    preOrderIterator(node?: ValueNode<T>): IterableIterator<ValueNode<T>>;
     /**
      * @description it's an extended breadthSearch with a tree node level value
      * @param node root node to calculate level order
      * @param callback a function called for every tree node with it's level 1-based
      */
-    levelOrder(node: ValueNode<T>, callback: (node: ValueNode<T>, level: number) => void): number;
-    postOrder(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number;
-    breathSearch(node: ValueNode<T>, callback: (node: ValueNode<T>) => void): number;
+    levelOrderEnumerator(node?: ValueNode<T>): Generator<{
+        node: ValueNode<T>;
+        level: number;
+    }, number, unknown>;
+    postOrderEnumerator(node?: ValueNode<T>): Generator<ValueNode<T>, number, unknown>;
+    breathSearchEnumerator(node?: ValueNode<T>): Generator<ValueNode<T>, number, unknown>;
 }
 export declare class Tree<T> extends BaseTree<T> {
     root: TreeNode<T>;

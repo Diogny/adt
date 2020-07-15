@@ -34,11 +34,11 @@ export class BTree<T> extends BaseTree<T>{
 	}
 
 	//(LNR)
-	public inOrder(node: BTreeNode<T>, callback: (node: BTreeNode<T>) => void): number {
+	public *inOrderEnumerator(node?: BTreeNode<T>) {
 		let
 			stack = new Stack<BTreeNode<T>>(),
 			count = 0,
-			n: BTreeNode<T> | undefined = node;
+			n: BTreeNode<T> | undefined = node || this.root;
 		while (!stack.empty || n != undefined) {
 			if (n != undefined) {
 				stack.push(n);
@@ -46,17 +46,17 @@ export class BTree<T> extends BaseTree<T>{
 			} else {
 				n = stack.pop() as BTreeNode<T>;
 				count++;
-				callback(n);
+				yield n;
 				n = n.right;
 			}
 		}
 		return count;
 	}
 
-	public postOrder(node: BTreeNode<T>, callback: (node: BTreeNode<T>) => void): number {
+	public *postOrderEnumerator(node?: BTreeNode<T>) {
 		let
 			stack = new Stack<BTreeNode<T>>(),
-			n: BTreeNode<T> | undefined = node,
+			n: BTreeNode<T> | undefined = node || this.root,
 			lastNodeVisited: BTreeNode<T> | undefined,
 			count = 0;
 		while (!stack.empty || n != undefined) {
@@ -71,7 +71,7 @@ export class BTree<T> extends BaseTree<T>{
 					n = peekNode.right;
 				else {
 					count++;
-					callback(peekNode);
+					yield peekNode;
 					lastNodeVisited = stack.pop();
 				}
 			}

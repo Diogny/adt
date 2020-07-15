@@ -32,8 +32,8 @@ class BTree extends Tree_1.BaseTree {
         return key.comp == 0 ? key.node : undefined;
     }
     //(LNR)
-    inOrder(node, callback) {
-        let stack = new Stack_1.default(), count = 0, n = node;
+    *inOrderEnumerator(node) {
+        let stack = new Stack_1.default(), count = 0, n = node || this.root;
         while (!stack.empty || n != undefined) {
             if (n != undefined) {
                 stack.push(n);
@@ -42,14 +42,14 @@ class BTree extends Tree_1.BaseTree {
             else {
                 n = stack.pop();
                 count++;
-                callback(n);
+                yield n;
                 n = n.right;
             }
         }
         return count;
     }
-    postOrder(node, callback) {
-        let stack = new Stack_1.default(), n = node, lastNodeVisited, count = 0;
+    *postOrderEnumerator(node) {
+        let stack = new Stack_1.default(), n = node || this.root, lastNodeVisited, count = 0;
         while (!stack.empty || n != undefined) {
             if (n != undefined) {
                 stack.push(n);
@@ -62,7 +62,7 @@ class BTree extends Tree_1.BaseTree {
                     n = peekNode.right;
                 else {
                     count++;
-                    callback(peekNode);
+                    yield peekNode;
                     lastNodeVisited = stack.pop();
                 }
             }
