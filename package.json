@@ -1,7 +1,7 @@
 {
 	"name": "adtjs",
 	"author": "Diogny A. B. <diognyab@outlook.com>",
-	"version": "0.0.17",
+	"version": "0.0.18",
 	"description": "Javascript Abstract Data Types",
 	"license": "MIT",
 	"main": "dist/index.js",
@@ -38,7 +38,7 @@
 		"chai": "^4.2.0",
 		"eslint": "^7.4.0",
 		"mocha": "^8.0.1",
-		"ts-node": "^8.10.2",
-		"typescript": "^3.9.6"
+		"typescript": "^3.9.7",
+		"ts-node": "^8.10.2"
 	}
 }

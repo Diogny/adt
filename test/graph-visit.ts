@@ -1,7 +1,7 @@
 import { expect } from 'chai';
-import { LabeledGraph } from '../src/lib/Graph';
+import { LabeledGraph, EdgeVisitEnum } from '../src/lib/Graph';
 import { EdgeAnalizer, CyclesAnalizer } from '../src/lib/Graph-Analizers';
-import { dfsAnalysis } from "../src/lib/Graph-Search";
+import { dfsAnalysis, dfs } from "../src/lib/Graph-Search";
 
 //run as Task launch.json
 //or	node node_modules/mocha/bin/_mocha --require ts-node/register test/graph-visit.ts
@@ -34,6 +34,62 @@ describe('Graph Visits', () => {
 				new CyclesAnalizer()
 			];
 		dfsAnalysis(g, start, analizers);
+		expect(1).to.equal(1);
+	});
+	it('g dfs', () => {
+		let
+			array = [];
+		for (let edge of dfs(g, 0, true)) {
+			if (edge.e == EdgeVisitEnum.tree)
+				array.push(g.nodeLabel(edge.w));
+		}
+		console.log('dfs: ' + array.join(', '));
+		expect(1).to.equal(1);
+	});
+	it('g dfs search node', () => {
+		let
+			array = [],
+			node = "E",
+			found = false,
+			iterations = 0;
+		for (let edge of dfs(g, 0, true, true)) {
+			let
+				labelNode = g.nodeLabel(edge.w);
+			iterations++;
+			array.push(labelNode);
+			if (labelNode == node) {
+				found = true;
+				break;
+			}
+		}
+		if (found)
+			console.log(`[${node}] found, iterations: ${iterations}, path: ${array.join(' > ')}`);
+		else
+			console.log(`${node} not found!`)
+		expect(1).to.equal(1);
+	});
+	it('g dfs search node looking all edges', () => {
+		let
+			array = [],
+			node = "E",
+			found = false,
+			iterations = 0;
+		for (let edge of dfs(g, 0, true, false)) {
+			iterations++;
+			if (edge.e == EdgeVisitEnum.tree) {
+				let
+					labelNode = g.nodeLabel(edge.w);
+				array.push(labelNode);
+				if (labelNode == node) {
+					found = true;
+					break;
+				}
+			}
+		}
+		if (found)
+			console.log(`[${node}] found, iterations: ${iterations}, path: ${array.join(' > ')}`);
+		else
+			console.log(`${node} not found!`)
 		expect(1).to.equal(1);
 	});
 });

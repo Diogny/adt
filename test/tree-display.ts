@@ -1,4 +1,4 @@
-import { Tree, TreeNode, ValueNode } from '../src/lib/Tree';
+import { Tree, TreeNode } from '../src/lib/Tree';
 import { visulizeTree, generatorObjToArray } from '../src/lib/Graph-Utils';
 
 //independent run
@@ -30,16 +30,9 @@ console.log('post order:   ', post.array.join(', '));
 console.log('iterations: ', post.value);
 
 console.log('level order enumerable');
-let
-	array = new Array<string>(),
-	result: IteratorResult<{ node: ValueNode<string>, level: number }, number>,
-	enumerator = t.levelOrderEnumerator(),
-	getStr = (val: { node: ValueNode<string>, level: number }) => `${val.node.value}::${val.level}`;
-while (!(result = enumerator.next()).done)
-	array.push(getStr((<{ node: ValueNode<string>, level: number }>result.value)));
-
-console.log('level order: ', array.join(', '));
-console.log('level order depth: ', <number>result.value);
+let level = generatorObjToArray(t.levelOrderEnumerator(), (value) => `${value.node.value}::${value.level}`);
+console.log('level order: ', level.array.join(', '));
+console.log('level order depth: ', level.value);
 
 visulizeTree(t);
 

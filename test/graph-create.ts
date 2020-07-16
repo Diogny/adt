@@ -1,5 +1,5 @@
 import { WeightedEdge, Edge } from '../src/lib/Graph';
-import { EdgeAnalizer, BridgeAnalizer } from '../src/lib/Graph-Analizers';
+import { EdgeAnalizer, BridgeAnalizer, ComponentAnalizer } from '../src/lib/Graph-Analizers';
 import { fromJSON } from "../src/lib/Graph-Utils";
 import { dfsAnalysis } from "../src/lib/Graph-Search";
 
@@ -54,6 +54,7 @@ let
 	start = 0,
 	analizers = [
 		new EdgeAnalizer(true, true, true),
-		//new BridgeAnalizer(), check
+		new BridgeAnalizer(),
+		new ComponentAnalizer(),
 	];
 dfsAnalysis(g, start, analizers);

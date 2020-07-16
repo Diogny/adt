@@ -1,4 +1,4 @@
-import { IDFSAnalizer, ISearchTask, DFSVisitEdge } from "./Graph";
+import { IDFSAnalizer, ISearchTask, EdgeVisitEnum } from "./Graph";
 import { fillChar, padStr, range, formatNumber } from "./Utils";
 
 export abstract class BaseAnalizer implements IDFSAnalizer {
@@ -13,11 +13,9 @@ export abstract class BaseAnalizer implements IDFSAnalizer {
 		this.dfs = dfs;
 	}
 
-	abstract startTree(node: number): void;
-
 	public endTree(v: number, w: number) { }
 
-	abstract visit(v: number, w: number, e: DFSVisitEdge): void;
+	abstract visit(v: number, w: number, e: EdgeVisitEnum): void;
 
 	public report() {
 		console.log(this.name)
@@ -41,16 +39,12 @@ export class BridgeAnalizer extends UndirectedBaseAnalizer {
 
 	constructor() {
 		super("Bridge Analizer");
-		this.edgeList = [];
 	}
 
 	public register(dfs: ISearchTask): void {
 		super.register(dfs);
+		this.edgeList = [];
 		this.low = new Array<number>(this.dfs.nodes).fill(-1)
-	}
-
-	public startTree(node: number) {
-		this.low[node] = this.dfs.timing();
 	}
 
 	public endTree(v: number, w: number) {
@@ -63,15 +57,15 @@ export class BridgeAnalizer extends UndirectedBaseAnalizer {
 		}
 	}
 
-	public visit(v: number, w: number, e: DFSVisitEdge) {
+	public visit(v: number, w: number, e: EdgeVisitEnum) {
 		switch (e) {
-			case DFSVisitEdge.tree:
+			case EdgeVisitEnum.tree:
 				this.low[w] = this.dfs.pre[w];
 				break;
-			case DFSVisitEdge.parent:
-			case DFSVisitEdge.down:
+			case EdgeVisitEnum.parent:
+			case EdgeVisitEnum.down:
 				break;
-			case DFSVisitEdge.back:
+			case EdgeVisitEnum.back:
 				if (this.low[v] > this.dfs.pre[w])
 					this.low[v] = this.dfs.pre[w];
 				break;
@@ -98,13 +92,15 @@ export class CyclesAnalizer extends UndirectedBaseAnalizer {
 
 	constructor() {
 		super("Cycles Analizer");
+	}
+
+	public register(dfs: ISearchTask): void {
+		super.register(dfs);
 		this.cycles = new Array()
 	}
 
-	public startTree(node: number) { }
-
-	public visit(v: number, w: number, e: DFSVisitEdge) {
-		if (e == DFSVisitEdge.back) {
+	public visit(v: number, w: number, e: EdgeVisitEnum) {
+		if (e == EdgeVisitEnum.back) {
 			let
 				array: number[] = [v, w],
 				p = v;
@@ -125,26 +121,28 @@ export class CyclesAnalizer extends UndirectedBaseAnalizer {
 
 }
 
-//multi-analizer
+//multi-analizers
 export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 
+	colSpaces: number[];
 	edgeList: string[];
 	stackTrace: string[];
+
 	tabs = 4;
-	colSpaces: number[];
 	spaces = 0;
 	components = 0;
 	maxLabelWidth = 0;
 
 	constructor(name: string, public showStack?: boolean, public showInternals?: boolean, public showTreeEnd?: boolean) {
 		super(name);
-		this.edgeList = [];
-		this.stackTrace = [];
 	}
 
 	public register(dfs: ISearchTask): void {
 		super.register(dfs);
 		this.colSpaces = new Array(this.dfs.g.size).fill(-1);
+		this.edgeList = [];
+		this.stackTrace = [];
+		this.spaces = 0;
 	}
 
 	protected appendLine(edgeStr: string, stackStr: string) {
@@ -153,32 +151,35 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 			&& this.stackTrace.push(stackStr);
 	}
 
-	public startTree(node: number) {
-		this.appendLine(`component: ${++this.components}`, '');
-		this.appendLine(`[${node}] start tree`, '');
-	}
-
 	public endTree(v: number, w: number) {
 		super.endTree(v, w);
 		if (this.showTreeEnd) {
 			let
-				s = this.colSpaces[w] * this.tabs;
-			this.appendLine(`${fillChar(' ', s)}[${w}] tree analized as:(${v}-${w})`, '');
+				s = this.colSpaces[w] * this.tabs,
+				nv = this.dfs.g.nodeLabel(v),
+				nw = this.dfs.g.nodeLabel(w);
+			this.appendLine(`${fillChar(' ', s)}[${nw}] tree analized as:(${nv}-${nw})`, '');
 		}
 	}
 
-	public visit(v: number, w: number, e: DFSVisitEdge) {
-		if (this.colSpaces[v] < 0)
-			this.colSpaces[v] = 0;
-		if (e == DFSVisitEdge.tree) {
-			this.colSpaces[w] = this.colSpaces[v] + 1;
-		}
-		this.spaces = this.colSpaces[v] * this.tabs;
+	public visit(v: number, w: number, e: EdgeVisitEnum) {
 		let
 			nv = this.dfs.g.nodeLabel(v),
-			nw = this.dfs.g.nodeLabel(w);
-		this.appendLine(`${fillChar(' ', this.spaces)}(${nv}-${nw}) ${DFSVisitEdge[e]}`,
-			this.showStack ? `[${this.dfs.edgePipe().map(e => `${e.v}-${e.w}`).join(', ')}]` : '');
+			nw = this.dfs.g.nodeLabel(w),
+			isRoot = false;
+		if (this.colSpaces[v] < 0)
+			this.colSpaces[v] = 0;
+		if (e == EdgeVisitEnum.tree) {
+			this.colSpaces[w] = this.colSpaces[v] + 1;
+			if (v == w) {
+				isRoot = true;
+				this.appendLine(`component: ${++this.components}`, '');
+				this.appendLine(`[${w}] start tree`, '');
+			}
+		}
+		this.spaces = this.colSpaces[v] * this.tabs;
+		this.appendLine(`${fillChar(' ', isRoot ? 0 : this.spaces)}(${nv}-${nw}) ${EdgeVisitEnum[e]}`,
+			this.showStack ? `[${this.dfs.edges().map(e => `${e.v}-${e.w}`).join(', ')}]` : '');
 	}
 
 	public report() {
@@ -195,6 +196,7 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 			this.maxLabelWidth = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1;
 			let
 				header = `node: ${range(0, this.dfs.nodes).map(n => formatNumber(n, this.maxLabelWidth)).join('  ')}`;
+			console.log();
 			console.log(header);
 			console.log(fillChar('-', header.length + 1));
 			console.log(`pre:  ${this.dfs.pre.map(n => formatNumber(n, this.maxLabelWidth)).join('  ')}`);
@@ -212,4 +214,48 @@ export class EdgeAnalizer extends BaseEdgeAnalizer {
 		super("Edge Analizer", showStack, showInternals, showTreeEnd);
 	}
 
+}
+
+export abstract class BaseComponentAnalizer extends BaseAnalizer {
+
+	count: number;
+	components: number[];
+
+	constructor(name: string) {
+		super(name);
+	}
+
+	public register(dfs: ISearchTask): void {
+		super.register(dfs);
+		this.count = 0;
+		this.components = new Array(this.dfs.g.size).fill(-1);
+	}
+
+	public visit(v: number, w: number, e: EdgeVisitEnum) {
+		if (e == EdgeVisitEnum.tree) {
+			if (v == w)
+				this.count++;
+			this.components[w] = this.count
+		}
+	}
+
+	public report() {
+		super.report();
+		let
+			maxLabelWidth = String(this.dfs.nodes).length + 1,
+			header = `node: ${range(0, this.dfs.nodes).map(n => formatNumber(n, maxLabelWidth)).join('  ')}`;
+		console.log(`component(s): ${this.count}`);
+		console.log(header);
+		console.log(fillChar('-', header.length + 1));
+		console.log(`comp:  ${this.components.map(n => formatNumber(n, maxLabelWidth)).join('  ')}`);
+	}
+}
+
+export class ComponentAnalizer extends BaseComponentAnalizer {
+
+	public get directed(): boolean { return false }
+
+	constructor() {
+		super("Component Analizer");
+	}
 }

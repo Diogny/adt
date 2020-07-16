@@ -1,6 +1,6 @@
 import { formatNumber } from "./Utils";
-import { BaseAnalizer, BaseEdgeAnalizer } from "./Graph-Analizers";
-import { DFSVisitEdge, ISearchTask } from "./Graph";
+import { BaseAnalizer, BaseEdgeAnalizer, BaseComponentAnalizer } from "./Graph-Analizers";
+import { EdgeVisitEnum, ISearchTask } from "./Graph";
 
 export abstract class DirectedBaseAnalizer extends BaseAnalizer {
 
@@ -25,6 +25,15 @@ export class DirectedEdgeAnalizer extends BaseEdgeAnalizer {
 
 }
 
+export class DirectedComponentAnalizer extends BaseComponentAnalizer {
+
+	public get directed(): boolean { return true }
+	
+	constructor() {
+		super("Directed Component Analizer");
+	}
+}
+
 //works with DFS only
 export class ToposortAnalizer extends DirectedBaseAnalizer {
 
@@ -43,10 +52,8 @@ export class ToposortAnalizer extends DirectedBaseAnalizer {
 		this.isDAG = true;
 	}
 
-	startTree(node: number): void { }
-
-	visit(v: number, w: number, e: DFSVisitEdge): void {
-		if (e == DFSVisitEdge.back)
+	visit(v: number, w: number, e: EdgeVisitEnum): void {
+		if (e == EdgeVisitEnum.back)
 			this.isDAG = false;
 	}
 

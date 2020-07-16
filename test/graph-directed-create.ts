@@ -1,5 +1,5 @@
 import { Edge, WeightedEdge } from "../src/lib/Graph";
-import { DirectedEdgeAnalizer } from "../src/lib/Graph-Directed-Analizers";
+import { DirectedEdgeAnalizer, DirectedComponentAnalizer } from "../src/lib/Graph-Directed-Analizers";
 import { fromJSON } from "../src/lib/Graph-Utils";
 import { dfsAnalysis } from "../src/lib/Graph-Search";
 
@@ -67,5 +67,6 @@ let
 	start = 0,
 	analizers = [
 		new DirectedEdgeAnalizer(true, true, true),
+		new DirectedComponentAnalizer(),
 	];
 dfsAnalysis(g, start, analizers);

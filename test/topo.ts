@@ -1,7 +1,7 @@
 import { Edge, WeightedEdge } from "../src/lib/Graph";
 import { displayMatrix, toMatrix, transposeMatrix, fromJSON } from "../src/lib/Graph-Utils";
 import { dfsAnalysis } from "../src/lib/Graph-Search";
-import { DirectedEdgeAnalizer, ToposortAnalizer } from "../src/lib/Graph-Directed-Analizers";
+import { DirectedEdgeAnalizer, ToposortAnalizer, DirectedComponentAnalizer } from "../src/lib/Graph-Directed-Analizers";
 
 //independent run
 //	node --require ts-node/register --trace-uncaught test/topo.ts
@@ -60,6 +60,7 @@ let
 	analizers = [
 		new DirectedEdgeAnalizer(true, true, true),
 		new ToposortAnalizer(),
+		new DirectedComponentAnalizer(),
 	];
 console.log('Degree or Source');
 console.log(g.degrees().join(" "));

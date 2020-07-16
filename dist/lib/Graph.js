@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LabeledDiGraph = exports.LabeledGraph = exports.WeightedDiGraph = exports.WeightedGraph = exports.DiGraph = exports.Graph = exports.BaseGraph = exports.DFSVisitEdge = exports.WeightedEdge = exports.Edge = exports.LabeledNode = exports.GraphNode = void 0;
+exports.LabeledDiGraph = exports.LabeledGraph = exports.WeightedDiGraph = exports.WeightedGraph = exports.DiGraph = exports.Graph = exports.BaseGraph = exports.EdgeVisitEnum = exports.WeightedEdge = exports.Edge = exports.LabeledNode = exports.GraphNode = void 0;
 const Utils_1 = require("./Utils");
 class GraphNode {
     constructor(id) {
@@ -37,14 +37,14 @@ class WeightedEdge extends Edge {
     label() { return `(${this.v}>${this.w})::${this.weight}`; }
 }
 exports.WeightedEdge = WeightedEdge;
-var DFSVisitEdge;
-(function (DFSVisitEdge) {
-    DFSVisitEdge[DFSVisitEdge["tree"] = 0] = "tree";
-    DFSVisitEdge[DFSVisitEdge["parent"] = 1] = "parent";
-    DFSVisitEdge[DFSVisitEdge["back"] = 2] = "back";
-    DFSVisitEdge[DFSVisitEdge["down"] = 3] = "down";
-    DFSVisitEdge[DFSVisitEdge["cross"] = 4] = "cross";
-})(DFSVisitEdge = exports.DFSVisitEdge || (exports.DFSVisitEdge = {}));
+var EdgeVisitEnum;
+(function (EdgeVisitEnum) {
+    EdgeVisitEnum[EdgeVisitEnum["tree"] = 0] = "tree";
+    EdgeVisitEnum[EdgeVisitEnum["parent"] = 1] = "parent";
+    EdgeVisitEnum[EdgeVisitEnum["back"] = 2] = "back";
+    EdgeVisitEnum[EdgeVisitEnum["down"] = 3] = "down";
+    EdgeVisitEnum[EdgeVisitEnum["cross"] = 4] = "cross";
+})(EdgeVisitEnum = exports.EdgeVisitEnum || (exports.EdgeVisitEnum = {}));
 class BaseGraph {
     constructor(name, directed, weighted, labeled) {
         this.name = name;

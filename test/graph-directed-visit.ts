@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { DiGraph } from '../src/lib/Graph';
-import { DirectedEdgeAnalizer } from '../src/lib/Graph-Directed-Analizers';
+import { DirectedEdgeAnalizer, DirectedComponentAnalizer } from '../src/lib/Graph-Directed-Analizers';
 import { dfsAnalysis } from "../src/lib/Graph-Search";
 
 //run as Task launch.json
@@ -34,7 +34,8 @@ describe('DiGraph Visits', () => {
 		let
 			start = 0,
 			analizers = [
-				new DirectedEdgeAnalizer(true, true, true)
+				new DirectedEdgeAnalizer(true, true, true),
+				new DirectedComponentAnalizer(),
 			];
 		dfsAnalysis(g, start, analizers);
 		expect(1).to.equal(1);

@@ -11,7 +11,11 @@ export declare class LabeledNode extends GraphNode {
     constructor(id: number, __label: string);
     label(): string;
 }
-export declare class Edge implements ILabel {
+export interface IEdge {
+    v: number;
+    w: number;
+}
+export declare class Edge implements ILabel, IEdge {
     v: number;
     w: number;
     label(): string;
@@ -22,7 +26,7 @@ export declare class WeightedEdge extends Edge {
     constructor(v: number, w: number, weight: number);
     label(): string;
 }
-export declare enum DFSVisitEdge {
+export declare enum EdgeVisitEnum {
     tree = 0,
     parent = 1,
     back = 2,
@@ -32,8 +36,11 @@ export declare enum DFSVisitEdge {
 export interface EdgeCallback {
     (v: number, w: number): void;
 }
+export interface IEdgeSearch extends IEdge {
+    e: EdgeVisitEnum;
+}
 export interface EdgeSearchCallback {
-    (v: number, w: number, e: DFSVisitEdge): void;
+    (v: number, w: number, e: EdgeVisitEnum): void;
 }
 export interface ISearchTask {
     g: BaseGraph;
@@ -41,20 +48,20 @@ export interface ISearchTask {
     st: number[];
     post: number[];
     nodes: number;
-    edgePipe(): {
+    initial(): number;
+    edges(): {
         v: number;
         w: number;
     }[];
     next(): boolean;
     current(): number;
     timing(): number;
-    run: (start: number, edgeCallback: EdgeSearchCallback, treeEndCallback: EdgeCallback) => void;
+    search: (start: number) => Generator<IEdgeSearch, number>;
 }
 export interface IDFSAnalizer {
     name: string;
     directed: boolean;
-    startTree(node: number): void;
-    visit(v: number, w: number, e: DFSVisitEdge): void;
+    visit(v: number, w: number, e: EdgeVisitEnum): void;
     endTree(v: number, w: number): void;
     report(): void;
     register(dfs: ISearchTask): void;

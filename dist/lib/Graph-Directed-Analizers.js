@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToposortAnalizer = exports.DirectedEdgeAnalizer = exports.DirectedBaseAnalizer = void 0;
+exports.ToposortAnalizer = exports.DirectedComponentAnalizer = exports.DirectedEdgeAnalizer = exports.DirectedBaseAnalizer = void 0;
 const Utils_1 = require("./Utils");
 const Graph_Analizers_1 = require("./Graph-Analizers");
 const Graph_1 = require("./Graph");
@@ -24,6 +24,13 @@ class DirectedEdgeAnalizer extends Graph_Analizers_1.BaseEdgeAnalizer {
     }
 }
 exports.DirectedEdgeAnalizer = DirectedEdgeAnalizer;
+class DirectedComponentAnalizer extends Graph_Analizers_1.BaseComponentAnalizer {
+    get directed() { return true; }
+    constructor() {
+        super("Directed Component Analizer");
+    }
+}
+exports.DirectedComponentAnalizer = DirectedComponentAnalizer;
 //works with DFS only
 class ToposortAnalizer extends DirectedBaseAnalizer {
     constructor() {
@@ -35,9 +42,8 @@ class ToposortAnalizer extends DirectedBaseAnalizer {
         this.index = 0;
         this.isDAG = true;
     }
-    startTree(node) { }
     visit(v, w, e) {
-        if (e == Graph_1.DFSVisitEdge.back)
+        if (e == Graph_1.EdgeVisitEnum.back)
             this.isDAG = false;
     }
     endTree(v, w) {

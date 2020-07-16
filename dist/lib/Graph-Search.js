@@ -1,196 +1,191 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bfsAnalysis = exports.bfs = exports.dfsAnalysis = exports.dfs = void 0;
+exports.bfsEngine = exports.bfsAnalysis = exports.bfs = exports.dfsEngine = exports.dfsAnalysis = exports.dfs = exports.searchGraph = void 0;
 const tslib_1 = require("tslib");
 const Graph_1 = require("./Graph");
 const Stack_1 = tslib_1.__importDefault(require("./Stack"));
 const Queue_1 = tslib_1.__importDefault(require("./Queue"));
 const Utils_1 = require("./Utils");
-function dfs(g, start, edgeCallback, treeStartCallback, treeEndCallback) {
-    return graphSearch.call(g, start, dfsEngine.call(g, start, 0), edgeCallback, treeStartCallback, treeEndCallback);
+function* searchGraph(engine, start, full) {
+    let components = 0;
+    if (engine.next()) {
+        do {
+            components++;
+            start = engine.current();
+            for (let edge of engine.search(start)) {
+                yield edge;
+            }
+        } while (full && engine.next());
+    }
+    return components;
+}
+exports.searchGraph = searchGraph;
+function dfs(g, start, full, treeEdgesOnly, searchTreeEdgeEndCallback) {
+    let enumerator = searchGraph(dfsEngine(g, start, treeEdgesOnly, searchTreeEdgeEndCallback), start, full), iterator = {
+        next: () => {
+            return enumerator.next();
+        },
+        [Symbol.iterator]() {
+            return iterator;
+        }
+    };
+    return iterator;
 }
 exports.dfs = dfs;
-function dfsAnalysis(g, start, analizers) {
-    return graphAnalysis.call(g, start, dfsEngine.call(g, start, 0), analizers, g.directed);
-}
-exports.dfsAnalysis = dfsAnalysis;
-function bfs(g, start, edgeCallback, treeStartCallback, treeEndCallback) {
-    return graphSearch.call(g, start, bfsEngine.call(g, start, 0), edgeCallback, treeStartCallback, treeEndCallback);
+function bfs(g, start, full, treeEdgesOnly, searchTreeEdgeEndCallback) {
+    let enumerator = searchGraph(bfsEngine(g, start, treeEdgesOnly, searchTreeEdgeEndCallback), start, full), iterator = {
+        next: () => {
+            return enumerator.next();
+        },
+        [Symbol.iterator]() {
+            return iterator;
+        }
+    };
+    return iterator;
 }
 exports.bfs = bfs;
-function bfsAnalysis(g, start, analizers) {
-    return graphAnalysis.call(g, start, bfsEngine.call(g, start, 0), analizers, g.directed);
-}
-exports.bfsAnalysis = bfsAnalysis;
-function graphSearch(start, engine, edgeCallback, treeStartCallback, treeEndCallback) {
-    let count = 0;
-    while (engine.next()) {
-        treeStartCallback(start = engine.current());
-        count++;
-        engine.run(start, edgeCallback, treeEndCallback);
-    }
-    return count;
-}
-function graphAnalysis(start, engine, analizers, directed) {
-    let edgeCallback = (v, w, e) => analizers.forEach(a => a.visit(v, w, e)), endTreeCallback = (v, w) => analizers.forEach(a => a.endTree(v, w)), count = 0;
+function searchGraphAnalysis(engine, start, analizers) {
+    let enumerator = searchGraph(engine, start, true), result;
     analizers.forEach(a => {
-        if (directed != a.directed)
+        if (engine.g.directed != a.directed)
             throw `edge analizer direction does not match graph`;
         a.register(engine);
     });
-    while (engine.next()) {
-        count++;
-        analizers.forEach(a => a.startTree(start = engine.current()));
-        engine.run(start, edgeCallback, endTreeCallback);
+    while (!(result = enumerator.next()).done) {
+        let edge = result.value;
+        analizers.forEach(a => a.visit(edge.v, edge.w, edge.e));
     }
     analizers.forEach(a => a.report());
-    return count;
+    return result.value;
 }
-function bfsEngine(entryNode, startTiming) {
-    let g = this, nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, timing = startTiming, postTiming = startTiming, discovered = (node) => pre[node] >= 0, enumerator = Utils_1.enumConditional(entryNode, nodes - 1, discovered), queue = new Queue_1.default(), bfsFindAdjacents = (v, edgeCallback, processEdge) => {
-        let empty = true;
-        for (let array = g.adjacentEdges(v), i = 0, count = array.length; i < count; i++) {
-            let w = array[i];
-            if (discovered(w))
-                processEdge(v, w, edgeCallback);
-            else {
-                queue.enqueue({ v: v, w: w });
-                empty = false;
+function dfsAnalysis(g, start, analizers) {
+    let endTreeEdgeCallback = (v, w) => {
+        analizers.forEach(a => a.endTree(v, w));
+    }, engine = dfsEngine(g, start, false, endTreeEdgeCallback);
+    return searchGraphAnalysis(engine, start, analizers);
+}
+exports.dfsAnalysis = dfsAnalysis;
+function bfsAnalysis(g, start, analizers) {
+    let endTreeEdgeCallback = (v, w) => {
+        analizers.forEach(a => a.endTree(v, w));
+    }, engine = bfsEngine(g, start, false, endTreeEdgeCallback);
+    return searchGraphAnalysis(engine, start, analizers);
+}
+exports.bfsAnalysis = bfsAnalysis;
+function dfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
+    let nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, startTiming = 0, timing = startTiming, postTiming = startTiming, discovered = (node) => pre[node] >= 0, enumerator = Utils_1.enumConditional(start, nodes - 1, discovered), stack = new Stack_1.default(), dfsFindAdjacents = (v, processEdge) => {
+        let result = [];
+        for (let adjacents = g.adjacentEdges(v), i = adjacents.length - 1; i >= 0; i--) {
+            let w = adjacents[i];
+            if (discovered(w)) {
+                !treeEdgesOnly && result.push(processEdge(v, w));
             }
-        }
-        empty && (console.log(`leaf: ${v}`));
-    }, bfsProcessNonTreeEdge = (v, w, edgeCallback) => {
-        if (st[v] == w)
-            edgeCallback(v, w, Graph_1.DFSVisitEdge.parent);
-        else {
-            if (pre[w] < pre[v]) {
-                edgeCallback(v, w, Graph_1.DFSVisitEdge.back);
-            }
-            else if (pre[w] > pre[v])
-                edgeCallback(v, w, Graph_1.DFSVisitEdge.down);
             else
-                console.log(v, w, 'Ooopsie!');
-        }
-    }, bfsProcessNonTreeDirectedEdge = (v, w, edgeCallback) => {
-    }, bfs = (startNode, edgeCallback, treeEndCallback) => {
-        st[startNode] = startNode;
-        pre[startNode] = timing++;
-        bfsFindAdjacents(startNode, edgeCallback, bfsProcessNonTreeEdge);
-        while (!queue.empty) {
-            let edge = queue.dequeue();
-            if (discovered(edge.w)) {
-                bfsProcessNonTreeEdge(edge.v, edge.w, edgeCallback);
-            }
-            else {
-                pre[edge.w] = timing++;
-                st[edge.w] = edge.v;
-                edgeCallback(edge.v, edge.w, Graph_1.DFSVisitEdge.tree);
-                bfsFindAdjacents(edge.w, edgeCallback, bfsProcessNonTreeEdge);
-            }
-        }
-        treeEndCallback(startNode, startNode);
-    }, bfsDirected = (startNode, edgeCallback, treeEndCallback) => {
-        st[startNode] = startNode;
-        pre[startNode] = timing++;
-        //
-        post[startNode] = postTiming++;
-        treeEndCallback(startNode, startNode);
-    };
-    g.directed && (post = new Array(nodes).fill(-1));
-    return {
-        g: g,
-        nodes: nodes,
-        pre: pre,
-        st: st,
-        post: post,
-        timing: () => timing,
-        next: () => enumerator.next(),
-        current: () => enumerator.current(),
-        edgePipe: () => queue.items,
-        run: g.directed ? bfsDirected : bfs
-    };
-}
-function dfsEngine(entryNode, startTiming) {
-    let g = this, nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, timing = startTiming, postTiming = startTiming, discovered = (node) => pre[node] >= 0, enumerator = Utils_1.enumConditional(entryNode, nodes - 1, discovered), stack = new Stack_1.default(), dfsFindAdjacents = (v, edgeCallback, processEdge) => {
-        for (let array = g.adjacentEdges(v), i = array.length - 1; i >= 0; i--) {
-            let w = array[i];
-            if (discovered(w))
-                processEdge(v, w, edgeCallback);
-            else {
                 stack.push({ v: v, w: w, t: false });
-            }
         }
-    }, dfsProcessNonTreeEdge = (v, w, edgeCallback) => {
-        if (st[v] == w)
-            edgeCallback(v, w, Graph_1.DFSVisitEdge.parent);
-        else {
-            if (pre[w] < pre[v]) {
-                edgeCallback(v, w, Graph_1.DFSVisitEdge.back);
-            }
-            else if (pre[w] > pre[v])
-                edgeCallback(v, w, Graph_1.DFSVisitEdge.down);
+        return result;
+    }, dfsProcessNonTreeEdge = (v, w) => {
+        let edgeKind = () => {
+            if (st[v] == w)
+                return Graph_1.EdgeVisitEnum.parent;
+            else if (pre[w] < pre[v])
+                return Graph_1.EdgeVisitEnum.back;
             else
-                console.log(v, w, 'Ooopsie!');
-        }
-    }, dfsProcessNonTreeDirectedEdge = (v, w, edgeCallback) => {
-        if (pre[v] < pre[w])
-            edgeCallback(v, w, Graph_1.DFSVisitEdge.down);
-        else if (post[v] == -1 && post[w] == -1)
-            edgeCallback(v, w, Graph_1.DFSVisitEdge.back);
-        else
-            edgeCallback(v, w, Graph_1.DFSVisitEdge.cross);
-    }, dfs = (startNode, edgeCallback, treeEndCallback) => {
+                return Graph_1.EdgeVisitEnum.down;
+        };
+        return { v: v, w: w, e: edgeKind() };
+    }, dfsProcessNonTreeDirectedEdge = (v, w) => {
+        let edgeKind = () => {
+            if (pre[v] < pre[w])
+                return Graph_1.EdgeVisitEnum.down;
+            else if (post[v] == -1 && post[w] == -1)
+                return Graph_1.EdgeVisitEnum.back;
+            else
+                return Graph_1.EdgeVisitEnum.cross;
+        };
+        return { v: v, w: w, e: edgeKind() };
+    }, dfs = function* (startNode) {
+        if (discovered(startNode))
+            return 0;
+        let count = 1;
         st[startNode] = startNode;
         pre[startNode] = timing++;
-        dfsFindAdjacents(startNode, edgeCallback, dfsProcessNonTreeEdge);
+        yield { v: startNode, w: startNode, e: Graph_1.EdgeVisitEnum.tree };
+        let nonTreeEdges = dfsFindAdjacents(startNode, dfsProcessNonTreeEdge);
+        if (!treeEdgesOnly) {
+            for (let i = 0; i < nonTreeEdges.length; i++)
+                yield nonTreeEdges[i];
+        }
         while (!stack.empty) {
             let edge = stack.peek();
             if (edge.t) {
-                treeEndCallback(edge.v, edge.w);
+                searchEndCallback && searchEndCallback(edge.v, edge.w);
                 stack.pop();
             }
             else {
                 if (discovered(edge.w)) {
-                    dfsProcessNonTreeEdge(edge.v, edge.w, edgeCallback);
+                    if (!treeEdgesOnly)
+                        yield dfsProcessNonTreeEdge(edge.v, edge.w);
                     stack.pop();
                 }
                 else {
                     edge.t = true;
                     pre[edge.w] = timing++;
                     st[edge.w] = edge.v;
-                    edgeCallback(edge.v, edge.w, Graph_1.DFSVisitEdge.tree);
-                    dfsFindAdjacents(edge.w, edgeCallback, dfsProcessNonTreeEdge);
+                    count++;
+                    yield { v: edge.v, w: edge.w, e: Graph_1.EdgeVisitEnum.tree };
+                    nonTreeEdges = dfsFindAdjacents(edge.w, dfsProcessNonTreeEdge);
+                    if (!treeEdgesOnly) {
+                        for (let i = 0; i < nonTreeEdges.length; i++)
+                            yield nonTreeEdges[i];
+                    }
                 }
             }
         }
-        treeEndCallback(startNode, startNode);
-    }, dfsDirected = (startNode, edgeCallback, treeEndCallback) => {
+        searchEndCallback && searchEndCallback(startNode, startNode);
+        return count;
+    }, dfsDirected = function* (startNode) {
+        if (discovered(startNode))
+            return 0;
+        let count = 1;
         st[startNode] = startNode;
         pre[startNode] = timing++;
-        dfsFindAdjacents(startNode, edgeCallback, dfsProcessNonTreeDirectedEdge);
+        yield { v: startNode, w: startNode, e: Graph_1.EdgeVisitEnum.tree };
+        let nonTreeEdges = dfsFindAdjacents(startNode, dfsProcessNonTreeDirectedEdge);
+        if (!treeEdgesOnly) {
+            for (let i = 0; i < nonTreeEdges.length; i++)
+                yield nonTreeEdges[i];
+        }
         while (!stack.empty) {
             let edge = stack.peek();
             if (edge.t) {
                 post[edge.w] = postTiming++;
-                treeEndCallback(edge.v, edge.w);
+                searchEndCallback && searchEndCallback(edge.v, edge.w);
                 stack.pop();
             }
             else {
                 if (discovered(edge.w)) {
-                    dfsProcessNonTreeDirectedEdge(edge.v, edge.w, edgeCallback);
+                    if (!treeEdgesOnly)
+                        yield dfsProcessNonTreeDirectedEdge(edge.v, edge.w);
                     stack.pop();
                 }
                 else {
                     edge.t = true;
                     pre[edge.w] = timing++;
                     st[edge.w] = edge.v;
-                    edgeCallback(edge.v, edge.w, Graph_1.DFSVisitEdge.tree);
-                    dfsFindAdjacents(edge.w, edgeCallback, dfsProcessNonTreeDirectedEdge);
+                    count++;
+                    yield { v: edge.v, w: edge.w, e: Graph_1.EdgeVisitEnum.tree };
+                    nonTreeEdges = dfsFindAdjacents(edge.w, dfsProcessNonTreeDirectedEdge);
+                    if (!treeEdgesOnly) {
+                        for (let i = 0; i < nonTreeEdges.length; i++)
+                            yield nonTreeEdges[i];
+                    }
                 }
             }
         }
         post[startNode] = postTiming++;
-        treeEndCallback(startNode, startNode);
+        searchEndCallback && searchEndCallback(startNode, startNode);
+        return count;
     };
     g.directed && (post = new Array(nodes).fill(-1));
     return {
@@ -199,10 +194,96 @@ function dfsEngine(entryNode, startTiming) {
         pre: pre,
         st: st,
         post: post,
+        initial: () => start,
         timing: () => timing,
         next: () => enumerator.next(),
         current: () => enumerator.current(),
-        edgePipe: () => stack.items,
-        run: g.directed ? dfsDirected : dfs
+        edges: () => stack.items,
+        search: g.directed ? dfsDirected : dfs
     };
 }
+exports.dfsEngine = dfsEngine;
+function bfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
+    let nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, startTiming = 0, timing = startTiming, postTiming = startTiming, discovered = (node) => pre[node] >= 0, enumerator = Utils_1.enumConditional(start, nodes - 1, discovered), queue = new Queue_1.default(), bfsFindAdjacents = (v, processEdge) => {
+        let result = [];
+        for (let adjacents = g.adjacentEdges(v), i = 0; i < adjacents.length; i++) {
+            let w = adjacents[i];
+            if (discovered(w))
+                !treeEdgesOnly && result.push(processEdge(v, w));
+            else
+                queue.enqueue({ v: v, w: w });
+        }
+        return result;
+    }, bfsProcessNonTreeEdge = (v, w) => {
+        let edgeKind = () => {
+            if (st[v] == w)
+                return Graph_1.EdgeVisitEnum.parent;
+            else if (pre[w] < pre[v])
+                return Graph_1.EdgeVisitEnum.back;
+            else
+                return Graph_1.EdgeVisitEnum.down;
+        };
+        return { v: v, w: w, e: edgeKind() };
+    }, bfsProcessNonTreeDirectedEdge = (v, w) => {
+        //...
+        return void 0;
+    }, bfs = function* (startNode) {
+        if (discovered(startNode))
+            return 0;
+        let count = 1;
+        st[startNode] = startNode;
+        pre[startNode] = timing++;
+        yield { v: startNode, w: startNode, e: Graph_1.EdgeVisitEnum.tree };
+        let nonTreeEdges = bfsFindAdjacents(startNode, bfsProcessNonTreeEdge);
+        if (!treeEdgesOnly) {
+            for (let i = 0; i < nonTreeEdges.length; i++)
+                yield nonTreeEdges[i];
+        }
+        while (!queue.empty) {
+            let edge = queue.dequeue();
+            if (discovered(edge.w)) {
+                if (!treeEdgesOnly)
+                    yield bfsProcessNonTreeEdge(edge.v, edge.w);
+            }
+            else {
+                pre[edge.w] = timing++;
+                st[edge.w] = edge.v;
+                count++;
+                yield { v: edge.v, w: edge.w, e: Graph_1.EdgeVisitEnum.tree };
+                nonTreeEdges = bfsFindAdjacents(edge.w, bfsProcessNonTreeEdge);
+                if (!treeEdgesOnly) {
+                    for (let i = 0; i < nonTreeEdges.length; i++)
+                        yield nonTreeEdges[i];
+                }
+            }
+        }
+        searchEndCallback && searchEndCallback(startNode, startNode);
+        return count;
+    }, bfsDirected = function* (startNode) {
+        if (discovered(startNode))
+            return 0;
+        let count = 1;
+        st[startNode] = startNode;
+        pre[startNode] = timing++;
+        yield { v: startNode, w: startNode, e: Graph_1.EdgeVisitEnum.tree };
+        //...
+        post[startNode] = postTiming++;
+        searchEndCallback && searchEndCallback(startNode, startNode);
+        return count;
+    };
+    g.directed && (post = new Array(nodes).fill(-1));
+    return {
+        g: g,
+        nodes: nodes,
+        pre: pre,
+        st: st,
+        post: post,
+        initial: () => start,
+        timing: () => timing,
+        next: () => enumerator.next(),
+        current: () => enumerator.current(),
+        edges: () => queue.items,
+        search: g.directed ? bfsDirected : bfs
+    };
+}
+exports.bfsEngine = bfsEngine;
