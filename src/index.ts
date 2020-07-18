@@ -4,8 +4,8 @@ import Deque from "./lib/Deque";
 import { Tree, TreeNode } from "./lib/Tree";
 import { BTree, BTreeNode } from "./lib/BTree";
 import { AVLTree, AVLTreeNode } from "./lib/AVLTree";
-import { BridgeAnalizer, CyclesAnalizer, EdgeAnalizer } from "./lib/Graph-Analizers";
-import { DirectedEdgeAnalizer, ToposortAnalizer } from "./lib/Graph-Directed-Analizers";
+import { BridgeAnalizer, CyclesAnalizer, EdgeAnalizer, ComponentAnalizer } from "./lib/Graph-Analizers";
+import { DirectedEdgeAnalizer, DirectedComponentAnalizer, ToposortAnalizer } from "./lib/Graph-Directed-Analizers";
 import * as GraphSearch from "./lib/Graph-Search";
 import { toMatrix, fromJSON, transposeMatrix } from "./lib/Graph-Utils";
 import * as utils from "./lib/Utils";
@@ -45,7 +45,9 @@ export {
 	BridgeAnalizer,
 	CyclesAnalizer,
 	EdgeAnalizer,
+	ComponentAnalizer,
 	DirectedEdgeAnalizer,
+	DirectedComponentAnalizer,
 	ToposortAnalizer,
 
 	GraphSearch,

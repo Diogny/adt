@@ -244,7 +244,6 @@ function bfsEngine(g: BaseGraph, start: number, treeEdgesOnly?: boolean, searchE
 		post: number[] = <any>void 0,
 		startTiming = 0,
 		timing = startTiming,
-		postTiming = startTiming,
 		discovered = (node: number) => pre[node] >= 0,
 		enumerator = enumConditional(start, nodes - 1, discovered),
 		queue = new Queue<{ v: number, w: number }>(),
@@ -272,10 +271,6 @@ function bfsEngine(g: BaseGraph, start: number, treeEdgesOnly?: boolean, searchE
 						return EdgeVisitEnum.down;
 				};
 			return { v: v, w: w, e: edgeKind() }
-		},
-		bfsProcessNonTreeDirectedEdge = (v: number, w: number): IEdgeSearch => {
-			//...
-			return <any>void 0
 		},
 		bfs = function* (startNode: number): Generator<IEdgeSearch, number> {
 			if (discovered(startNode))
@@ -311,19 +306,6 @@ function bfsEngine(g: BaseGraph, start: number, treeEdgesOnly?: boolean, searchE
 			}
 			searchEndCallback && searchEndCallback(startNode, startNode);
 			return count;
-		},
-		bfsDirected = function* (startNode: number): Generator<IEdgeSearch, number> {
-			if (discovered(startNode))
-				return 0;
-			let
-				count = 1;
-			st[startNode] = startNode;
-			pre[startNode] = timing++;
-			yield { v: startNode, w: startNode, e: EdgeVisitEnum.tree };
-			//...
-			post[startNode] = postTiming++;
-			searchEndCallback && searchEndCallback(startNode, startNode);
-			return count;
 		};
 	g.directed && (post = new Array<number>(nodes).fill(-1));
 	return {
@@ -337,7 +319,7 @@ function bfsEngine(g: BaseGraph, start: number, treeEdgesOnly?: boolean, searchE
 		next: () => enumerator.next(),
 		current: () => enumerator.current(),
 		edges: () => queue.items,
-		search: g.directed ? bfsDirected : bfs
+		search: bfs
 	}
 }
 

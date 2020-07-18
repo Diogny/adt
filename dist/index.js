@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.utils = exports.transposeMatrix = exports.fromJSON = exports.toMatrix = exports.GraphSearch = exports.ToposortAnalizer = exports.DirectedEdgeAnalizer = exports.EdgeAnalizer = exports.CyclesAnalizer = exports.BridgeAnalizer = exports.LabeledDiGraph = exports.LabeledGraph = exports.WeightedDiGraph = exports.WeightedGraph = exports.DiGraph = exports.Graph = exports.WeightedEdge = exports.Edge = exports.AVLTreeNode = exports.AVLTree = exports.BTreeNode = exports.BTree = exports.Tree = exports.TreeNode = exports.Deque = exports.Queue = exports.Stack = void 0;
+exports.utils = exports.transposeMatrix = exports.fromJSON = exports.toMatrix = exports.GraphSearch = exports.ToposortAnalizer = exports.DirectedComponentAnalizer = exports.DirectedEdgeAnalizer = exports.ComponentAnalizer = exports.EdgeAnalizer = exports.CyclesAnalizer = exports.BridgeAnalizer = exports.LabeledDiGraph = exports.LabeledGraph = exports.WeightedDiGraph = exports.WeightedGraph = exports.DiGraph = exports.Graph = exports.WeightedEdge = exports.Edge = exports.AVLTreeNode = exports.AVLTree = exports.BTreeNode = exports.BTree = exports.Tree = exports.TreeNode = exports.Deque = exports.Queue = exports.Stack = void 0;
 const tslib_1 = require("tslib");
 const Stack_1 = tslib_1.__importDefault(require("./lib/Stack"));
 exports.Stack = Stack_1.default;
@@ -21,8 +21,10 @@ const Graph_Analizers_1 = require("./lib/Graph-Analizers");
 Object.defineProperty(exports, "BridgeAnalizer", { enumerable: true, get: function () { return Graph_Analizers_1.BridgeAnalizer; } });
 Object.defineProperty(exports, "CyclesAnalizer", { enumerable: true, get: function () { return Graph_Analizers_1.CyclesAnalizer; } });
 Object.defineProperty(exports, "EdgeAnalizer", { enumerable: true, get: function () { return Graph_Analizers_1.EdgeAnalizer; } });
+Object.defineProperty(exports, "ComponentAnalizer", { enumerable: true, get: function () { return Graph_Analizers_1.ComponentAnalizer; } });
 const Graph_Directed_Analizers_1 = require("./lib/Graph-Directed-Analizers");
 Object.defineProperty(exports, "DirectedEdgeAnalizer", { enumerable: true, get: function () { return Graph_Directed_Analizers_1.DirectedEdgeAnalizer; } });
+Object.defineProperty(exports, "DirectedComponentAnalizer", { enumerable: true, get: function () { return Graph_Directed_Analizers_1.DirectedComponentAnalizer; } });
 Object.defineProperty(exports, "ToposortAnalizer", { enumerable: true, get: function () { return Graph_Directed_Analizers_1.ToposortAnalizer; } });
 const GraphSearch = tslib_1.__importStar(require("./lib/Graph-Search"));
 exports.GraphSearch = GraphSearch;

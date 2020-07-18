@@ -204,7 +204,7 @@ function dfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
 }
 exports.dfsEngine = dfsEngine;
 function bfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
-    let nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, startTiming = 0, timing = startTiming, postTiming = startTiming, discovered = (node) => pre[node] >= 0, enumerator = Utils_1.enumConditional(start, nodes - 1, discovered), queue = new Queue_1.default(), bfsFindAdjacents = (v, processEdge) => {
+    let nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, startTiming = 0, timing = startTiming, discovered = (node) => pre[node] >= 0, enumerator = Utils_1.enumConditional(start, nodes - 1, discovered), queue = new Queue_1.default(), bfsFindAdjacents = (v, processEdge) => {
         let result = [];
         for (let adjacents = g.adjacentEdges(v), i = 0; i < adjacents.length; i++) {
             let w = adjacents[i];
@@ -224,9 +224,6 @@ function bfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
                 return Graph_1.EdgeVisitEnum.down;
         };
         return { v: v, w: w, e: edgeKind() };
-    }, bfsProcessNonTreeDirectedEdge = (v, w) => {
-        //...
-        return void 0;
     }, bfs = function* (startNode) {
         if (discovered(startNode))
             return 0;
@@ -259,17 +256,6 @@ function bfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
         }
         searchEndCallback && searchEndCallback(startNode, startNode);
         return count;
-    }, bfsDirected = function* (startNode) {
-        if (discovered(startNode))
-            return 0;
-        let count = 1;
-        st[startNode] = startNode;
-        pre[startNode] = timing++;
-        yield { v: startNode, w: startNode, e: Graph_1.EdgeVisitEnum.tree };
-        //...
-        post[startNode] = postTiming++;
-        searchEndCallback && searchEndCallback(startNode, startNode);
-        return count;
     };
     g.directed && (post = new Array(nodes).fill(-1));
     return {
@@ -283,7 +269,7 @@ function bfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
         next: () => enumerator.next(),
         current: () => enumerator.current(),
         edges: () => queue.items,
-        search: g.directed ? bfsDirected : bfs
+        search: bfs
     };
 }
 exports.bfsEngine = bfsEngine;

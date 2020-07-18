@@ -12,6 +12,7 @@ class BaseAnalizer {
     }
     endTree(v, w) { }
     report() {
+        console.log();
         console.log(this.name);
     }
 }
@@ -29,15 +30,25 @@ class BridgeAnalizer extends UndirectedBaseAnalizer {
     }
     register(dfs) {
         super.register(dfs);
-        this.edgeList = [];
+        this.bridges = [];
+        this.articulationPoints = [];
         this.low = new Array(this.dfs.nodes).fill(-1);
     }
     endTree(v, w) {
         super.endTree(v, w);
         if (this.low[v] > this.low[w])
             this.low[v] = this.low[w];
-        if (v != w && this.low[w] == this.dfs.pre[w]) {
-            this.edgeList.push(`${v}-${w}`);
+        if (v != w) {
+            if (this.low[w] > this.dfs.pre[v]) {
+                this.articulationPoints.push(w);
+                this.articulationPoints.push(v);
+            }
+            else if (this.low[w] == this.dfs.pre[v] && this.low[v] != this.low[w]) {
+                this.articulationPoints.push(v);
+            }
+            if (this.low[w] == this.dfs.pre[w]) {
+                this.bridges.push({ v: v, w: w });
+            }
         }
     }
     visit(v, w, e) {
@@ -56,11 +67,19 @@ class BridgeAnalizer extends UndirectedBaseAnalizer {
     }
     report() {
         super.report();
-        this.edgeList.forEach(s => console.log(s));
-        let biggest = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1, header = `node: ${Utils_1.range(0, this.dfs.nodes).map(n => Utils_1.formatNumber(n, biggest)).join('  ')}`;
+        let label = (node) => this.dfs.g.nodeLabel(node), biggest = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1, header = `node: ${this.dfs.g.nodeList().map(n => Utils_1.padStr(n.label(), biggest)).join('  ')}`;
+        console.log(this.bridges.length ? `${this.bridges.length} bridge(s)` : 'no bridges');
+        this.bridges
+            .forEach(e => console.log(`${label(e.v)}-${label(e.w)}`));
+        console.log(this.articulationPoints.length ? `${this.articulationPoints.length} articulation point(s)` : 'no articulation points');
+        console.log(this.articulationPoints
+            .map(node => label(node))
+            .join(', '));
         console.log(header);
         console.log(Utils_1.fillChar('-', header.length + 1));
         console.log(`low:  ${this.low.map(n => Utils_1.formatNumber(n, biggest)).join('  ')}`);
+        if (this.dfs.g.labeled)
+            console.log(`      ${this.low.map(n => Utils_1.padStr(this.dfs.g.nodeLabel(n), biggest)).join('  ')}`);
     }
 }
 exports.BridgeAnalizer = BridgeAnalizer;

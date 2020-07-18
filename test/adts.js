@@ -1,6 +1,6 @@
 var expect = require('chai').expect;
-var Stack = require('../dist/ts/Stack').default;
-var Queue = require('../dist/ts/Queue').default;
+var Stack = require('../dist/lib/Stack').default;
+var Queue = require('../dist/lib/Queue').default;
 
 describe('Stack tests', () => {
 	let

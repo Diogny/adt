@@ -1,4 +1,4 @@
-import { IDFSAnalizer, ISearchTask, EdgeVisitEnum } from "./Graph";
+import { IDFSAnalizer, ISearchTask, EdgeVisitEnum, IEdge } from "./Graph";
 import { fillChar, padStr, range, formatNumber } from "./Utils";
 
 export abstract class BaseAnalizer implements IDFSAnalizer {
@@ -18,6 +18,7 @@ export abstract class BaseAnalizer implements IDFSAnalizer {
 	abstract visit(v: number, w: number, e: EdgeVisitEnum): void;
 
 	public report() {
+		console.log();
 		console.log(this.name)
 	}
 
@@ -35,7 +36,8 @@ export abstract class UndirectedBaseAnalizer extends BaseAnalizer {
 export class BridgeAnalizer extends UndirectedBaseAnalizer {
 
 	low: number[];
-	edgeList: string[];
+	bridges: IEdge[];
+	articulationPoints: number[];
 
 	constructor() {
 		super("Bridge Analizer");
@@ -43,18 +45,30 @@ export class BridgeAnalizer extends UndirectedBaseAnalizer {
 
 	public register(dfs: ISearchTask): void {
 		super.register(dfs);
-		this.edgeList = [];
+		this.bridges = [];
+		this.articulationPoints = [];
 		this.low = new Array<number>(this.dfs.nodes).fill(-1)
 	}
 
 	public endTree(v: number, w: number) {
 		super.endTree(v, w);
+
 		if (this.low[v] > this.low[w])
 			this.low[v] = this.low[w];
 
-		if (v != w && this.low[w] == this.dfs.pre[w]) {
-			this.edgeList.push(`${v}-${w}`);
+		if (v != w) {
+			if (this.low[w] > this.dfs.pre[v]) {
+				this.articulationPoints.push(w);
+				this.articulationPoints.push(v);
+			} else if (this.low[w] == this.dfs.pre[v] && this.low[v] != this.low[w]) {
+				this.articulationPoints.push(v);
+			}
+
+			if (this.low[w] == this.dfs.pre[w]) {
+				this.bridges.push({ v: v, w: w });
+			}
 		}
+
 	}
 
 	public visit(v: number, w: number, e: EdgeVisitEnum) {
@@ -74,13 +88,22 @@ export class BridgeAnalizer extends UndirectedBaseAnalizer {
 
 	public report() {
 		super.report();
-		this.edgeList.forEach(s => console.log(s));
 		let
+			label = (node: number): string => this.dfs.g.nodeLabel(node),
 			biggest = Math.max.apply(null, this.dfs.g.nodeList().map(n => n.label().length)) + 1,
-			header = `node: ${range(0, this.dfs.nodes).map(n => formatNumber(n, biggest)).join('  ')}`;
+			header = `node: ${this.dfs.g.nodeList().map(n => padStr(n.label(), biggest)).join('  ')}`;
+		console.log(this.bridges.length ? `${this.bridges.length} bridge(s)` : 'no bridges');
+		this.bridges
+			.forEach(e => console.log(`${label(e.v)}-${label(e.w)}`));
+		console.log(this.articulationPoints.length ? `${this.articulationPoints.length} articulation point(s)` : 'no articulation points');
+		console.log(this.articulationPoints
+			.map(node => label(node))
+			.join(', '));
 		console.log(header);
 		console.log(fillChar('-', header.length + 1));
-		console.log(`low:  ${this.low.map(n => formatNumber(n, biggest)).join('  ')}`)
+		console.log(`low:  ${this.low.map(n => formatNumber(n, biggest)).join('  ')}`);
+		if (this.dfs.g.labeled)
+			console.log(`      ${this.low.map(n => padStr(this.dfs.g.nodeLabel(n), biggest)).join('  ')}`)
 	}
 }
 

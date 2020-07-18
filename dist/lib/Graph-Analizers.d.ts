@@ -1,4 +1,4 @@
-import { IDFSAnalizer, ISearchTask, EdgeVisitEnum } from "./Graph";
+import { IDFSAnalizer, ISearchTask, EdgeVisitEnum, IEdge } from "./Graph";
 export declare abstract class BaseAnalizer implements IDFSAnalizer {
     name: string;
     protected dfs: ISearchTask;
@@ -15,7 +15,8 @@ export declare abstract class UndirectedBaseAnalizer extends BaseAnalizer {
 }
 export declare class BridgeAnalizer extends UndirectedBaseAnalizer {
     low: number[];
-    edgeList: string[];
+    bridges: IEdge[];
+    articulationPoints: number[];
     constructor();
     register(dfs: ISearchTask): void;
     endTree(v: number, w: number): void;

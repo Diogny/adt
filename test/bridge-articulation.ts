@@ -7,7 +7,7 @@ import { BridgeAnalizer, EdgeAnalizer } from '../src/lib/Graph-Analizers'
 //or	node node_modules/mocha/bin/_mocha --require ts-node/register test/bridge-articulation.ts
 
 const
-	g = new Graph("");
+	g = new Graph("bridges and articulation points");
 
 g.addNode("0");	// 1
 g.addNode("1");
