@@ -65,6 +65,11 @@ export class TreeNode<T> extends ValueNode<T> {
 export abstract class BaseTree<T> {
 
 	abstract root: ValueNode<T>;
+	protected __comp: (a: T, b: T) => number;
+
+	constructor(comparer?: (a: T, b: T) => number) {
+		this.__comp = comparer || compare;
+	}
 
 	public empty(): boolean { return this.root == undefined }
 
@@ -74,14 +79,7 @@ export abstract class BaseTree<T> {
 
 	abstract find(value: T): ValueNode<T> | undefined;
 
-	public comparer(a: T, b: T): number {
-		if (a == b)
-			return 0
-		else if (a > b)
-			return 1
-		else
-			return -1
-	}
+	public get comparer(): (a: T, b: T) => number { return this.__comp }
 
 	/**
 	 * @description it calls levelOrder from root, and returns it's result with empty callback.
@@ -224,8 +222,17 @@ export class Tree<T> extends BaseTree<T>{
 		return
 	}
 
-	constructor(public root: TreeNode<T>) {
-		super()
+	constructor(public root: TreeNode<T>, comparer?: (a: T, b: T) => number) {
+		super(comparer)
 	}
 
+}
+
+function compare<T>(a: T, b: T): number {
+	if (a == b)
+		return 0
+	else if (a > b)
+		return 1
+	else
+		return -1
 }

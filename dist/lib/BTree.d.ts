@@ -13,7 +13,7 @@ export declare enum SearchBTreeTraverse {
 }
 export declare class BTree<T> extends BaseTree<T> {
     root: BTreeNode<T>;
-    constructor(root: BTreeNode<T>);
+    constructor(root: BTreeNode<T>, comparer?: (a: T, b: T) => number);
     find(value: T): BTreeNode<T> | undefined;
     inOrderEnumerator(node?: BTreeNode<T>): Generator<BTreeNode<T>, number, unknown>;
     postOrderEnumerator(node?: BTreeNode<T>): Generator<BTreeNode<T>, number, unknown>;

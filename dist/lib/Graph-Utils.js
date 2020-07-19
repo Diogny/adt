@@ -86,7 +86,7 @@ exports.fromJSON = fromJSON;
 function visulizeTree(tree) {
     let columns = 0, map = new Map(), maxLabelWidth = 0, cons = [], newRow = () => new Array(columns).fill(Utils_1.fillChar(' ', maxLabelWidth + 1)), postOrder = tree.postOrderEnumerator(), result;
     if (!tree || !tree.root) {
-        console.log('no tree root provided');
+        console.log('empty tree');
         return;
     }
     while (!(result = postOrder.next()).done) {

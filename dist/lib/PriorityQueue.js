@@ -1,8 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class PriorityQueue {
-    constructor(initialData) {
-        this.clear();
+    constructor(initialData, comparer) {
+        this.__settings = {
+            size: 0,
+            items: [],
+            comp: comparer || compare
+        };
         if (initialData) {
             this.__settings.size = initialData.length;
             initialData
@@ -12,24 +16,15 @@ class PriorityQueue {
     }
     get size() { return this.__settings.size; }
     get empty() { return !this.__settings.size; }
+    get comparer() { return this.__settings.comp; }
     get element() {
         if (this.empty)
             throw `priority queue is empty`;
         return this.__settings.items[1];
     }
     clear() {
-        this.__settings = {
-            size: 0,
-            items: new Array()
-        };
-    }
-    comparer(a, b) {
-        if (a == b)
-            return 0;
-        else if (a > b)
-            return 1;
-        else
-            return -1;
+        this.__settings.size = 0;
+        this.__settings.items = [];
     }
     add(data) {
         // Percolate up
@@ -44,6 +39,7 @@ class PriorityQueue {
         let minItem = this.element;
         this.__settings.items[1] = this.__settings.items[this.__settings.size--];
         percolateDown(this, this.__settings.items, 1);
+        this.__settings.items.length = this.__settings.size + 1;
         return minItem;
     }
 }
@@ -65,4 +61,12 @@ function percolateDown(pq, array, hole) {
             break;
     }
     array[hole] = tmp;
+}
+function compare(a, b) {
+    if (a == b)
+        return 0;
+    else if (a > b)
+        return 1;
+    else
+        return -1;
 }

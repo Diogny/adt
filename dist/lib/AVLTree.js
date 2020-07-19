@@ -12,8 +12,8 @@ class AVLTreeNode extends BTree_1.BTreeNode {
 }
 exports.AVLTreeNode = AVLTreeNode;
 class AVLTree extends BTree_1.SearchBTree {
-    constructor() {
-        super(undefined);
+    constructor(comparer) {
+        super(undefined, comparer);
     }
     newNode(value) {
         return new AVLTreeNode(value);
@@ -38,7 +38,7 @@ class AVLTree extends BTree_1.SearchBTree {
         if (!parent)
             return this.root = this.newNode(value);
         insertNode(parent, node = this.newNode(value), comp);
-        balance.call(this, stack);
+        balanceTree.call(this, stack);
         return node;
     }
     delete(value) {
@@ -102,9 +102,9 @@ class AVLTree extends BTree_1.SearchBTree {
             if (!parent) {
                 return this.root = (node.left || node.right), node;
             }
-            setChild(void 0, parent, this.comparer(node.value, parent.value));
+            setChild(node.left || node.right, parent, this.comparer(node.value, parent.value));
         }
-        balance.call(this, stack);
+        balanceTree.call(this, stack);
         return node;
     }
 }
@@ -114,52 +114,6 @@ function setDepth(node) {
     let ldepth = getDepth(node.left), rdepth = getDepth(node.right);
     node.depth = Math.max(ldepth, rdepth) + 1;
     return rdepth - ldepth;
-}
-function balance(stack) {
-    while (!stack.empty) {
-        let parent = void 0, node = stack.pop(), balance = setDepth(node), svdPivot = void 0, pivot = void 0;
-        if (node.depth > 2 && Math.abs(balance) > 1) {
-            if (balance > 1) {
-                pivot = node.right;
-                if (pivot.right) {
-                    node.right = pivot.left;
-                    setDepth(node);
-                }
-                else {
-                    svdPivot = pivot;
-                    pivot = pivot.left;
-                    pivot.right = svdPivot;
-                    node.right = svdPivot.left = void 0;
-                    node.depth = svdPivot.depth = 1;
-                }
-                pivot.left = node;
-            }
-            else if (balance < 1) {
-                pivot = node.left;
-                if (pivot.left) {
-                    node.left = pivot.right;
-                    setDepth(node);
-                }
-                else {
-                    svdPivot = pivot;
-                    pivot = pivot.right;
-                    pivot.left = svdPivot;
-                    node.left = svdPivot.right = void 0;
-                    node.depth = svdPivot.depth = 1;
-                }
-                pivot.right = node;
-            }
-            setDepth(pivot);
-            parent = stack.peek();
-            if (!parent) {
-                this.root = pivot;
-            }
-            else {
-                insertNode(parent, pivot, this.comparer(pivot.value, parent.value));
-                setDepth(parent);
-            }
-        }
-    }
 }
 function insertNode(parent, node, comp) {
     if (comp < 0) {
@@ -188,6 +142,60 @@ function deleteMin(node, parent, comp) {
     }
     setChild(node.right, parent, comp);
     setDepth(parent);
-    balance.call(this, stack);
+    balanceTree.call(this, stack);
     return node;
+}
+function balanceTree(stack) {
+    while (!stack.empty) {
+        let parent = void 0, node = stack.pop(), balance = setDepth(node), childrenBalance = 0, root = void 0;
+        if (node.depth > 2 && Math.abs(balance) > 1) {
+            if (balance < 0) {
+                root = node.left;
+                childrenBalance = getDepth(root.right) - getDepth(root.left);
+                if (childrenBalance < 0) {
+                    node.left = root.right;
+                    root.right = node;
+                }
+                else {
+                    parent = root;
+                    root = root.right;
+                    parent.right = root.left;
+                    root.left = parent;
+                    node.left = root.right;
+                    root.right = node;
+                    setDepth(parent);
+                }
+            }
+            else {
+                root = node.right;
+                childrenBalance = getDepth(root.right) - getDepth(root.left);
+                if (childrenBalance > 0) {
+                    node.right = root.left;
+                    root.left = node;
+                }
+                else {
+                    parent = root;
+                    root = root.left;
+                    parent.left = root.right;
+                    root.right = parent;
+                    node.right = root.left;
+                    root.left = node;
+                    setDepth(parent);
+                }
+            }
+            setDepth(node);
+            setDepth(root);
+            parent = stack.peek();
+            if (!parent) {
+                this.root = root;
+            }
+            else {
+                if (this.comparer(root.value, parent.value) > 0)
+                    parent.right = root;
+                else
+                    parent.left = root;
+                setDepth(parent);
+            }
+        }
+    }
 }

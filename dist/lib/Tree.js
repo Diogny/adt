@@ -46,18 +46,14 @@ class TreeNode extends ValueNode {
 }
 exports.TreeNode = TreeNode;
 class BaseTree {
+    constructor(comparer) {
+        this.__comp = comparer || compare;
+    }
     empty() { return this.root == undefined; }
     clear() {
         this.root = void 0;
     }
-    comparer(a, b) {
-        if (a == b)
-            return 0;
-        else if (a > b)
-            return 1;
-        else
-            return -1;
-    }
+    get comparer() { return this.__comp; }
     /**
      * @description it calls levelOrder from root, and returns it's result with empty callback.
      */
@@ -157,8 +153,8 @@ class BaseTree {
 }
 exports.BaseTree = BaseTree;
 class Tree extends BaseTree {
-    constructor(root) {
-        super();
+    constructor(root, comparer) {
+        super(comparer);
         this.root = root;
     }
     /**
@@ -184,3 +180,11 @@ class Tree extends BaseTree {
     }
 }
 exports.Tree = Tree;
+function compare(a, b) {
+    if (a == b)
+        return 0;
+    else if (a > b)
+        return 1;
+    else
+        return -1;
+}

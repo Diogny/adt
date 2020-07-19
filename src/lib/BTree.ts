@@ -23,8 +23,8 @@ export enum SearchBTreeTraverse {
 
 export class BTree<T> extends BaseTree<T>{
 
-	constructor(public root: BTreeNode<T>) {
-		super()
+	constructor(public root: BTreeNode<T>, comparer?: (a: T, b: T) => number) {
+		super(comparer)
 	}
 
 	public find(value: T): BTreeNode<T> | undefined {

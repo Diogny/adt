@@ -2,12 +2,15 @@ export default class PriorityQueue<T> {
 
 	protected __settings: {
 		items: T[],
-		size: number
+		size: number,
+		comp: (a: T, b: T) => number;
 	}
 
 	public get size(): number { return this.__settings.size }
 
 	public get empty(): boolean { return !this.__settings.size }
+
+	public get comparer(): (a: T, b: T) => number { return this.__settings.comp }
 
 	public get element(): T {
 		if (this.empty)
@@ -15,8 +18,12 @@ export default class PriorityQueue<T> {
 		return this.__settings.items[1]
 	}
 
-	constructor(initialData?: T[]) {
-		this.clear();
+	constructor(initialData?: T[], comparer?: (a: T, b: T) => number) {
+		this.__settings = {
+			size: 0,
+			items: [],
+			comp: comparer || compare
+		}
 		if (initialData) {
 			this.__settings.size = initialData.length;
 			initialData
@@ -26,19 +33,8 @@ export default class PriorityQueue<T> {
 	}
 
 	public clear() {
-		this.__settings = {
-			size: 0,
-			items: new Array<T>()
-		}
-	}
-
-	public comparer(a: T, b: T): number {
-		if (a == b)
-			return 0
-		else if (a > b)
-			return 1
-		else
-			return -1
+		this.__settings.size = 0;
+		this.__settings.items = [];
 	}
 
 	public add(data: T): boolean {
@@ -58,8 +54,8 @@ export default class PriorityQueue<T> {
 			minItem = this.element;
 		this.__settings.items[1] = this.__settings.items[this.__settings.size--];
 		percolateDown(this, this.__settings.items, 1);
+		this.__settings.items.length = this.__settings.size + 1;
 		return minItem;
-
 	}
 }
 
@@ -83,4 +79,13 @@ function percolateDown<T>(pq: PriorityQueue<T>, array: T[], hole: number) {
 			break;
 	}
 	array[hole] = tmp;
+}
+
+function compare<T>(a: T, b: T): number {
+	if (a == b)
+		return 0
+	else if (a > b)
+		return 1
+	else
+		return -1
 }

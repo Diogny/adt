@@ -23,8 +23,8 @@ var SearchBTreeTraverse;
     SearchBTreeTraverse[SearchBTreeTraverse["Right"] = 2] = "Right";
 })(SearchBTreeTraverse = exports.SearchBTreeTraverse || (exports.SearchBTreeTraverse = {}));
 class BTree extends Tree_1.BaseTree {
-    constructor(root) {
-        super();
+    constructor(root, comparer) {
+        super(comparer);
         this.root = root;
     }
     find(value) {

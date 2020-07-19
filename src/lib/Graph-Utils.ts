@@ -115,7 +115,7 @@ function visulizeTree<T>(tree: BaseTree<T>) {
 		result: IteratorResult<ValueNode<T> | number, number>;
 
 	if (!tree || !tree.root) {
-		console.log('no tree root provided');
+		console.log('empty tree');
 		return
 	}
 	while (!(result = postOrder.next()).done) {

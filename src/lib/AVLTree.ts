@@ -14,8 +14,8 @@ export class AVLTreeNode<T> extends BTreeNode<T>{
 
 export class AVLTree<T> extends SearchBTree<T> {
 
-	constructor() {
-		super(<any>undefined)
+	constructor(comparer?: (a: T, b: T) => number) {
+		super(<any>undefined, comparer)
 	}
 
 	public newNode(value: T): AVLTreeNode<T> {
@@ -45,7 +45,7 @@ export class AVLTree<T> extends SearchBTree<T> {
 		if (!parent)
 			return this.root = this.newNode(value)
 		insertNode(parent, node = this.newNode(value), comp);
-		balance.call(this, stack);
+		balanceTree.call(this, stack);
 		return node
 	}
 
@@ -112,12 +112,11 @@ export class AVLTree<T> extends SearchBTree<T> {
 			if (!parent) {
 				return this.root = <AVLTreeNode<T>>(node.left || node.right), node
 			}
-			setChild(void 0, parent, this.comparer(node.value, parent.value))
+			setChild(node.left || node.right, parent, this.comparer(node.value, parent.value))
 		}
-		balance.call(this, stack);
+		balanceTree.call(this, stack);
 		return node
 	}
-
 }
 
 const getDepth = <T>(n: AVLTreeNode<T> | undefined) => n?.depth || 0;
@@ -128,55 +127,6 @@ function setDepth<T>(node: AVLTreeNode<T>): number {
 		rdepth = getDepth(<any>node.right);
 	node.depth = Math.max(ldepth, rdepth) + 1;
 	return rdepth - ldepth
-}
-
-function balance<T>(stack: Stack<BTreeNode<T>>) {
-	while (!stack.empty) {
-		let
-			parent: AVLTreeNode<T> = <any>void 0,
-			node = stack.pop() as AVLTreeNode<T>,
-			balance = setDepth(node),
-			svdPivot: AVLTreeNode<T> = <any>void 0,
-			pivot: AVLTreeNode<T> = <any>void 0;
-
-		if (node.depth > 2 && Math.abs(balance) > 1) {
-			if (balance > 1) {
-				pivot = <AVLTreeNode<T>>node.right;
-				if (pivot.right) {
-					node.right = pivot.left;
-					setDepth(node);
-				} else {
-					svdPivot = pivot;
-					pivot = pivot.left as AVLTreeNode<T>;
-					pivot.right = svdPivot;
-					node.right = svdPivot.left = <any>void 0;
-					node.depth = svdPivot.depth = 1;
-				}
-				pivot.left = node;
-			} else if (balance < 1) {
-				pivot = <AVLTreeNode<T>>node.left;
-				if (pivot.left) {
-					node.left = pivot.right;
-					setDepth(node);
-				} else {
-					svdPivot = pivot;
-					pivot = pivot.right as AVLTreeNode<T>;
-					pivot.left = svdPivot;
-					node.left = svdPivot.right = <any>void 0;
-					node.depth = svdPivot.depth = 1;
-				}
-				pivot.right = node;
-			}
-			setDepth(pivot);
-			parent = stack.peek() as AVLTreeNode<T>;
-			if (!parent) {
-				(this as AVLTree<T>).root = pivot;
-			} else {
-				insertNode(parent, pivot, (this as AVLTree<T>).comparer(pivot.value, parent.value));
-				setDepth(parent)
-			}
-		}
-	}
 }
 
 function insertNode<T>(parent: AVLTreeNode<T>, node: AVLTreeNode<T>, comp: number): AVLTreeNode<T> {
@@ -208,6 +158,62 @@ function deleteMin<T>(node: BTreeNode<T>, parent: BTreeNode<T>, comp: number): B
 	}
 	setChild(node.right, parent, comp);
 	setDepth(parent as AVLTreeNode<T>);
-	balance.call(this, stack);
+	balanceTree.call(this, stack);
 	return node
+}
+
+function balanceTree<T>(stack: Stack<BTreeNode<T>>) {
+	while (!stack.empty) {
+		let
+			parent: AVLTreeNode<T> = <any>void 0,
+			node = stack.pop() as AVLTreeNode<T>,
+			balance = setDepth(node),
+			childrenBalance = 0,
+			root: AVLTreeNode<T> = <any>void 0;
+		if (node.depth > 2 && Math.abs(balance) > 1) {
+			if (balance < 0) {
+				root = <AVLTreeNode<T>>node.left;
+				childrenBalance = getDepth(<any>root.right) - getDepth(<any>root.left);
+				if (childrenBalance < 0) {
+					node.left = root.right;
+					root.right = node;
+				} else {
+					parent = root;
+					root = <AVLTreeNode<T>>root.right;
+					parent.right = root.left;
+					root.left = parent;
+					node.left = root.right;
+					root.right = node;
+					setDepth(parent)
+				}
+			} else {
+				root = <AVLTreeNode<T>>node.right;
+				childrenBalance = getDepth(<any>root.right) - getDepth(<any>root.left);
+				if (childrenBalance > 0) {
+					node.right = root.left;
+					root.left = node;
+				} else {
+					parent = root;
+					root = <AVLTreeNode<T>>root.left;
+					parent.left = root.right;
+					root.right = parent;
+					node.right = root.left;
+					root.left = node;
+					setDepth(parent)
+				}
+			}
+			setDepth(node);
+			setDepth(root);
+			parent = stack.peek() as AVLTreeNode<T>;
+			if (!parent) {
+				(this as AVLTree<T>).root = root;
+			} else {
+				if ((this as AVLTree<T>).comparer(root.value, parent.value) > 0)
+					parent.right = root
+				else
+					parent.left = root;
+				setDepth(parent)
+			}
+		}
+	}
 }

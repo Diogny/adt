@@ -26,10 +26,12 @@ export declare class TreeNode<T> extends ValueNode<T> {
 }
 export declare abstract class BaseTree<T> {
     abstract root: ValueNode<T>;
+    protected __comp: (a: T, b: T) => number;
+    constructor(comparer?: (a: T, b: T) => number);
     empty(): boolean;
     clear(): void;
     abstract find(value: T): ValueNode<T> | undefined;
-    comparer(a: T, b: T): number;
+    get comparer(): (a: T, b: T) => number;
     /**
      * @description it calls levelOrder from root, and returns it's result with empty callback.
      */
@@ -55,5 +57,5 @@ export declare class Tree<T> extends BaseTree<T> {
      * @param value value to search
      */
     find(value: T): TreeNode<T> | undefined;
-    constructor(root: TreeNode<T>);
+    constructor(root: TreeNode<T>, comparer?: (a: T, b: T) => number);
 }
