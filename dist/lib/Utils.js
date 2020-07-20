@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.enumConditional = exports.matrix = exports.selectMany = exports.range = exports.replaceAt = exports.formatNumber = exports.centerPadStr = exports.centerStr = exports.padStr = exports.fillChar = exports.pad = exports.toBool = void 0;
+exports.html = exports.svg = exports.tag = exports.attr = exports.css = exports.isStr = exports.enumConditional = exports.matrix = exports.selectMany = exports.range = exports.replaceAt = exports.formatNumber = exports.centerPadStr = exports.centerStr = exports.padStr = exports.fillChar = exports.pad = exports.toBool = void 0;
 var a = {
     'true': true,
     'false': false,
@@ -9,6 +9,7 @@ var a = {
     '1': true,
     '0': false
 };
+const svgNS = "http://www.w3.org/2000/svg";
 exports.toBool = (val) => a[val];
 //used for string & numbers
 exports.pad = (t, e, ch) => new Array(Math.max(0, (e || 2) + 1 - String(t).length)).join(ch ? ch : '0') + t;
@@ -47,4 +48,31 @@ exports.enumConditional = (start, max, discovered) => {
             }
         }
     };
+};
+exports.isStr = (s) => typeof s === "string";
+exports.css = (el, styles) => {
+    if (exports.isStr(styles))
+        return el.style[styles];
+    for (let prop in styles)
+        el.style[prop] = styles[prop];
+    return el;
+};
+exports.attr = function (el, attrs) {
+    if (exports.isStr(attrs))
+        return el.getAttribute(attrs);
+    for (let attr in attrs)
+        el.setAttribute(attr, attrs[attr]);
+    return el;
+};
+exports.tag = (tagName, id, nsAttrs) => (id && (nsAttrs.id = id),
+    exports.attr(document.createElementNS(svgNS, tagName), nsAttrs));
+exports.svg = (html) => {
+    let template = document.createElementNS(svgNS, "template");
+    template.innerHTML = html;
+    return template.children[0];
+};
+exports.html = (html) => {
+    let template = document.createElement("template");
+    template.innerHTML = html;
+    return template.content.firstChild;
 };

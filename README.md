@@ -4,7 +4,6 @@ javascript abstract data types
 pnpm install --save-dev ts-node
 pnpm install --save-dev @types/chai @types/mocha
 
-
 ## graphs
 
 	component: 1
@@ -93,3 +92,8 @@ pnpm install --save-dev @types/chai @types/mocha
 	pre order:    Art, B, C, D, E, F, G, H, I
 	post order:   C, D, B, G, H, F, E, I, Art
 	level order:  Art:1, B:2, E:2, I:2, C:3, D:3, F:3, G:4, H:4
+
+
+### AVL & Red-Black Trees
+
+![AVL Red-Black Trees](img/avl-red-black-trees.png)

@@ -7,6 +7,8 @@ var a = {
 	'0': false
 };
 
+const svgNS = "http://www.w3.org/2000/svg";
+
 export const toBool = (val: any): boolean => a[val];
 
 //used for string & numbers
@@ -65,3 +67,36 @@ export const enumConditional = (start: number, max: number, discovered: (ndx: nu
 		}
 	}
 }
+
+export const isStr = (s: any) => typeof s === "string";
+
+export const css = (el: any, styles: any) => {//css(el, { background: 'green', display: 'none', 'border-radius': '5px' });
+	if (isStr(styles))
+		return el.style[styles];
+	for (let prop in styles)
+		el.style[prop] = styles[prop];
+	return el;
+}
+
+export const attr = function (el: any, attrs: any) {
+	if (isStr(attrs))
+		return el.getAttribute(attrs);
+	for (let attr in attrs)
+		el.setAttribute(attr, attrs[attr]);
+	return el;
+}
+
+export const tag = (tagName: string, id: string, nsAttrs: any): SVGElement => (id && (nsAttrs.id = id),
+	attr(document.createElementNS(svgNS, tagName), nsAttrs));
+
+export const svg = (html: string): Element => {
+	let template = document.createElementNS(svgNS, "template");
+	template.innerHTML = html;
+	return template.children[0];
+};
+
+export const html = (html: string): ChildNode => {
+	let template = document.createElement("template");
+	template.innerHTML = html;
+	return <any>template.content.firstChild;
+};

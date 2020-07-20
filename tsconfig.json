@@ -11,7 +11,16 @@
 		"removeComments": false,
 		"noEmitOnError": true,
 		"declaration": true,
-		"outDir": "./dist"
+		"outDir": "./dist",
+		"baseUrl": ".",
+		"paths": {
+			"src/*": [
+				"src/lib/*"
+			],
+			"*": [
+				"node_modules/*"
+			]
+		}
 	},
 	"include": [
 		"src/**/*"

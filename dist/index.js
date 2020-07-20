@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.utils = exports.transposeMatrix = exports.fromJSON = exports.toMatrix = exports.GraphSearch = exports.ToposortAnalizer = exports.DirectedComponentAnalizer = exports.DirectedEdgeAnalizer = exports.ComponentAnalizer = exports.EdgeAnalizer = exports.CyclesAnalizer = exports.BridgeAnalizer = exports.LabeledDiGraph = exports.LabeledGraph = exports.WeightedDiGraph = exports.WeightedGraph = exports.DiGraph = exports.Graph = exports.WeightedEdge = exports.Edge = exports.AVLTreeNode = exports.AVLTree = exports.BTreeNode = exports.BTree = exports.Tree = exports.TreeNode = exports.Deque = exports.Queue = exports.Stack = void 0;
+exports.utils = exports.transposeMatrix = exports.fromJSON = exports.toMatrix = exports.GraphSearch = exports.ToposortAnalizer = exports.DirectedComponentAnalizer = exports.DirectedEdgeAnalizer = exports.ComponentAnalizer = exports.EdgeAnalizer = exports.CyclesAnalizer = exports.BridgeAnalizer = exports.LabeledDiGraph = exports.LabeledGraph = exports.WeightedDiGraph = exports.WeightedGraph = exports.DiGraph = exports.Graph = exports.WeightedEdge = exports.Edge = exports.RedBlackEnum = exports.RedBlackTreeNode = exports.RedBlackTree = exports.AVLTreeNode = exports.AVLTree = exports.BTreeNode = exports.BTree = exports.Tree = exports.TreeNode = exports.Deque = exports.Queue = exports.Stack = void 0;
 const tslib_1 = require("tslib");
 const Stack_1 = tslib_1.__importDefault(require("./lib/Stack"));
 exports.Stack = Stack_1.default;
@@ -17,6 +17,10 @@ Object.defineProperty(exports, "BTreeNode", { enumerable: true, get: function ()
 const AVLTree_1 = require("./lib/AVLTree");
 Object.defineProperty(exports, "AVLTree", { enumerable: true, get: function () { return AVLTree_1.AVLTree; } });
 Object.defineProperty(exports, "AVLTreeNode", { enumerable: true, get: function () { return AVLTree_1.AVLTreeNode; } });
+const RedBlackTree_1 = require("./lib/RedBlackTree");
+Object.defineProperty(exports, "RedBlackTree", { enumerable: true, get: function () { return RedBlackTree_1.RedBlackTree; } });
+Object.defineProperty(exports, "RedBlackTreeNode", { enumerable: true, get: function () { return RedBlackTree_1.RedBlackTreeNode; } });
+Object.defineProperty(exports, "RedBlackEnum", { enumerable: true, get: function () { return RedBlackTree_1.RedBlackEnum; } });
 const Graph_Analizers_1 = require("./lib/Graph-Analizers");
 Object.defineProperty(exports, "BridgeAnalizer", { enumerable: true, get: function () { return Graph_Analizers_1.BridgeAnalizer; } });
 Object.defineProperty(exports, "CyclesAnalizer", { enumerable: true, get: function () { return Graph_Analizers_1.CyclesAnalizer; } });

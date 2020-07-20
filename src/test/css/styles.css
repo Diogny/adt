@@ -1,0 +1,54 @@
+body {
+  margin: 0;
+}
+#board {
+  margin: 10px;
+}
+g.svg-tree > text {
+  fill: black;
+  stroke: black;
+  stroke-width: 1.5px;
+  font-family: monospace;
+}
+g.svg-node {
+  cursor: pointer;
+}
+g.svg-node > circle {
+  fill: #f3f0f0;
+  stroke: black;
+  stroke-opacity: 1;
+  stroke-width: 4px;
+}
+g.svg-node > text {
+  fill: black;
+  stroke: black;
+  stroke-width: 1.5px;
+  font-family: monospace;
+}
+g.svg-node.red > text,
+g.svg-node.black > text {
+  fill: white;
+  stroke: white;
+}
+g.svg-node.red > circle {
+  fill: red;
+  stroke: white;
+}
+g.svg-node.black > circle {
+  fill: black;
+  stroke: white;
+}
+g > line.svg-line {
+  stroke-width: 5px;
+  stroke: black;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}

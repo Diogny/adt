@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const AVLTree_1 = require("../lib/AVLTree");
+const RedBlackTree_1 = require("../lib/RedBlackTree");
+const tree_utils_1 = require("./tree-utils");
+let avl = new AVLTree_1.AVLTree(), rbt = new RedBlackTree_1.RedBlackTree(), svg = document.querySelector('svg'), leftpad = 20, toppad = 10, xstart = leftpad;
+avl.insertRange([15, 27, 19, 36, 52, 29, 18, 4]);
+let size = tree_utils_1.visulizeBTree(avl, svg, "AVL Tree", xstart, toppad);
+console.log(size);
+xstart += leftpad * 2 + size.width;
+rbt.insertRange([7, 6, 5, 4, 3, 2, 1]);
+size = tree_utils_1.visulizeBTree(rbt, svg, "Red-Black Tree", xstart, toppad, (node) => RedBlackTree_1.RedBlackEnum[node.color]);
+xstart += leftpad * 2 + size.width;
+rbt = new RedBlackTree_1.RedBlackTree();
+rbt.insertRange([10, 20, 30, 15]);
+size = tree_utils_1.visulizeBTree(rbt, svg, "Red-Black Tree 2", xstart, toppad, (node) => RedBlackTree_1.RedBlackEnum[node.color]);

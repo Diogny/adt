@@ -13,3 +13,9 @@ export declare const enumConditional: (start: number, max: number, discovered: (
     current: () => number;
     next: () => boolean;
 };
+export declare const isStr: (s: any) => boolean;
+export declare const css: (el: any, styles: any) => any;
+export declare const attr: (el: any, attrs: any) => any;
+export declare const tag: (tagName: string, id: string, nsAttrs: any) => SVGElement;
+export declare const svg: (html: string) => Element;
+export declare const html: (html: string) => ChildNode;
