@@ -9,6 +9,6 @@ export declare class RedBlackTreeNode<T> extends BTreeNode<T> {
 }
 export declare class RedBlackTree<T> extends SearchBTree<T> {
     constructor(comparer?: (a: T, b: T) => number);
-    insert(value: T): RedBlackTreeNode<T>;
-    delete(value: T): RedBlackTreeNode<T> | undefined;
+    insert(value: T): boolean;
+    delete(value: T): boolean;
 }

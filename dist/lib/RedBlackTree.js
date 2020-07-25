@@ -21,17 +21,17 @@ class RedBlackTree extends BTree_1.SearchBTree {
         super(undefined, comparer);
     }
     insert(value) {
-        if (this.root == undefined) {
-            this.root = newNode(value);
-            this.root.color = RedBlackEnum.black;
-            return this.root;
-        }
         let stack = new Stack_1.default(), parent = void 0, node = this.root, comp = 0;
+        if (node == undefined) {
+            this.root = node = newNode(value);
+            node.color = RedBlackEnum.black;
+            return true;
+        }
         while (node != undefined) {
             parent = node;
             comp = this.comparer(value, node.value);
             if (comp == 0)
-                return node;
+                return false;
             else {
                 if (comp < 0)
                     node = node.left;
@@ -40,96 +40,257 @@ class RedBlackTree extends BTree_1.SearchBTree {
                 stack.push(parent);
             }
         }
-        insertNode(parent, node = newNode(value), comp);
-        balanceTree(this, node, stack);
-        return node;
+        node = newNode(value);
+        setChild(parent, node, comp);
+        balanceAfterInsert(this, node, stack);
+        return true;
     }
     delete(value) {
-        return;
+        let found = false, comp = 0, stack = new Stack_1.default(), parent = void 0, node = this.root, yIsNode, x, ycomp = 0, yParent, y;
+        while (node != undefined && !found) {
+            let nextComp = this.comparer(value, node.value);
+            if (nextComp == 0)
+                found = true;
+            else {
+                parent = node;
+                if (nextComp < 0) {
+                    node = node.left;
+                }
+                else {
+                    node = node.right;
+                }
+                stack.push(parent);
+                comp = nextComp;
+            }
+        }
+        if (!found)
+            return false;
+        // "node" to be deleted: 
+        //	  is a leaf with no children
+        //	  has one child
+        //	  has two children
+        // if "node" is red, the red black properties still hold.
+        // if "node" is black, the tree needs rebalancing and/or recolouring
+        if (node.left == undefined || node.right == undefined) {
+            //node is leaf or has at least one empty child
+            y = node;
+            yParent = parent;
+            yIsNode = true;
+        }
+        else {
+            //node has 2 children
+            //replacement node is the leftmost node greater than "node"
+            stack.push(node);
+            y = node.right;
+            yParent = node;
+            yIsNode = false;
+            while (y.left != undefined) {
+                stack.push(y);
+                yParent = y;
+                y = y.left;
+            }
+        }
+        //y has the replacement node here, it's "value" content will be copied to "node"
+        //x is y's only child, it'll be linked to y's parent
+        if (y.left != undefined)
+            x = y.left;
+        else
+            x = y.right;
+        // replace x's parent with y's parent and link x to proper subtree in parent, this removes y from tree
+        if (yParent != undefined) {
+            setChild(yParent, x, ycomp = this.comparer(y.value, yParent.value));
+        }
+        else {
+            this.root = x;
+            (x != undefined) && (x.color = RedBlackEnum.black);
+            return true;
+        }
+        !yIsNode && (node.value = y.value);
+        if (y.color == RedBlackEnum.black) {
+            // x may be undefined
+            balanceAfterDelete(this, x, stack, ycomp);
+        }
+        return true;
     }
 }
 exports.RedBlackTree = RedBlackTree;
+const siblingComparer = (comp) => comp > 0 ? -1 : 1;
+function setChild(parent, node, comp) {
+    if (comp < 0)
+        parent.left = node;
+    else
+        parent.right = node;
+}
+function getChild(parent, comp) {
+    return (comp < 0 ? parent.left : parent.right);
+}
 function newNode(value) {
     return new RedBlackTreeNode(value);
-}
-function insertNode(parent, node, comp) {
-    if (comp < 0) {
-        parent.left = node;
-    }
-    else {
-        parent.right = node;
-    }
-    return parent;
 }
 function getColor(node) {
     return node == undefined ?
         RedBlackEnum.black :
         node.color;
 }
-function balanceTree(tree, node, stack) {
-    while (!stack.empty) {
-        let comp = 0, parent = stack.pop(), grandparent = stack.pop();
-        if (parent.color == RedBlackEnum.black || grandparent == undefined) {
-            return;
-        }
-        let uncle = ((comp = tree.comparer(parent.value, grandparent.value)) < 0 ? grandparent.right : grandparent.left);
-        if (getColor(uncle) == RedBlackEnum.red) {
-            parent.color = RedBlackEnum.black;
-            uncle.color = RedBlackEnum.black;
-            if (stack.empty)
-                grandparent.color = RedBlackEnum.black;
-            else
-                grandparent.color = RedBlackEnum.red;
-            node = grandparent;
+function rotateLeft(x, tree, stack, pushParent) {
+    let p = stack.peek(), y = x.right;
+    x.right = y.left;
+    y.left = x;
+    pushParent && stack.push(y);
+    if (p != undefined)
+        setChild(p, y, tree.comparer(y.value, p.value));
+    else
+        tree.root = y;
+}
+function rotateRight(x, tree, stack, pushParent) {
+    let p = stack.peek(), y = x.left;
+    x.left = y.right;
+    y.right = x;
+    pushParent && stack.push(y);
+    if (p != undefined)
+        setChild(p, y, tree.comparer(y.value, p.value));
+    else
+        tree.root = y;
+}
+function balanceAfterInsert(tree, x, stack) {
+    let t, g, p, y = x.left, comp = 0;
+    while (stack.count >= 2 && (p = stack.pop()).color == RedBlackEnum.red) {
+        //parent is RED
+        g = stack.peek();
+        comp = tree.comparer(p.value, g.value);
+        //get x's parent uncle y
+        if (comp < 0)
+            y = g.right;
+        else
+            y = g.left;
+        if (y != undefined && y.color == RedBlackEnum.red) {
+            //uncle is RED, change x's parent and uncle to black
+            p.color = RedBlackEnum.black;
+            y.color = RedBlackEnum.black;
+            // grandparent must be red. Why? Every red node that is not 
+            // a leaf has only black children
+            g.color = RedBlackEnum.red;
+            stack.pop();
+            x = g;
         }
         else {
+            //uncle is BLACK
             if (comp < 0) {
-                if (tree.comparer(node.value, parent.value) < 0) {
-                    grandparent.left = parent.right;
-                    parent.right = grandparent;
-                    parent.color = RedBlackEnum.black;
-                    grandparent.color = RedBlackEnum.red;
-                    node = parent;
+                if (tree.comparer(x.value, p.value) > 0) {
+                    // x > p, rotate left, make x a left child
+                    rotateLeft(p, tree, stack, false);
+                    //this's faster than ES6 array destructuring
+                    t = x;
+                    x = p;
+                    p = t;
                 }
-                else {
-                    parent.right = node.left;
-                    grandparent.left = node.right;
-                    grandparent.right = uncle;
-                    node.left = parent;
-                    node.right = grandparent;
-                    grandparent.color = RedBlackEnum.red;
-                    node.color = RedBlackEnum.black;
-                }
+                // x < p
+                p.color = RedBlackEnum.black;
+                g.color = RedBlackEnum.red;
+                stack.pop();
+                rotateRight(g, tree, stack, true);
             }
             else {
-                if (tree.comparer(node.value, parent.value) > 0) {
-                    grandparent.right = parent.left;
-                    parent.left = grandparent;
-                    parent.color = RedBlackEnum.black;
-                    grandparent.color = RedBlackEnum.red;
-                    node = parent;
+                if (tree.comparer(x.value, p.value) < 0) {
+                    // x < p, rotate right, make x a right child
+                    rotateRight(p, tree, stack, false);
+                    //this's faster than ES6 array destructuring
+                    t = x;
+                    x = p;
+                    p = t;
                 }
-                else {
-                    parent.left = node.right;
-                    grandparent.right = node.left;
-                    grandparent.left = uncle;
-                    node.left = grandparent;
-                    node.right = parent;
-                    grandparent.color = RedBlackEnum.red;
-                    node.color = RedBlackEnum.black;
-                }
-            }
-            parent = stack.peek();
-            if (parent == undefined) {
-                tree.root = node;
-                return;
-            }
-            else {
-                if (tree.comparer(node.value, parent.value) > 0)
-                    parent.right = node;
-                else
-                    parent.left = node;
+                // x > p
+                p.color = RedBlackEnum.black;
+                g.color = RedBlackEnum.red;
+                stack.pop();
+                rotateLeft(g, tree, stack, true);
             }
         }
     }
+    tree.root.color = RedBlackEnum.black;
+}
+function balanceAfterDelete(tree, x, stack, comp) {
+    let parent, y;
+    while (!stack.empty && getColor(x) == RedBlackEnum.black) {
+        parent = stack.peek();
+        y = getChild(parent, siblingComparer(comp));
+        if (comp < 0) {
+            //x is left child, y is right child
+            if (getColor(y) == RedBlackEnum.red) {
+                // x is black, y is red - make both black and rotate
+                y.color = RedBlackEnum.black;
+                parent.color = RedBlackEnum.red;
+                stack.pop();
+                rotateLeft(parent, tree, stack, true);
+                stack.push(parent);
+                y = parent.right;
+            }
+            if (y == undefined ||
+                (getColor(y.left) == RedBlackEnum.black &&
+                    getColor(y.right) == RedBlackEnum.black)) {
+                //y children are both black or y is a leaf
+                (y != undefined) && (y.color = RedBlackEnum.red);
+                //move up
+                stack.pop();
+                x = parent;
+                parent = stack.peek();
+                (parent != undefined) && (comp = tree.comparer(x.value, parent.value));
+            }
+            else {
+                if (getColor(y.right) == RedBlackEnum.black) {
+                    y.left.color = RedBlackEnum.black;
+                    y.color = RedBlackEnum.red;
+                    rotateRight(y, tree, stack, false);
+                    y = getChild(parent, 1);
+                }
+                y.color = parent.color; // x.parent.color
+                parent.color = RedBlackEnum.black;
+                y.right.color = RedBlackEnum.black;
+                stack.pop();
+                rotateLeft(parent, tree, stack, false);
+                stack.clear();
+                return;
+            }
+        }
+        else {
+            //y is left child, x is right child
+            //y could be null
+            if (getColor(y) == RedBlackEnum.red) {
+                // x is black, y is red - make both black and rotate
+                y.color = RedBlackEnum.black;
+                parent.color = RedBlackEnum.red;
+                stack.pop();
+                rotateRight(parent, tree, stack, true);
+                stack.push(parent);
+                y = parent.left;
+            }
+            if (y == undefined ||
+                (getColor(y.left) == RedBlackEnum.black &&
+                    getColor(y.right) == RedBlackEnum.black)) {
+                //y children are both black or y is a leaf
+                (y != undefined) && (y.color = RedBlackEnum.red);
+                //move up
+                stack.pop();
+                x = parent;
+                parent = stack.peek();
+                (parent != undefined) && (comp = tree.comparer(x.value, parent.value));
+            }
+            else {
+                if (getColor(y.left) == RedBlackEnum.black) {
+                    y.right.color = RedBlackEnum.black;
+                    y.color = RedBlackEnum.red;
+                    rotateLeft(y, tree, stack, false);
+                    y = getChild(parent, -1);
+                }
+                y.color = parent.color; // x.parent.color
+                parent.color = RedBlackEnum.black;
+                y.left.color = RedBlackEnum.black;
+                stack.pop();
+                rotateRight(parent, tree, stack, false);
+                stack.clear();
+                return;
+            }
+        }
+    }
+    (x != undefined) && (x.color = RedBlackEnum.black);
 }

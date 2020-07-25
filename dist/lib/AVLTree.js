@@ -21,7 +21,7 @@ class AVLTree extends BTree_1.SearchBTree {
             parent = node;
             comp = this.comparer(value, node.value);
             if (comp == 0)
-                return node;
+                return false;
             else {
                 if (comp < 0) {
                     node = node.left;
@@ -33,10 +33,10 @@ class AVLTree extends BTree_1.SearchBTree {
             }
         }
         if (!parent)
-            return this.root = newNode(value);
+            return this.root = newNode(value), true;
         insertNode(parent, node = newNode(value), comp);
         balanceTree(this, stack);
-        return node;
+        return true;
     }
     delete(value) {
         let stack = new Stack_1.default(), comp = 0, parent = void 0, root = void 0, node = this.root, min = void 0, found = false;
@@ -56,11 +56,12 @@ class AVLTree extends BTree_1.SearchBTree {
             }
         }
         if (!found)
-            return undefined;
+            return false;
         parent = stack.peek();
         if (node.isLeaf) {
             if (!parent) {
-                return this.root = void 0, node;
+                this.root = void 0;
+                return true;
             }
             setChild(void 0, parent, this.comparer(node.value, parent.value));
         }
@@ -97,12 +98,13 @@ class AVLTree extends BTree_1.SearchBTree {
         }
         else {
             if (!parent) {
-                return this.root = (node.left || node.right), node;
+                this.root = (node.left || node.right);
+                return true;
             }
             setChild(node.left || node.right, parent, this.comparer(node.value, parent.value));
         }
         balanceTree(this, stack);
-        return node;
+        return true;
     }
 }
 exports.AVLTree = AVLTree;

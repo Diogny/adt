@@ -97,3 +97,5 @@ pnpm install --save-dev @types/chai @types/mocha
 ### AVL & Red-Black Trees
 
 ![AVL Red-Black Trees](img/avl-red-black-trees.png)
+
+![AVL Red-Black Trees](img/avl-red-black-trees-2.png)

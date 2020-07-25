@@ -27,7 +27,8 @@ export declare class BTree<T> extends BaseTree<T> {
     max(node: BTreeNode<T>): BTreeNode<T>;
 }
 export declare abstract class SearchBTree<T> extends BTree<T> {
-    abstract insert(value: T): BTreeNode<T>;
-    abstract delete(value: T): BTreeNode<T> | undefined;
-    insertRange(values: T[]): BTreeNode<T>[];
+    abstract insert(value: T): boolean;
+    abstract delete(value: T): boolean;
+    insertRange(values: T[]): boolean[];
+    deleteRange(values: T[]): boolean[];
 }

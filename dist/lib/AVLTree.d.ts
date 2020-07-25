@@ -5,6 +5,6 @@ export declare class AVLTreeNode<T> extends BTreeNode<T> {
 }
 export declare class AVLTree<T> extends SearchBTree<T> {
     constructor(comparer?: (a: T, b: T) => number);
-    insert(value: T): AVLTreeNode<T>;
-    delete(value: T): AVLTreeNode<T> | undefined;
+    insert(value: T): boolean;
+    delete(value: T): boolean;
 }

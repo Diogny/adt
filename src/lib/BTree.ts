@@ -124,15 +124,21 @@ export class BTree<T> extends BaseTree<T>{
 
 export abstract class SearchBTree<T> extends BTree<T> {
 
-	abstract insert(value: T): BTreeNode<T>;
+	abstract insert(value: T): boolean;
 
-	abstract delete(value: T): BTreeNode<T> | undefined;
+	abstract delete(value: T): boolean;
 
-	public insertRange(values: T[]): BTreeNode<T>[] {
+	public insertRange(values: T[]): boolean[] {
 		let
-			array: BTreeNode<T>[] = [];
+			array: boolean[] = [];
 		values.forEach(value => array.push(this.insert(value)))
 		return array
 	}
 
+	public deleteRange(values: T[]): boolean[] {
+		let
+			array: boolean[] = [];
+		values.forEach(value => array.push(this.delete(value)))
+		return array
+	}
 }

@@ -18,7 +18,7 @@ export class AVLTree<T> extends SearchBTree<T> {
 		super(<any>undefined, comparer)
 	}
 
-	public insert(value: T): AVLTreeNode<T> {
+	public insert(value: T): boolean {
 		let
 			stack = new Stack<AVLTreeNode<T>>(),
 			comp = 0,
@@ -28,7 +28,7 @@ export class AVLTree<T> extends SearchBTree<T> {
 			parent = node;
 			comp = this.comparer(value, node.value);
 			if (comp == 0)
-				return node
+				return false
 			else {
 				if (comp < 0) {
 					node = <AVLTreeNode<T>>node.left;
@@ -39,13 +39,13 @@ export class AVLTree<T> extends SearchBTree<T> {
 			}
 		}
 		if (!parent)
-			return this.root = newNode(value)
+			return this.root = newNode(value), true
 		insertNode(parent, node = newNode(value), comp);
 		balanceTree(this, stack);
-		return node
+		return true
 	}
 
-	public delete(value: T): AVLTreeNode<T> | undefined {
+	public delete(value: T): boolean {
 		let
 			stack = new Stack<AVLTreeNode<T>>(),
 			comp = 0,
@@ -69,11 +69,12 @@ export class AVLTree<T> extends SearchBTree<T> {
 			}
 		}
 		if (!found)
-			return undefined;
+			return false;
 		parent = stack.peek() as AVLTreeNode<T>;
 		if (node.isLeaf) {
 			if (!parent) {
-				return this.root = <any>void 0, node
+				this.root = <any>void 0;
+				return true
 			}
 			setChild(void 0, parent, this.comparer(node.value, parent.value))
 		}
@@ -106,12 +107,13 @@ export class AVLTree<T> extends SearchBTree<T> {
 			}
 		} else {
 			if (!parent) {
-				return this.root = <AVLTreeNode<T>>(node.left || node.right), node
+				this.root = <AVLTreeNode<T>>(node.left || node.right);
+				return true
 			}
 			setChild(node.left || node.right, parent, this.comparer(node.value, parent.value))
 		}
 		balanceTree(this, stack);
-		return node
+		return true
 	}
 }
 

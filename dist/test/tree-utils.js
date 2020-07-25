@@ -12,7 +12,7 @@ function visulizeBTree(tree, svg, caption, x, y, nodeClass) {
     }), svgCaption = Utils_1.tag("text", "", {
         "font-size": FONT_SIZE,
     });
-    if (tree && tree.root) {
+    if (tree) {
         svg.appendChild(svgTree);
         depth = tree.depth();
         width = depth == 1 ? 1 : Math.pow(2, depth - 1);
@@ -30,6 +30,7 @@ function visulizeBTree(tree, svg, caption, x, y, nodeClass) {
         height = box.height;
     }
     return {
+        svg: svgTree,
         width: width,
         height: height
     };

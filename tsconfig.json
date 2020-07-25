@@ -12,22 +12,12 @@
 		"noEmitOnError": true,
 		"declaration": true,
 		"outDir": "./dist",
-		"baseUrl": ".",
-		"paths": {
-			"src/*": [
-				"src/lib/*"
-			],
-			"*": [
-				"node_modules/*"
-			]
-		}
+		"baseUrl": "."
 	},
 	"include": [
 		"src/**/*"
 	],
 	"exclude": [
-		"node_modules",
-		"test",
-		"dist"
+		"node_modules"
 	]
 }

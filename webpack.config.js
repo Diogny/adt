@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require('path');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
@@ -47,11 +48,16 @@ const commonConfig = {
 
 module.exports = env => {
 	commonConfig.mode = env.mode;
-	console.log('enviriment: ', env.mode)
-	
+	console.log('enviroment: ', env.mode)
+
 	return [
 		Object.assign(
 			{
+				devServer: {
+					contentBase: path.resolve(__dirname, 'dist/test/www'),
+					hot: true,
+					port : 9000
+				},
 				entry: {
 					index: ['./src/test/index.ts', './src/test/css/styles.css']
 				},
@@ -75,8 +81,11 @@ module.exports = env => {
 							{ from: './src/test/favicon.ico', to: 'favicon.ico' },
 						]
 					}),
+					new webpack.NamedModulesPlugin(),
+					new webpack.HotModuleReplacementPlugin(),
 				],
 			},
 			commonConfig),
+
 	];
 }

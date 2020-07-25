@@ -14,7 +14,8 @@ insertSequence("Right Left Rotation (RL Rotation", [1, 3, 2]);
 function insertSequence(msg: string, array: number[]) {
 	console.log(msg)
 	const t = new RedBlackTree<number>();
-	t.insertRange(array);
+	//t.insertRange(array);
+	array.forEach(value => t.insert(value));
 	visulizeTree(t);
 }
 

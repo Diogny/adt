@@ -113,5 +113,10 @@ class SearchBTree extends BTree {
         values.forEach(value => array.push(this.insert(value)));
         return array;
     }
+    deleteRange(values) {
+        let array = [];
+        values.forEach(value => array.push(this.delete(value)));
+        return array;
+    }
 }
 exports.SearchBTree = SearchBTree;

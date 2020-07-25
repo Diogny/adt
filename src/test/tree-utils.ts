@@ -6,7 +6,7 @@ const HEIGHT = 120;
 const FONT_SIZE = 40;
 
 export function visulizeBTree<T>(tree: BTree<T>, svg: SVGSVGElement, caption: string, x: number, y: number,
-	nodeClass?: (node: BTreeNode<T>) => string): { width: number, height: number } {
+	nodeClass?: (node: BTreeNode<T>) => string): { svg: SVGGElement, width: number, height: number } {
 	let
 		depth = 0,
 		width = 0,
@@ -18,7 +18,7 @@ export function visulizeBTree<T>(tree: BTree<T>, svg: SVGSVGElement, caption: st
 		svgCaption = <SVGTextElement>tag("text", "", {
 			"font-size": FONT_SIZE,
 		});
-	if (tree && tree.root) {
+	if (tree) {
 		svg.appendChild(svgTree);
 		depth = tree.depth();
 		width = depth == 1 ? 1 : Math.pow(2, depth - 1);
@@ -38,6 +38,7 @@ export function visulizeBTree<T>(tree: BTree<T>, svg: SVGSVGElement, caption: st
 	}
 
 	return {
+		svg: svgTree,
 		width: width,
 		height: height
 	}
