@@ -23,8 +23,17 @@ export enum SearchBTreeTraverse {
 
 export class BTree<T> extends BaseTree<T>{
 
+	protected __size: number;
+
+	public get size(): number { return this.__size }
+
 	constructor(public root: BTreeNode<T>, comparer?: (a: T, b: T) => number) {
-		super(comparer)
+		super(comparer);
+		this.__size = 0;
+		if (this.root != undefined) {
+			for (let n of this.preOrderEnumerator())
+				this.__size++;
+		}
 	}
 
 	public find(value: T): BTreeNode<T> | undefined {
@@ -120,13 +129,15 @@ export class BTree<T> extends BaseTree<T>{
 		return node
 	}
 
-}
+	public insert(value: T): boolean {
+		//will be implemented later
+		return false
+	}
 
-export abstract class SearchBTree<T> extends BTree<T> {
-
-	abstract insert(value: T): boolean;
-
-	abstract delete(value: T): boolean;
+	public delete(value: T): boolean {
+		//will be implemented later
+		return false
+	}
 
 	public insertRange(values: T[]): boolean[] {
 		let

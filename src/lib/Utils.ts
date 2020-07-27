@@ -100,3 +100,25 @@ export const html = (html: string): ChildNode => {
 	template.innerHTML = html;
 	return <any>template.content.firstChild;
 };
+
+export const aEL = (el: HTMLElement, eventName: string, fn: Function, b?: boolean | AddEventListenerOptions | undefined): void => el.addEventListener(<any>eventName, <any>fn, b);
+export const rEL = (el: HTMLElement, eventName: string, fn: Function, b?: boolean | AddEventListenerOptions | undefined): void => el.removeEventListener(<any>eventName, <any>fn, b);
+export const qS = (s: string): HTMLElement => <HTMLElement>document.querySelector(s);
+export const qSA = (s: string) => document.querySelectorAll(s);
+export const gEId = (id: string) => document.getElementById(id);
+
+export const ready = (fn: Function) => { //https://plainjs.com/javascript/events/running-code-when-the-document-is-ready-15/
+	if (typeof fn != "function") {
+		return !1;
+	}
+	if (document.readyState != "loading")
+		return (fn(), !0);
+	else if (document["addEventListener"])
+		aEL(<any>document, "DOMContentLoaded", fn, false);
+	else
+		(<any>document).attachEvent("onreadystatechange", () => {
+			if (document.readyState == "complete")
+				fn();
+		});
+	return !0;
+};

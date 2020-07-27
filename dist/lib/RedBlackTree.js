@@ -1,30 +1,35 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedBlackTree = exports.RedBlackTreeNode = exports.RedBlackEnum = void 0;
-const tslib_1 = require("tslib");
-const BTree_1 = require("./BTree");
-const Stack_1 = tslib_1.__importDefault(require("./Stack"));
+var tslib_1 = require("tslib");
+var BTree_1 = require("./BTree");
+var Stack_1 = tslib_1.__importDefault(require("./Stack"));
 var RedBlackEnum;
 (function (RedBlackEnum) {
     RedBlackEnum[RedBlackEnum["red"] = 0] = "red";
     RedBlackEnum[RedBlackEnum["black"] = 1] = "black";
 })(RedBlackEnum = exports.RedBlackEnum || (exports.RedBlackEnum = {}));
-class RedBlackTreeNode extends BTree_1.BTreeNode {
-    constructor(value) {
-        super(value);
-        this.color = RedBlackEnum.red;
+var RedBlackTreeNode = /** @class */ (function (_super) {
+    tslib_1.__extends(RedBlackTreeNode, _super);
+    function RedBlackTreeNode(value) {
+        var _this = _super.call(this, value) || this;
+        _this.color = RedBlackEnum.red;
+        return _this;
     }
-}
+    return RedBlackTreeNode;
+}(BTree_1.BTreeNode));
 exports.RedBlackTreeNode = RedBlackTreeNode;
-class RedBlackTree extends BTree_1.SearchBTree {
-    constructor(comparer) {
-        super(undefined, comparer);
+var RedBlackTree = /** @class */ (function (_super) {
+    tslib_1.__extends(RedBlackTree, _super);
+    function RedBlackTree(comparer) {
+        return _super.call(this, undefined, comparer) || this;
     }
-    insert(value) {
-        let stack = new Stack_1.default(), parent = void 0, node = this.root, comp = 0;
+    RedBlackTree.prototype.insert = function (value) {
+        var stack = new Stack_1.default(), parent = void 0, node = this.root, comp = 0;
         if (node == undefined) {
             this.root = node = newNode(value);
             node.color = RedBlackEnum.black;
+            this.__size++;
             return true;
         }
         while (node != undefined) {
@@ -43,12 +48,13 @@ class RedBlackTree extends BTree_1.SearchBTree {
         node = newNode(value);
         setChild(parent, node, comp);
         balanceAfterInsert(this, node, stack);
+        this.__size++;
         return true;
-    }
-    delete(value) {
-        let found = false, comp = 0, stack = new Stack_1.default(), parent = void 0, node = this.root, yIsNode, x, ycomp = 0, yParent, y;
+    };
+    RedBlackTree.prototype.delete = function (value) {
+        var found = false, comp = 0, stack = new Stack_1.default(), parent = void 0, node = this.root, yIsNode, x, ycomp = 0, yParent, y;
         while (node != undefined && !found) {
-            let nextComp = this.comparer(value, node.value);
+            var nextComp = this.comparer(value, node.value);
             if (nextComp == 0)
                 found = true;
             else {
@@ -103,6 +109,7 @@ class RedBlackTree extends BTree_1.SearchBTree {
         else {
             this.root = x;
             (x != undefined) && (x.color = RedBlackEnum.black);
+            this.__size--;
             return true;
         }
         !yIsNode && (node.value = y.value);
@@ -110,11 +117,13 @@ class RedBlackTree extends BTree_1.SearchBTree {
             // x may be undefined
             balanceAfterDelete(this, x, stack, ycomp);
         }
+        this.__size--;
         return true;
-    }
-}
+    };
+    return RedBlackTree;
+}(BTree_1.BTree));
 exports.RedBlackTree = RedBlackTree;
-const siblingComparer = (comp) => comp > 0 ? -1 : 1;
+var siblingComparer = function (comp) { return comp > 0 ? -1 : 1; };
 function setChild(parent, node, comp) {
     if (comp < 0)
         parent.left = node;
@@ -133,7 +142,7 @@ function getColor(node) {
         node.color;
 }
 function rotateLeft(x, tree, stack, pushParent) {
-    let p = stack.peek(), y = x.right;
+    var p = stack.peek(), y = x.right;
     x.right = y.left;
     y.left = x;
     pushParent && stack.push(y);
@@ -143,7 +152,7 @@ function rotateLeft(x, tree, stack, pushParent) {
         tree.root = y;
 }
 function rotateRight(x, tree, stack, pushParent) {
-    let p = stack.peek(), y = x.left;
+    var p = stack.peek(), y = x.left;
     x.left = y.right;
     y.right = x;
     pushParent && stack.push(y);
@@ -153,7 +162,7 @@ function rotateRight(x, tree, stack, pushParent) {
         tree.root = y;
 }
 function balanceAfterInsert(tree, x, stack) {
-    let t, g, p, y = x.left, comp = 0;
+    var t, g, p, y = x.left, comp = 0;
     while (stack.count >= 2 && (p = stack.pop()).color == RedBlackEnum.red) {
         //parent is RED
         g = stack.peek();
@@ -210,7 +219,7 @@ function balanceAfterInsert(tree, x, stack) {
     tree.root.color = RedBlackEnum.black;
 }
 function balanceAfterDelete(tree, x, stack, comp) {
-    let parent, y;
+    var parent, y;
     while (!stack.empty && getColor(x) == RedBlackEnum.black) {
         parent = stack.peek();
         y = getChild(parent, siblingComparer(comp));
@@ -294,3 +303,4 @@ function balanceAfterDelete(tree, x, stack, comp) {
     }
     (x != undefined) && (x.color = RedBlackEnum.black);
 }
+//# sourceMappingURL=RedBlackTree.js.map

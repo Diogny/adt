@@ -1,4 +1,4 @@
-import { SearchBTree, BTreeNode } from "./BTree";
+import { BTree, BTreeNode } from "./BTree";
 import Stack from "./Stack";
 
 export enum RedBlackEnum {
@@ -17,7 +17,7 @@ export class RedBlackTreeNode<T> extends BTreeNode<T>{
 
 }
 
-export class RedBlackTree<T> extends SearchBTree<T> {
+export class RedBlackTree<T> extends BTree<T> {
 
 	constructor(comparer?: (a: T, b: T) => number) {
 		super(<any>undefined, comparer)
@@ -32,6 +32,7 @@ export class RedBlackTree<T> extends SearchBTree<T> {
 		if (node == undefined) {
 			this.root = node = newNode(value);
 			node.color = RedBlackEnum.black;
+			this.__size++;
 			return true;
 		}
 		while (node != undefined) {
@@ -50,6 +51,7 @@ export class RedBlackTree<T> extends SearchBTree<T> {
 		node = newNode(value);
 		setChild(parent, node, comp);
 		balanceAfterInsert(this, node, stack);
+		this.__size++;
 		return true
 	}
 
@@ -122,6 +124,7 @@ export class RedBlackTree<T> extends SearchBTree<T> {
 		} else {
 			this.root = x;
 			(x != undefined) && (x.color = RedBlackEnum.black);
+			this.__size--;
 			return true
 		}
 
@@ -131,6 +134,7 @@ export class RedBlackTree<T> extends SearchBTree<T> {
 			// x may be undefined
 			balanceAfterDelete(this, x, stack, ycomp)
 		}
+		this.__size--;
 		return true
 	}
 }

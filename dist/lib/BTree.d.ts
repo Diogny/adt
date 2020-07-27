@@ -13,6 +13,8 @@ export declare enum SearchBTreeTraverse {
 }
 export declare class BTree<T> extends BaseTree<T> {
     root: BTreeNode<T>;
+    protected __size: number;
+    get size(): number;
     constructor(root: BTreeNode<T>, comparer?: (a: T, b: T) => number);
     find(value: T): BTreeNode<T> | undefined;
     inOrderEnumerator(node?: BTreeNode<T>): Generator<BTreeNode<T>, number, unknown>;
@@ -25,10 +27,8 @@ export declare class BTree<T> extends BaseTree<T> {
     };
     min(node: BTreeNode<T>): BTreeNode<T>;
     max(node: BTreeNode<T>): BTreeNode<T>;
-}
-export declare abstract class SearchBTree<T> extends BTree<T> {
-    abstract insert(value: T): boolean;
-    abstract delete(value: T): boolean;
+    insert(value: T): boolean;
+    delete(value: T): boolean;
     insertRange(values: T[]): boolean[];
     deleteRange(values: T[]): boolean[];
 }

@@ -4,6 +4,7 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const uglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 console.log('webpack __dirname', __dirname);
 
@@ -26,6 +27,11 @@ const commonConfig = {
 					{ loader: MiniCssExtractPlugin.loader },
 					"css-loader"
 				]
+			},
+			{
+				test: /\.js$/,
+				use: ["source-map-loader"],
+				enforce: "pre"
 			},
 			{
 				test: /\.(png|svg|jpe?g|gif)$/i,
@@ -56,7 +62,7 @@ module.exports = env => {
 				devServer: {
 					contentBase: path.resolve(__dirname, 'dist/test/www'),
 					hot: true,
-					port : 9000
+					port: 9000
 				},
 				entry: {
 					index: ['./src/test/index.ts', './src/test/css/styles.css']
@@ -86,6 +92,26 @@ module.exports = env => {
 				],
 			},
 			commonConfig),
-
+		Object.assign(
+			{
+				entry: {
+					rbt: ['./src/test/rbt.ts', './src/test/css/rbt.css']
+				},
+				output: {
+					path: path.resolve(__dirname, 'dist/test/www'), // __dirname, //
+					filename: '[name].js',
+				},
+				plugins: [
+					new MiniCssExtractPlugin({
+						filename: "[name].css"
+					}),
+					new HtmlWebpackPlugin({
+						title: 'Binary Tree tester',
+						template: './src/test/rbt.html',
+						filename: 'rbt.html'
+					}),
+				],
+			},
+			commonConfig),
 	];
 }

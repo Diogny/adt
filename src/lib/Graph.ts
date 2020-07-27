@@ -208,7 +208,7 @@ export abstract class BaseGraph implements IGraph, ILabel {
 		e.edges.splice(e.index, 1);
 		this.modified = true;
 		if (!this.directed) {
-			e = getInternalEdge.call(this, w, v);
+			e = <NodeInternalIndex>getInternalEdge.call(this, w, v);
 			e.edges.splice(e.index, 1);
 		}
 		return true;

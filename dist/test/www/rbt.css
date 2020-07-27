@@ -1,0 +1,98 @@
+body {
+  margin: 10px;
+}
+#board {
+  height: 400px;
+  border: 1px solid #dfd8d8;
+  margin-top: 10px;
+}
+#cons-out {
+  height: 100px;
+  border: 1px solid #dfd8d8;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+#cons-out > div:nth-of-type(1) {
+  display: flex;
+  background-color: #f3f0f0;
+  padding: 1px 5px;
+}
+#cons-out > div:nth-of-type(2) {
+  height: 100%;
+  flex: 1;
+  background-color: black;
+  color: white;
+  padding: 1px 5px;
+}
+#node-value {
+  width: 70px;
+}
+.header > button,
+.header > input {
+  font-size: 16px;
+}
+.header > label {
+  border: 1px solid gray;
+  padding: 2px 4px;
+  background-color: #efefef;
+  border-radius: 3px;
+}
+g.svg-tree > text {
+  fill: black;
+  stroke: black;
+  stroke-width: 0.2px;
+  font-family: monospace;
+}
+g.svg-node {
+  cursor: pointer;
+}
+g.svg-node > circle {
+  fill: #f3f0f0;
+  stroke: black;
+  stroke-opacity: 1;
+  stroke-width: 4px;
+}
+g.svg-node > text {
+  fill: black;
+  stroke: black;
+  stroke-width: 0.2px;
+  font-family: monospace;
+}
+g.svg-node.red > text,
+g.svg-node.black > text {
+  fill: white;
+  stroke: white;
+}
+g.svg-node.red > circle {
+  fill: red;
+  stroke: white;
+}
+g.svg-node.black > circle {
+  fill: black;
+  stroke: white;
+}
+g > line.svg-line {
+  stroke-width: 5px;
+  stroke: black;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.no-select {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+.grid60x60 {
+  background-size: 20px 20px;
+  background-image: linear-gradient(
+      to right,
+      rgba(128, 128, 128, 0.1) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(128, 128, 128, 0.1) 1px, transparent 1px);
+}
+

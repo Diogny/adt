@@ -1,15 +1,18 @@
 {
 	"compilerOptions": {
-		"target": "es2015",
+		"target": "es5",
 		"module": "commonjs",
+		"allowJs": true,
 		"noImplicitAny": true,
 		"suppressImplicitAnyIndexErrors": true,
 		"allowSyntheticDefaultImports": true,
 		"moduleResolution": "node",
+		"downlevelIteration": true,
 		"strictNullChecks": true,
 		"esModuleInterop": true,
 		"removeComments": false,
 		"noEmitOnError": true,
+		"sourceMap": true,
 		"declaration": true,
 		"outDir": "./dist",
 		"baseUrl": "."

@@ -1,26 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.visulizeBTree = void 0;
-const Utils_1 = require("../lib/Utils");
-const WIDTH = 80;
-const HEIGHT = 120;
-const FONT_SIZE = 40;
-function visulizeBTree(tree, svg, caption, x, y, nodeClass) {
-    let depth = 0, width = 0, height = 0, svgTree = Utils_1.tag("g", "", {
+exports.BTreeVisualizer = void 0;
+var Utils_1 = require("../lib/Utils");
+;
+function BTreeVisualizer(conf) {
+    var depth = 0, width = 0, height = 0, svgTree = Utils_1.tag("g", "", {
         class: "svg-tree",
-        transform: `translate(${x} ${y})`
+        transform: "translate(" + (conf.x | 0) + " " + (conf.y | 0) + ")"
     }), svgCaption = Utils_1.tag("text", "", {
-        "font-size": FONT_SIZE,
+        class: "caption",
+        "font-size": conf.FONT_SIZE,
     });
-    if (tree) {
-        svg.appendChild(svgTree);
-        depth = tree.depth();
+    if (conf && conf.tree && conf.svg) {
+        conf.svg.appendChild(svgTree);
+        depth = conf.tree.depth();
         width = depth == 1 ? 1 : Math.pow(2, depth - 1);
-        width = width * WIDTH;
-        height = visualizeNode(tree.root, svgTree, 0, width, 0, nodeClass);
-        svgCaption.innerHTML = caption;
+        width = width * conf.WIDTH;
+        height = visualizeNode(conf.tree.root, svgTree, 0, width, 0, conf);
+        svgCaption.innerHTML = conf.caption || "[caption]";
         svgTree.appendChild(svgCaption);
-        let box = svgCaption.getBBox();
+        var box = svgCaption.getBBox();
         Utils_1.attr(svgCaption, {
             x: Math.max(0, (width / 2 - box.width / 2) | 0),
             y: height
@@ -35,23 +34,27 @@ function visulizeBTree(tree, svg, caption, x, y, nodeClass) {
         height: height
     };
 }
-exports.visulizeBTree = visulizeBTree;
-function visualizeNode(node, svg, minx, maxx, y, nodeClass) {
+exports.BTreeVisualizer = BTreeVisualizer;
+function visualizeNode(node, svg, minx, maxx, y, conf) {
     if (node == undefined)
         return 0;
-    let halfWidth = WIDTH / 2 | 0, centerX = minx + (maxx - minx) / 2 | 0, centerY = y + halfWidth, circleRadius = WIDTH / 2 | 0, cl = nodeClass ? nodeClass(node) : "", nextYStart = y + HEIGHT, svgNode = Utils_1.tag("g", "", {
+    var halfWidth = conf.WIDTH / 2 | 0, centerX = minx + (maxx - minx) / 2 | 0, centerY = y + halfWidth, circleRadius = conf.WIDTH / 2 | 0, cl = conf.nodeClass ? conf.nodeClass(node) : "", nextYStart = y + conf.HEIGHT, svgNodeX = centerX - circleRadius, svgNodeY = centerY - circleRadius, svgNode = Utils_1.tag("g", "", {
         class: "svg-node " + cl,
-        transform: `translate(${centerX - circleRadius} ${centerY - circleRadius})`
+        transform: "translate(" + svgNodeX + " " + svgNodeY + ")"
     }), svgCircle = Utils_1.tag("circle", "", {
         cx: circleRadius,
         cy: circleRadius,
         r: circleRadius
     }), svgText = Utils_1.tag("text", "", {
-        "font-size": FONT_SIZE,
+        "font-size": conf.FONT_SIZE,
         class: "no-select"
     });
+    svgText.innerHTML = conf.nodeValue(node.value);
+    svgNode.appendChild(svgCircle);
+    svgNode.appendChild(svgText);
+    svg.appendChild(svgNode);
     if (!node.isLeaf) {
-        let childrenY = nextYStart + halfWidth, childrenX = 0;
+        var childrenY = nextYStart + halfWidth, childrenX = 0;
         if (node.left) {
             childrenX = minx + (centerX - minx) / 2 | 0;
             svg.appendChild(Utils_1.tag("line", "", lineAttrs(centerX, centerY, childrenX, childrenY, circleRadius)));
@@ -61,19 +64,15 @@ function visualizeNode(node, svg, minx, maxx, y, nodeClass) {
             svg.appendChild(Utils_1.tag("line", "", lineAttrs(centerX, centerY, childrenX, childrenY, circleRadius)));
         }
     }
-    svgText.innerHTML = String(node.value);
-    svgNode.appendChild(svgCircle);
-    svgNode.appendChild(svgText);
-    svg.appendChild(svgNode);
-    let box = svgText.getBBox();
+    var box = svgText.getBBox();
     Utils_1.attr(svgText, {
         x: circleRadius - box.width / 2 | 0,
         y: circleRadius + box.height / 4 | 0
     });
-    return Math.max(nextYStart, visualizeNode(node.left, svg, minx, centerX, nextYStart, nodeClass), visualizeNode(node.right, svg, centerX, maxx, nextYStart, nodeClass));
+    return Math.max(nextYStart, visualizeNode(node.left, svg, minx, centerX, nextYStart, conf), visualizeNode(node.right, svg, centerX, maxx, nextYStart, conf));
 }
 function lineAttrs(x1, y1, x2, y2, r) {
-    let angle = Math.atan2(y1 - y2, x1 - x2);
+    var angle = Math.atan2(y1 - y2, x1 - x2);
     x1 = (x1 - r * Math.cos(angle)) | 0;
     y1 = (y1 - r * Math.sin(angle)) | 0;
     x2 = (x2 + r * Math.cos(angle)) | 0;
@@ -86,3 +85,4 @@ function lineAttrs(x1, y1, x2, y2, r) {
         class: "svg-line"
     };
 }
+//# sourceMappingURL=tree-utils.js.map

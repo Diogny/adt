@@ -1,4 +1,4 @@
-import { BTreeNode, SearchBTree } from "./BTree";
+import { BTreeNode, BTree } from "./BTree";
 import Stack from "./Stack";
 
 export class AVLTreeNode<T> extends BTreeNode<T>{
@@ -12,7 +12,7 @@ export class AVLTreeNode<T> extends BTreeNode<T>{
 
 }
 
-export class AVLTree<T> extends SearchBTree<T> {
+export class AVLTree<T> extends BTree<T> {
 
 	constructor(comparer?: (a: T, b: T) => number) {
 		super(<any>undefined, comparer)
@@ -38,10 +38,14 @@ export class AVLTree<T> extends SearchBTree<T> {
 				stack.push(parent);
 			}
 		}
-		if (!parent)
-			return this.root = newNode(value), true
+		if (!parent) {
+			this.root = newNode(value);
+			this.__size++;
+			return true
+		}
 		insertNode(parent, node = newNode(value), comp);
 		balanceTree(this, stack);
+		this.__size++;
 		return true
 	}
 
@@ -74,6 +78,7 @@ export class AVLTree<T> extends SearchBTree<T> {
 		if (node.isLeaf) {
 			if (!parent) {
 				this.root = <any>void 0;
+				this.__size--;
 				return true
 			}
 			setChild(void 0, parent, this.comparer(node.value, parent.value))
@@ -108,11 +113,13 @@ export class AVLTree<T> extends SearchBTree<T> {
 		} else {
 			if (!parent) {
 				this.root = <AVLTreeNode<T>>(node.left || node.right);
+				this.__size--;
 				return true
 			}
 			setChild(node.left || node.right, parent, this.comparer(node.value, parent.value))
 		}
 		balanceTree(this, stack);
+		this.__size--;
 		return true
 	}
 }

@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const tslib_1 = require("tslib");
-const http_1 = require("http");
-const path = tslib_1.__importStar(require("path"));
-const url_1 = tslib_1.__importDefault(require("url"));
-const fs = tslib_1.__importStar(require("fs"));
-const port = 5000;
+var tslib_1 = require("tslib");
+var http_1 = require("http");
+var path = tslib_1.__importStar(require("path"));
+var url_1 = tslib_1.__importDefault(require("url"));
+var fs = tslib_1.__importStar(require("fs"));
+var port = 5000;
 console.log('process.execPath', process.execPath);
 console.log(process.argv);
-const appFolder = path.resolve(path.dirname(process.argv[1]), 'www'); // path.resolve(process.argv[0], '..');
+var appFolder = path.resolve(path.dirname(process.argv[1]), 'www'); // path.resolve(process.argv[0], '..');
 console.log('app folder', appFolder);
-const server = http_1.createServer((request, response) => {
+var server = http_1.createServer(function (request, response) {
     try {
         //response.end('Hello world!');
         var requestUrl = url_1.default.parse(request.url);
@@ -32,6 +32,7 @@ const server = http_1.createServer((request, response) => {
         console.log(e.stack);
     }
 })
-    .listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+    .listen(port, function () {
+    console.log("Server listening on port " + port);
 });
+//# sourceMappingURL=server.js.map

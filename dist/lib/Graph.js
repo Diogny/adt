@@ -1,41 +1,50 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LabeledDiGraph = exports.LabeledGraph = exports.WeightedDiGraph = exports.WeightedGraph = exports.DiGraph = exports.Graph = exports.BaseGraph = exports.EdgeVisitEnum = exports.WeightedEdge = exports.Edge = exports.LabeledNode = exports.GraphNode = void 0;
-const Utils_1 = require("./Utils");
-class GraphNode {
-    constructor(id) {
+var tslib_1 = require("tslib");
+var Utils_1 = require("./Utils");
+var GraphNode = /** @class */ (function () {
+    function GraphNode(id) {
         this.id = id;
     }
-    label() { return String(this.id); }
-}
+    GraphNode.prototype.label = function () { return String(this.id); };
+    return GraphNode;
+}());
 exports.GraphNode = GraphNode;
-class LabeledNode extends GraphNode {
-    constructor(id, __label) {
-        super(id);
-        this.__label = __label;
+var LabeledNode = /** @class */ (function (_super) {
+    tslib_1.__extends(LabeledNode, _super);
+    function LabeledNode(id, __label) {
+        var _this = _super.call(this, id) || this;
+        _this.__label = __label;
         if (!__label)
-            throw `empty node label`;
+            throw "empty node label";
+        return _this;
     }
-    label() { return this.__label; }
-}
+    LabeledNode.prototype.label = function () { return this.__label; };
+    return LabeledNode;
+}(GraphNode));
 exports.LabeledNode = LabeledNode;
-class Edge {
-    constructor(v, w) {
+var Edge = /** @class */ (function () {
+    function Edge(v, w) {
         this.v = v;
         this.w = w;
     }
-    label() { return `(${this.v}>${this.w})`; }
-}
+    Edge.prototype.label = function () { return "(" + this.v + ">" + this.w + ")"; };
+    return Edge;
+}());
 exports.Edge = Edge;
-class WeightedEdge extends Edge {
-    constructor(v, w, weight) {
-        super(v, w);
-        this.weight = weight;
+var WeightedEdge = /** @class */ (function (_super) {
+    tslib_1.__extends(WeightedEdge, _super);
+    function WeightedEdge(v, w, weight) {
+        var _this = _super.call(this, v, w) || this;
+        _this.weight = weight;
         if (Number.isNaN(weight))
-            throw `invalid edge weight`;
+            throw "invalid edge weight";
+        return _this;
     }
-    label() { return `(${this.v}>${this.w})::${this.weight}`; }
-}
+    WeightedEdge.prototype.label = function () { return "(" + this.v + ">" + this.w + ")::" + this.weight; };
+    return WeightedEdge;
+}(Edge));
 exports.WeightedEdge = WeightedEdge;
 var EdgeVisitEnum;
 (function (EdgeVisitEnum) {
@@ -45,8 +54,8 @@ var EdgeVisitEnum;
     EdgeVisitEnum[EdgeVisitEnum["down"] = 3] = "down";
     EdgeVisitEnum[EdgeVisitEnum["cross"] = 4] = "cross";
 })(EdgeVisitEnum = exports.EdgeVisitEnum || (exports.EdgeVisitEnum = {}));
-class BaseGraph {
-    constructor(name, directed, weighted, labeled) {
+var BaseGraph = /** @class */ (function () {
+    function BaseGraph(name, directed, weighted, labeled) {
         this.name = name;
         this.directed = directed;
         this.weighted = weighted;
@@ -54,25 +63,36 @@ class BaseGraph {
         this.nodes = new Map();
         this.modified = false;
     }
-    label() { return this.name; }
-    get size() { return this.nodes.size; }
-    get nextNodeId() { return this.size; }
-    node(id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node; }
-    nodeLabel(id) { var _a; return ((_a = this.node(id)) === null || _a === void 0 ? void 0 : _a.label()) || ""; }
-    hasNode(id) { var _a; return !!((_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node); }
-    nodeList() { return Array.from(this.nodes.values()).map(n => n.node); }
-    nodeEdges(id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; }
-    edges() { return Utils_1.selectMany(Array.from(this.nodes.values()), (n) => n.edges); }
-    nodeDegree(node) { var _a; return ((_a = this.nodeEdges(node)) === null || _a === void 0 ? void 0 : _a.length) || 0; }
-    degrees() { return Array.from({ length: this.size }, (n, ndx) => this.nodeDegree(ndx)); }
-    indegrees() {
-        let array = new Array(this.size).fill(0);
-        this.edges().forEach(edge => array[edge.w]++);
+    BaseGraph.prototype.label = function () { return this.name; };
+    Object.defineProperty(BaseGraph.prototype, "size", {
+        get: function () { return this.nodes.size; },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(BaseGraph.prototype, "nextNodeId", {
+        get: function () { return this.size; },
+        enumerable: false,
+        configurable: true
+    });
+    BaseGraph.prototype.node = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node; };
+    BaseGraph.prototype.nodeLabel = function (id) { var _a; return ((_a = this.node(id)) === null || _a === void 0 ? void 0 : _a.label()) || ""; };
+    BaseGraph.prototype.hasNode = function (id) { var _a; return !!((_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node); };
+    BaseGraph.prototype.nodeList = function () { return Array.from(this.nodes.values()).map(function (n) { return n.node; }); };
+    BaseGraph.prototype.nodeEdges = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; };
+    BaseGraph.prototype.edges = function () { return Utils_1.selectMany(Array.from(this.nodes.values()), function (n) { return n.edges; }); };
+    BaseGraph.prototype.nodeDegree = function (node) { var _a; return ((_a = this.nodeEdges(node)) === null || _a === void 0 ? void 0 : _a.length) || 0; };
+    BaseGraph.prototype.degrees = function () {
+        var _this = this;
+        return Array.from({ length: this.size }, function (n, ndx) { return _this.nodeDegree(ndx); });
+    };
+    BaseGraph.prototype.indegrees = function () {
+        var array = new Array(this.size).fill(0);
+        this.edges().forEach(function (edge) { return array[edge.w]++; });
         return array;
-    }
-    validNode(node) { return node >= 0 && node < this.size; }
-    addNode(label) {
-        let node = this.labeled ?
+    };
+    BaseGraph.prototype.validNode = function (node) { return node >= 0 && node < this.size; };
+    BaseGraph.prototype.addNode = function (label) {
+        var node = this.labeled ?
             new LabeledNode(this.nextNodeId, label) :
             new GraphNode(this.nextNodeId);
         this.nodes.set(node.id, {
@@ -81,23 +101,26 @@ class BaseGraph {
         });
         this.modified = true;
         return node;
-    }
-    connect(v, w, weight) {
-        let startNode = this.nodes.get(v), endNode = this.nodes.get(w), createEdge = (nv, nw) => this.weighted ?
-            new WeightedEdge(nv, nw, weight) :
-            new Edge(nv, nw);
+    };
+    BaseGraph.prototype.connect = function (v, w, weight) {
+        var _this = this;
+        var startNode = this.nodes.get(v), endNode = this.nodes.get(w), createEdge = function (nv, nw) {
+            return _this.weighted ?
+                new WeightedEdge(nv, nw, weight) :
+                new Edge(nv, nw);
+        };
         if (!startNode || !endNode)
             return false;
-        if (startNode.edges.some(e => e.w == w))
+        if (startNode.edges.some(function (e) { return e.w == w; }))
             return false;
         startNode.edges.push(createEdge(v, w));
         this.modified = true;
         !this.directed
             && endNode.edges.push(createEdge(w, v));
         return true;
-    }
-    disconnect(v, w) {
-        let e = getInternalEdge.call(this, v, w);
+    };
+    BaseGraph.prototype.disconnect = function (v, w) {
+        var e = getInternalEdge.call(this, v, w);
         if (!e || e.index < 0)
             return false;
         e.edges.splice(e.index, 1);
@@ -107,34 +130,34 @@ class BaseGraph {
             e.edges.splice(e.index, 1);
         }
         return true;
-    }
-    adjacent(v, w) {
-        let vNode = this.nodes.get(v);
-        return !!(vNode === null || vNode === void 0 ? void 0 : vNode.edges.some(n => n.w == w));
-    }
-    adjacentEdges(node) {
-        let vNode = this.nodes.get(node);
-        return (vNode === null || vNode === void 0 ? void 0 : vNode.edges.map(e => e.w)) || [];
-    }
-    edge(v, w) {
-        let e = getInternalEdge.call(this, v, w);
+    };
+    BaseGraph.prototype.adjacent = function (v, w) {
+        var vNode = this.nodes.get(v);
+        return !!(vNode === null || vNode === void 0 ? void 0 : vNode.edges.some(function (n) { return n.w == w; }));
+    };
+    BaseGraph.prototype.adjacentEdges = function (node) {
+        var vNode = this.nodes.get(node);
+        return (vNode === null || vNode === void 0 ? void 0 : vNode.edges.map(function (e) { return e.w; })) || [];
+    };
+    BaseGraph.prototype.edge = function (v, w) {
+        var e = getInternalEdge.call(this, v, w);
         return e === null || e === void 0 ? void 0 : e.edges[e.index];
-    }
-    edgeCount() {
-        return Array.from(this.nodes.values()).reduce((sum, item) => sum + item.edges.length, 0);
-    }
+    };
+    BaseGraph.prototype.edgeCount = function () {
+        return Array.from(this.nodes.values()).reduce(function (sum, item) { return sum + item.edges.length; }, 0);
+    };
     // max. number of edges = ½ * |V| * ( |V| - 1 ). 
     //For undirected simple graphs, the graph density is defined as: 
     //D =     2|E|
     //    -----------
     //     |V|(|V| - 1)
-    density() {
+    BaseGraph.prototype.density = function () {
         return 2 * this.edgeCount() / (this.size * (this.size - 1));
-    }
-    static create(name, directed, weighted, labeled) {
+    };
+    BaseGraph.create = function (name, directed, weighted, labeled) {
         if (labeled) {
             if (weighted)
-                throw `weighted labeled graph not supported yet!`;
+                throw "weighted labeled graph not supported yet!";
             else
                 return directed ? new LabeledDiGraph(name) : new LabeledGraph(name);
         }
@@ -144,66 +167,86 @@ class BaseGraph {
             else
                 return directed ? new DiGraph(name) : new Graph(name);
         }
-    }
-}
+    };
+    return BaseGraph;
+}());
 exports.BaseGraph = BaseGraph;
-class Graph extends BaseGraph {
-    constructor(name) {
-        super(name, false, false, false);
+var Graph = /** @class */ (function (_super) {
+    tslib_1.__extends(Graph, _super);
+    function Graph(name) {
+        return _super.call(this, name, false, false, false) || this;
     }
-}
+    return Graph;
+}(BaseGraph));
 exports.Graph = Graph;
-class DiGraph extends BaseGraph {
-    constructor(name) {
-        super(name, true, false, false);
+var DiGraph = /** @class */ (function (_super) {
+    tslib_1.__extends(DiGraph, _super);
+    function DiGraph(name) {
+        return _super.call(this, name, true, false, false) || this;
     }
-}
+    return DiGraph;
+}(BaseGraph));
 exports.DiGraph = DiGraph;
-class BaseWeightedGraph extends BaseGraph {
-    nodeEdges(id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; }
-    constructor(name, directed) {
-        super(name, directed, true, false);
+var BaseWeightedGraph = /** @class */ (function (_super) {
+    tslib_1.__extends(BaseWeightedGraph, _super);
+    function BaseWeightedGraph(name, directed) {
+        return _super.call(this, name, directed, true, false) || this;
     }
-}
-class WeightedGraph extends BaseWeightedGraph {
-    constructor(name) {
-        super(name, false);
+    BaseWeightedGraph.prototype.nodeEdges = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; };
+    return BaseWeightedGraph;
+}(BaseGraph));
+var WeightedGraph = /** @class */ (function (_super) {
+    tslib_1.__extends(WeightedGraph, _super);
+    function WeightedGraph(name) {
+        return _super.call(this, name, false) || this;
     }
-}
+    return WeightedGraph;
+}(BaseWeightedGraph));
 exports.WeightedGraph = WeightedGraph;
-class WeightedDiGraph extends BaseWeightedGraph {
-    constructor(name) {
-        super(name, true);
+var WeightedDiGraph = /** @class */ (function (_super) {
+    tslib_1.__extends(WeightedDiGraph, _super);
+    function WeightedDiGraph(name) {
+        return _super.call(this, name, true) || this;
     }
-}
+    return WeightedDiGraph;
+}(BaseWeightedGraph));
 exports.WeightedDiGraph = WeightedDiGraph;
-class BaseLabeledGraph extends BaseGraph {
-    node(id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node; }
-    constructor(name, directed, weighted) {
-        super(name, directed, weighted, true);
+var BaseLabeledGraph = /** @class */ (function (_super) {
+    tslib_1.__extends(BaseLabeledGraph, _super);
+    function BaseLabeledGraph(name, directed, weighted) {
+        return _super.call(this, name, directed, weighted, true) || this;
     }
-}
-class LabeledGraph extends BaseLabeledGraph {
-    constructor(name) {
-        super(name, false, false);
+    BaseLabeledGraph.prototype.node = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node; };
+    return BaseLabeledGraph;
+}(BaseGraph));
+var LabeledGraph = /** @class */ (function (_super) {
+    tslib_1.__extends(LabeledGraph, _super);
+    function LabeledGraph(name) {
+        return _super.call(this, name, false, false) || this;
     }
-}
+    return LabeledGraph;
+}(BaseLabeledGraph));
 exports.LabeledGraph = LabeledGraph;
-class LabeledDiGraph extends BaseLabeledGraph {
-    constructor(name) {
-        super(name, true, false);
+var LabeledDiGraph = /** @class */ (function (_super) {
+    tslib_1.__extends(LabeledDiGraph, _super);
+    function LabeledDiGraph(name) {
+        return _super.call(this, name, true, false) || this;
     }
-}
+    return LabeledDiGraph;
+}(BaseLabeledGraph));
 exports.LabeledDiGraph = LabeledDiGraph;
-class BaseLabeledWeightedGraph extends BaseLabeledGraph {
-    nodeEdges(id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; }
-    constructor(name, directed) {
-        super(name, directed, true);
+var BaseLabeledWeightedGraph = /** @class */ (function (_super) {
+    tslib_1.__extends(BaseLabeledWeightedGraph, _super);
+    function BaseLabeledWeightedGraph(name, directed) {
+        return _super.call(this, name, directed, true) || this;
     }
-}
+    BaseLabeledWeightedGraph.prototype.nodeEdges = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; };
+    return BaseLabeledWeightedGraph;
+}(BaseLabeledGraph));
 function getInternalEdge(v, w) {
-    let n = this.nodes.get(v);
+    var n = this.nodes.get(v);
     return n ?
-        { node: n.node, edges: n.edges, index: n.edges.findIndex(e => e.w == w) }
+        { node: n.node, edges: n.edges, index: n.edges.findIndex(function (e) { return e.w == w; }) }
         : undefined;
 }
+//# sourceMappingURL=Graph.js.map

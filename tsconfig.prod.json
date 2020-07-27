@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "esnext",
+		"noImplicitAny": true,
+		"suppressImplicitAnyIndexErrors": true,
+		"allowSyntheticDefaultImports": true,
+		"moduleResolution": "node",
+		"downlevelIteration": true,
+		"strictNullChecks": true,
+		"esModuleInterop": true,
+		"removeComments": false,
+		"noEmitOnError": true,
+		"sourceMap": true,
+		"declaration": true,
+		"outDir": "./dist",
+		"baseUrl": "."
+	},
+	"files": [
+		"src/index.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
+}
