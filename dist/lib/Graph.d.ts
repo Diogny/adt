@@ -102,7 +102,7 @@ export declare abstract class BaseGraph implements IGraph, ILabel {
     labeled: boolean;
     label(): string;
     modified: boolean;
-    protected nodes: Map<number, NodeInternal>;
+    protected __nodes: Map<number, NodeInternal>;
     get size(): number;
     get nextNodeId(): number;
     node(id: number): GraphNode | undefined;

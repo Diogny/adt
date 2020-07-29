@@ -132,26 +132,26 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	modified: boolean;
 
-	protected nodes: Map<number, NodeInternal>;
+	protected __nodes: Map<number, NodeInternal>;
 
-	public get size(): number { return this.nodes.size }
+	public get size(): number { return this.__nodes.size }
 
 	public get nextNodeId(): number { return this.size }
 
-	public node(id: number): GraphNode | undefined { return this.nodes.get(id)?.node }
+	public node(id: number): GraphNode | undefined { return this.__nodes.get(id)?.node }
 
 	public nodeLabel(id: number): string { return this.node(id)?.label() || "" }
 
-	public hasNode(id: number): boolean { return !!this.nodes.get(id)?.node }
+	public hasNode(id: number): boolean { return !!this.node(id) }
 
-	public nodeList(): GraphNode[] { return Array.from(this.nodes.values()).map(n => n.node) }
+	public nodeList(): GraphNode[] { return Array.from(this.__nodes.values()).map(n => n.node) }
 
-	public nodeEdges(id: number): Edge[] | undefined { return this.nodes.get(id)?.edges }
+	public nodeEdges(id: number): Edge[] | undefined { return this.__nodes.get(id)?.edges }
 
-	public edges(): Edge[] { return selectMany<NodeInternal, Edge>(Array.from(this.nodes.values()), (n) => n.edges) }
+	public edges(): Edge[] { return selectMany<NodeInternal, Edge>(Array.from(this.__nodes.values()), (n) => n.edges) }
 
 	constructor(public name: string, public directed: boolean, public weighted: boolean, public labeled: boolean) {
-		this.nodes = new Map();
+		this.__nodes = new Map();
 		this.modified = false;
 	}
 
@@ -173,7 +173,7 @@ export abstract class BaseGraph implements IGraph, ILabel {
 			node = this.labeled ?
 				new LabeledNode(this.nextNodeId, <string>label) :
 				new GraphNode(this.nextNodeId);
-		this.nodes.set(node.id, <NodeInternal>{
+		this.__nodes.set(node.id, <NodeInternal>{
 			node: node,
 			edges: new Array()
 		});
@@ -183,8 +183,8 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public connect(v: number, w: number, weight?: number): boolean {
 		let
-			startNode = this.nodes.get(v),
-			endNode = this.nodes.get(w),
+			startNode = this.__nodes.get(v),
+			endNode = this.__nodes.get(w),
 			createEdge = (nv: number, nw: number): Edge =>
 				this.weighted ?
 					new WeightedEdge(nv, nw, <any>weight) :
@@ -216,13 +216,13 @@ export abstract class BaseGraph implements IGraph, ILabel {
 
 	public adjacent(v: number, w: number): boolean {
 		let
-			vNode = this.nodes.get(v);
+			vNode = this.__nodes.get(v);
 		return !!vNode?.edges.some(n => n.w == w)
 	}
 
 	public adjacentEdges(node: number): number[] {
 		let
-			vNode = this.nodes.get(node);
+			vNode = this.__nodes.get(node);
 		return vNode?.edges.map(e => e.w) || []
 	}
 
@@ -233,7 +233,7 @@ export abstract class BaseGraph implements IGraph, ILabel {
 	}
 
 	public edgeCount(): number {
-		return Array.from(this.nodes.values()).reduce((sum, item) => sum + item.edges.length, 0)
+		return Array.from(this.__nodes.values()).reduce((sum, item) => sum + item.edges.length, 0)
 	}
 
 	// max. number of edges = ½ * |V| * ( |V| - 1 ). 
@@ -275,7 +275,7 @@ export class DiGraph extends BaseGraph {
 
 abstract class BaseWeightedGraph extends BaseGraph {
 
-	public nodeEdges(id: number): WeightedEdge[] | undefined { return this.nodes.get(id)?.edges as WeightedEdge[] }
+	public nodeEdges(id: number): WeightedEdge[] | undefined { return super.nodeEdges(id) as WeightedEdge[] }
 
 	constructor(name: string, directed: boolean) {
 		super(name, directed, true, false)
@@ -296,7 +296,7 @@ export class WeightedDiGraph extends BaseWeightedGraph {
 
 abstract class BaseLabeledGraph extends BaseGraph {
 
-	public node(id: number): LabeledNode | undefined { return this.nodes.get(id)?.node as LabeledNode }
+	public node(id: number): LabeledNode | undefined { return super.node(id) as LabeledNode }
 
 	constructor(name: string, directed: boolean, weighted: boolean) {
 		super(name, directed, weighted, true)
@@ -317,7 +317,7 @@ export class LabeledDiGraph extends BaseLabeledGraph {
 
 class BaseLabeledWeightedGraph extends BaseLabeledGraph {
 
-	public nodeEdges(id: number): WeightedEdge[] | undefined { return this.nodes.get(id)?.edges as WeightedEdge[] }
+	public nodeEdges(id: number): WeightedEdge[] | undefined { return super.nodeEdges(id) as WeightedEdge[] }
 
 	constructor(name: string, directed: boolean) {
 		super(name, directed, true)

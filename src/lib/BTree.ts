@@ -39,6 +39,7 @@ export class BTree<T> extends BaseTree<T>{
 	public find(value: T): BTreeNode<T> | undefined {
 		let
 			key = this.findKey(value);
+		//key.comp == 0 && key.node != undefined has a valid found node
 		return key.comp == 0 ? key.node : undefined
 	}
 
@@ -92,29 +93,6 @@ export class BTree<T> extends BaseTree<T>{
 		return new BTreeNode<T>(value)
 	}
 
-	protected findKey(value: T): { node: BTreeNode<T>, parent: BTreeNode<T>, comp: number } {
-		let
-			comp = 0,
-			parent: BTreeNode<T> = <any>void 0,
-			node = this.root;
-		while (node != undefined) {
-			parent = node;
-			comp = this.comparer(value, node.value);
-			if (comp == 0) {
-				return {
-					node: node,
-					parent: parent,
-					comp: comp
-				}
-			} else if (comp < 0) {
-				node = <BTreeNode<T>>node.left
-			} else {
-				node = <BTreeNode<T>>node.right
-			}
-		}
-		return { node: node, parent: parent, comp: comp }
-	}
-
 	public min(node: BTreeNode<T>): BTreeNode<T> {
 		if (node)
 			while (node.left != undefined)
@@ -129,14 +107,74 @@ export class BTree<T> extends BaseTree<T>{
 		return node
 	}
 
+	protected findKey(value: T): { node: BTreeNode<T>, parent: BTreeNode<T>, prevComp: number, comp: number } {
+		let
+			prevComp = 0,
+			parent: BTreeNode<T> = <any>void 0,
+			node = this.root;
+		while (node != undefined) {
+			let
+				comp = this.comparer(value, node.value);
+			if (comp == 0) {
+				return {
+					node: node,
+					parent: parent,
+					prevComp: prevComp,
+					comp: 0
+				}
+			} else {
+				if (comp < 0) {
+					if (node.left != undefined) {
+						parent = node;
+						prevComp = comp;
+					}
+					node = <BTreeNode<T>>node.left
+				} else {
+					if (node.right != undefined) {
+						parent = node;
+						prevComp = comp;
+					}
+					node = <BTreeNode<T>>node.right
+				}
+			}
+		}
+		return { node: <any>void 0, parent: <any>void 0, prevComp: 0, comp: 0 }
+	}
+
 	public insert(value: T): boolean {
-		//will be implemented later
-		return false
+		let
+			key = this.findKey(value),
+			node = getChild(key.parent, key.prevComp),
+			child = this.newNode(value);
+		return (node != undefined) && (setChild(node, child, key.comp), this.__size++, true)
 	}
 
 	public delete(value: T): boolean {
-		//will be implemented later
-		return false
+		let
+			key = this.findKey(value);
+		if (!(key.comp == 0 && key.node != undefined)) {
+			return false
+		} if (key.node.isLeaf) {
+			setChild(key.parent, void 0, key.prevComp);
+		} else
+			if (key.node.left == undefined || key.node.right == undefined) {
+				setChild(key.parent, getChild(key.node, key.node.left == undefined ? 1 : -1), key.prevComp)
+			} else {
+				let
+					p: BTreeNode<T> = <any>void 0,
+					n = <BTreeNode<T>>key.node.left,
+					comp = n.right == undefined ? -1 : 1;
+				while (n.right != undefined) {
+					p = n;
+					n = <BTreeNode<T>>n.right
+				}
+				key.node.value = n.value;
+				if (p == undefined)
+					p = key.node;
+				setChild(p, n.left, comp)
+			}
+		this.__size--;
+		return true
 	}
 
 	public insertRange(values: T[]): boolean[] {
@@ -152,4 +190,12 @@ export class BTree<T> extends BaseTree<T>{
 		values.forEach(value => array.push(this.delete(value)))
 		return array
 	}
+}
+
+function getChild<T>(parent: BTreeNode<T>, comp: number): BTreeNode<T> | undefined {
+	return (parent == undefined) ? undefined : (comp < 0 ? parent.left : parent.right)
+}
+
+function setChild<T>(parent: BTreeNode<T>, node: BTreeNode<T> | undefined, comp: number) {
+	(parent != undefined) && (comp < 0 ? parent.left = node : parent.right = node)
 }

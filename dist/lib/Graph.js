@@ -60,12 +60,12 @@ var BaseGraph = /** @class */ (function () {
         this.directed = directed;
         this.weighted = weighted;
         this.labeled = labeled;
-        this.nodes = new Map();
+        this.__nodes = new Map();
         this.modified = false;
     }
     BaseGraph.prototype.label = function () { return this.name; };
     Object.defineProperty(BaseGraph.prototype, "size", {
-        get: function () { return this.nodes.size; },
+        get: function () { return this.__nodes.size; },
         enumerable: false,
         configurable: true
     });
@@ -74,12 +74,12 @@ var BaseGraph = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
-    BaseGraph.prototype.node = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node; };
+    BaseGraph.prototype.node = function (id) { var _a; return (_a = this.__nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node; };
     BaseGraph.prototype.nodeLabel = function (id) { var _a; return ((_a = this.node(id)) === null || _a === void 0 ? void 0 : _a.label()) || ""; };
-    BaseGraph.prototype.hasNode = function (id) { var _a; return !!((_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node); };
-    BaseGraph.prototype.nodeList = function () { return Array.from(this.nodes.values()).map(function (n) { return n.node; }); };
-    BaseGraph.prototype.nodeEdges = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; };
-    BaseGraph.prototype.edges = function () { return Utils_1.selectMany(Array.from(this.nodes.values()), function (n) { return n.edges; }); };
+    BaseGraph.prototype.hasNode = function (id) { return !!this.node(id); };
+    BaseGraph.prototype.nodeList = function () { return Array.from(this.__nodes.values()).map(function (n) { return n.node; }); };
+    BaseGraph.prototype.nodeEdges = function (id) { var _a; return (_a = this.__nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; };
+    BaseGraph.prototype.edges = function () { return Utils_1.selectMany(Array.from(this.__nodes.values()), function (n) { return n.edges; }); };
     BaseGraph.prototype.nodeDegree = function (node) { var _a; return ((_a = this.nodeEdges(node)) === null || _a === void 0 ? void 0 : _a.length) || 0; };
     BaseGraph.prototype.degrees = function () {
         var _this = this;
@@ -95,7 +95,7 @@ var BaseGraph = /** @class */ (function () {
         var node = this.labeled ?
             new LabeledNode(this.nextNodeId, label) :
             new GraphNode(this.nextNodeId);
-        this.nodes.set(node.id, {
+        this.__nodes.set(node.id, {
             node: node,
             edges: new Array()
         });
@@ -104,7 +104,7 @@ var BaseGraph = /** @class */ (function () {
     };
     BaseGraph.prototype.connect = function (v, w, weight) {
         var _this = this;
-        var startNode = this.nodes.get(v), endNode = this.nodes.get(w), createEdge = function (nv, nw) {
+        var startNode = this.__nodes.get(v), endNode = this.__nodes.get(w), createEdge = function (nv, nw) {
             return _this.weighted ?
                 new WeightedEdge(nv, nw, weight) :
                 new Edge(nv, nw);
@@ -132,11 +132,11 @@ var BaseGraph = /** @class */ (function () {
         return true;
     };
     BaseGraph.prototype.adjacent = function (v, w) {
-        var vNode = this.nodes.get(v);
+        var vNode = this.__nodes.get(v);
         return !!(vNode === null || vNode === void 0 ? void 0 : vNode.edges.some(function (n) { return n.w == w; }));
     };
     BaseGraph.prototype.adjacentEdges = function (node) {
-        var vNode = this.nodes.get(node);
+        var vNode = this.__nodes.get(node);
         return (vNode === null || vNode === void 0 ? void 0 : vNode.edges.map(function (e) { return e.w; })) || [];
     };
     BaseGraph.prototype.edge = function (v, w) {
@@ -144,7 +144,7 @@ var BaseGraph = /** @class */ (function () {
         return e === null || e === void 0 ? void 0 : e.edges[e.index];
     };
     BaseGraph.prototype.edgeCount = function () {
-        return Array.from(this.nodes.values()).reduce(function (sum, item) { return sum + item.edges.length; }, 0);
+        return Array.from(this.__nodes.values()).reduce(function (sum, item) { return sum + item.edges.length; }, 0);
     };
     // max. number of edges = ½ * |V| * ( |V| - 1 ). 
     //For undirected simple graphs, the graph density is defined as: 
@@ -192,7 +192,7 @@ var BaseWeightedGraph = /** @class */ (function (_super) {
     function BaseWeightedGraph(name, directed) {
         return _super.call(this, name, directed, true, false) || this;
     }
-    BaseWeightedGraph.prototype.nodeEdges = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; };
+    BaseWeightedGraph.prototype.nodeEdges = function (id) { return _super.prototype.nodeEdges.call(this, id); };
     return BaseWeightedGraph;
 }(BaseGraph));
 var WeightedGraph = /** @class */ (function (_super) {
@@ -216,7 +216,7 @@ var BaseLabeledGraph = /** @class */ (function (_super) {
     function BaseLabeledGraph(name, directed, weighted) {
         return _super.call(this, name, directed, weighted, true) || this;
     }
-    BaseLabeledGraph.prototype.node = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.node; };
+    BaseLabeledGraph.prototype.node = function (id) { return _super.prototype.node.call(this, id); };
     return BaseLabeledGraph;
 }(BaseGraph));
 var LabeledGraph = /** @class */ (function (_super) {
@@ -240,7 +240,7 @@ var BaseLabeledWeightedGraph = /** @class */ (function (_super) {
     function BaseLabeledWeightedGraph(name, directed) {
         return _super.call(this, name, directed, true) || this;
     }
-    BaseLabeledWeightedGraph.prototype.nodeEdges = function (id) { var _a; return (_a = this.nodes.get(id)) === null || _a === void 0 ? void 0 : _a.edges; };
+    BaseLabeledWeightedGraph.prototype.nodeEdges = function (id) { return _super.prototype.nodeEdges.call(this, id); };
     return BaseLabeledWeightedGraph;
 }(BaseLabeledGraph));
 function getInternalEdge(v, w) {

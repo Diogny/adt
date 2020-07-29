@@ -64,6 +64,7 @@ var BTree = /** @class */ (function (_super) {
     });
     BTree.prototype.find = function (value) {
         var key = this.findKey(value);
+        //key.comp == 0 && key.node != undefined has a valid found node
         return key.comp == 0 ? key.node : undefined;
     };
     //(LNR)
@@ -126,27 +127,6 @@ var BTree = /** @class */ (function (_super) {
     BTree.prototype.newNode = function (value) {
         return new BTreeNode(value);
     };
-    BTree.prototype.findKey = function (value) {
-        var comp = 0, parent = void 0, node = this.root;
-        while (node != undefined) {
-            parent = node;
-            comp = this.comparer(value, node.value);
-            if (comp == 0) {
-                return {
-                    node: node,
-                    parent: parent,
-                    comp: comp
-                };
-            }
-            else if (comp < 0) {
-                node = node.left;
-            }
-            else {
-                node = node.right;
-            }
-        }
-        return { node: node, parent: parent, comp: comp };
-    };
     BTree.prototype.min = function (node) {
         if (node)
             while (node.left != undefined)
@@ -159,13 +139,65 @@ var BTree = /** @class */ (function (_super) {
                 node = node.right;
         return node;
     };
+    BTree.prototype.findKey = function (value) {
+        var prevComp = 0, parent = void 0, node = this.root;
+        while (node != undefined) {
+            var comp = this.comparer(value, node.value);
+            if (comp == 0) {
+                return {
+                    node: node,
+                    parent: parent,
+                    prevComp: prevComp,
+                    comp: 0
+                };
+            }
+            else {
+                if (comp < 0) {
+                    if (node.left != undefined) {
+                        parent = node;
+                        prevComp = comp;
+                    }
+                    node = node.left;
+                }
+                else {
+                    if (node.right != undefined) {
+                        parent = node;
+                        prevComp = comp;
+                    }
+                    node = node.right;
+                }
+            }
+        }
+        return { node: void 0, parent: void 0, prevComp: 0, comp: 0 };
+    };
     BTree.prototype.insert = function (value) {
-        //will be implemented later
-        return false;
+        var key = this.findKey(value), node = getChild(key.parent, key.prevComp), child = this.newNode(value);
+        return (node != undefined) && (setChild(node, child, key.comp), this.__size++, true);
     };
     BTree.prototype.delete = function (value) {
-        //will be implemented later
-        return false;
+        var key = this.findKey(value);
+        if (!(key.comp == 0 && key.node != undefined)) {
+            return false;
+        }
+        if (key.node.isLeaf) {
+            setChild(key.parent, void 0, key.prevComp);
+        }
+        else if (key.node.left == undefined || key.node.right == undefined) {
+            setChild(key.parent, getChild(key.node, key.node.left == undefined ? 1 : -1), key.prevComp);
+        }
+        else {
+            var p = void 0, n = key.node.left, comp = n.right == undefined ? -1 : 1;
+            while (n.right != undefined) {
+                p = n;
+                n = n.right;
+            }
+            key.node.value = n.value;
+            if (p == undefined)
+                p = key.node;
+            setChild(p, n.left, comp);
+        }
+        this.__size--;
+        return true;
     };
     BTree.prototype.insertRange = function (values) {
         var _this = this;
@@ -182,4 +214,10 @@ var BTree = /** @class */ (function (_super) {
     return BTree;
 }(Tree_1.BaseTree));
 exports.BTree = BTree;
+function getChild(parent, comp) {
+    return (parent == undefined) ? undefined : (comp < 0 ? parent.left : parent.right);
+}
+function setChild(parent, node, comp) {
+    (parent != undefined) && (comp < 0 ? parent.left = node : parent.right = node);
+}
 //# sourceMappingURL=BTree.js.map

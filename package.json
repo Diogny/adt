@@ -1,7 +1,7 @@
 {
 	"name": "adtjs",
 	"author": "Diogny A. B. <diognyab@outlook.com>",
-	"version": "0.0.23",
+	"version": "0.0.24",
 	"description": "Javascript Abstract Data Types",
 	"license": "MIT",
 	"main": "dist/index.js",
@@ -30,6 +30,13 @@
 		"Graph",
 		"package",
 		"dabberio"
+	],
+	"files": [
+		"dist/lib",
+		"dist/index.js",
+		"dist/index.d.js",
+		"dist/index.js.map",
+		"dist/adtjs.min.js"
 	],
 	"scripts": {
 		"check-types": "tsc",

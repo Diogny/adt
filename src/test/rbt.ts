@@ -158,8 +158,8 @@ function addSVGTree(caption: string) {
 		maxYcaption = svgTree.height;
 	} else {
 		svgRowItems.push(svgTree.svg);
-		//adjust g>text
 		maxYcaption = Math.max(maxYcaption, svgTree.height);
+		//adjust g>text
 		svgRowItems.forEach((svg: SVGGElement) => {
 			let
 				text = svg.querySelector("text.caption");

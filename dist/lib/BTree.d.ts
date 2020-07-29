@@ -20,13 +20,14 @@ export declare class BTree<T> extends BaseTree<T> {
     inOrderEnumerator(node?: BTreeNode<T>): Generator<BTreeNode<T>, number, unknown>;
     postOrderEnumerator(node?: BTreeNode<T>): Generator<BTreeNode<T>, number, unknown>;
     newNode(value: T): BTreeNode<T>;
+    min(node: BTreeNode<T>): BTreeNode<T>;
+    max(node: BTreeNode<T>): BTreeNode<T>;
     protected findKey(value: T): {
         node: BTreeNode<T>;
         parent: BTreeNode<T>;
+        prevComp: number;
         comp: number;
     };
-    min(node: BTreeNode<T>): BTreeNode<T>;
-    max(node: BTreeNode<T>): BTreeNode<T>;
     insert(value: T): boolean;
     delete(value: T): boolean;
     insertRange(values: T[]): boolean[];
