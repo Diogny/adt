@@ -256,4 +256,3 @@ var ComponentAnalizer = /** @class */ (function (_super) {
     return ComponentAnalizer;
 }(BaseComponentAnalizer));
 exports.ComponentAnalizer = ComponentAnalizer;
-//# sourceMappingURL=Graph-Analizers.js.map

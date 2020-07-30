@@ -303,4 +303,3 @@ function balanceAfterDelete(tree, x, stack, comp) {
     }
     (x != undefined) && (x.color = RedBlackEnum.black);
 }
-//# sourceMappingURL=RedBlackTree.js.map

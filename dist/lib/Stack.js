@@ -39,4 +39,3 @@ var Stack = /** @class */ (function () {
     return Stack;
 }());
 exports.default = Stack;
-//# sourceMappingURL=Stack.js.map

@@ -21,4 +21,3 @@ var Deque = /** @class */ (function (_super) {
     return Deque;
 }(Queue_1.default));
 exports.default = Deque;
-//# sourceMappingURL=Deque.js.map

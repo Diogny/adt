@@ -249,4 +249,3 @@ function getInternalEdge(v, w) {
         { node: n.node, edges: n.edges, index: n.edges.findIndex(function (e) { return e.w == w; }) }
         : undefined;
 }
-//# sourceMappingURL=Graph.js.map

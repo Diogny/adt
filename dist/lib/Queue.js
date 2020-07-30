@@ -21,4 +21,3 @@ var Queue = /** @class */ (function (_super) {
     return Queue;
 }(Stack_1.default));
 exports.default = Queue;
-//# sourceMappingURL=Queue.js.map

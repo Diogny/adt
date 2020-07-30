@@ -85,4 +85,3 @@ function lineAttrs(x1, y1, x2, y2, r) {
         class: "svg-line"
     };
 }
-//# sourceMappingURL=tree-utils.js.map

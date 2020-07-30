@@ -270,4 +270,3 @@ function compare(a, b) {
     else
         return -1;
 }
-//# sourceMappingURL=Tree.js.map

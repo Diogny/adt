@@ -35,4 +35,3 @@ var server = http_1.createServer(function (request, response) {
     .listen(port, function () {
     console.log("Server listening on port " + port);
 });
-//# sourceMappingURL=server.js.map

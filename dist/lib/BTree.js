@@ -220,4 +220,3 @@ function getChild(parent, comp) {
 function setChild(parent, node, comp) {
     (parent != undefined) && (comp < 0 ? parent.left = node : parent.right = node);
 }
-//# sourceMappingURL=BTree.js.map

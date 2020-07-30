@@ -402,4 +402,3 @@ function bfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
     };
 }
 exports.bfsEngine = bfsEngine;
-//# sourceMappingURL=Graph-Search.js.map

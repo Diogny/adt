@@ -1,7 +1,7 @@
 {
 	"name": "adtjs",
 	"author": "Diogny A. B. <diognyab@outlook.com>",
-	"version": "0.0.25",
+	"version": "0.0.26",
 	"description": "Javascript Abstract Data Types",
 	"license": "MIT",
 	"main": "dist/index.js",
@@ -35,7 +35,6 @@
 		"dist/lib",
 		"dist/index.js",
 		"dist/index.d.ts",
-		"dist/index.js.map",
 		"dist/adtjs.min.js"
 	],
 	"scripts": {

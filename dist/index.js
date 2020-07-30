@@ -47,4 +47,3 @@ Object.defineProperty(exports, "WeightedGraph", { enumerable: true, get: functio
 Object.defineProperty(exports, "WeightedDiGraph", { enumerable: true, get: function () { return Graph_1.WeightedDiGraph; } });
 Object.defineProperty(exports, "LabeledGraph", { enumerable: true, get: function () { return Graph_1.LabeledGraph; } });
 Object.defineProperty(exports, "LabeledDiGraph", { enumerable: true, get: function () { return Graph_1.LabeledDiGraph; } });
-//# sourceMappingURL=index.js.map
