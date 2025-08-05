@@ -1,28 +1,28 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ComponentAnalizer = exports.BaseComponentAnalizer = exports.EdgeAnalizer = exports.BaseEdgeAnalizer = exports.CyclesAnalizer = exports.BridgeAnalizer = exports.UndirectedBaseAnalizer = exports.BaseAnalizer = void 0;
+exports.ComponentAnalyzer = exports.BaseComponentAnalizer = exports.EdgeAnalyzer = exports.BaseEdgeAnalizer = exports.CyclesAnalyzer = exports.BridgeAnalyzer = exports.UndirectedBaseAnalizer = exports.BaseAnalyzer = void 0;
 var tslib_1 = require("tslib");
 var Graph_1 = require("./Graph");
 var Utils_1 = require("./Utils");
-var BaseAnalizer = /** @class */ (function () {
-    function BaseAnalizer(name) {
+var BaseAnalyzer = /** @class */ (function () {
+    function BaseAnalyzer(name) {
         this.name = name;
     }
-    BaseAnalizer.prototype.register = function (dfs) {
+    BaseAnalyzer.prototype.register = function (dfs) {
         this.dfs = dfs;
     };
-    BaseAnalizer.prototype.endTree = function (v, w) { };
-    BaseAnalizer.prototype.report = function () {
+    BaseAnalyzer.prototype.endTree = function (v, w) { };
+    BaseAnalyzer.prototype.report = function () {
         console.log();
         console.log(this.name);
     };
-    return BaseAnalizer;
+    return BaseAnalyzer;
 }());
-exports.BaseAnalizer = BaseAnalizer;
+exports.BaseAnalyzer = BaseAnalyzer;
 var UndirectedBaseAnalizer = /** @class */ (function (_super) {
     tslib_1.__extends(UndirectedBaseAnalizer, _super);
-    function UndirectedBaseAnalizer(name) {
-        return _super.call(this, name) || this;
+    function UndirectedBaseAnalizer() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Object.defineProperty(UndirectedBaseAnalizer.prototype, "directed", {
         get: function () { return false; },
@@ -30,20 +30,20 @@ var UndirectedBaseAnalizer = /** @class */ (function (_super) {
         configurable: true
     });
     return UndirectedBaseAnalizer;
-}(BaseAnalizer));
+}(BaseAnalyzer));
 exports.UndirectedBaseAnalizer = UndirectedBaseAnalizer;
-var BridgeAnalizer = /** @class */ (function (_super) {
-    tslib_1.__extends(BridgeAnalizer, _super);
-    function BridgeAnalizer() {
-        return _super.call(this, "Bridge Analizer") || this;
+var BridgeAnalyzer = /** @class */ (function (_super) {
+    tslib_1.__extends(BridgeAnalyzer, _super);
+    function BridgeAnalyzer() {
+        return _super.call(this, "Bridge Analyzer") || this;
     }
-    BridgeAnalizer.prototype.register = function (dfs) {
+    BridgeAnalyzer.prototype.register = function (dfs) {
         _super.prototype.register.call(this, dfs);
         this.bridges = [];
         this.articulationPoints = [];
         this.low = new Array(this.dfs.nodes).fill(-1);
     };
-    BridgeAnalizer.prototype.endTree = function (v, w) {
+    BridgeAnalyzer.prototype.endTree = function (v, w) {
         _super.prototype.endTree.call(this, v, w);
         if (this.low[v] > this.low[w])
             this.low[v] = this.low[w];
@@ -60,7 +60,7 @@ var BridgeAnalizer = /** @class */ (function (_super) {
             }
         }
     };
-    BridgeAnalizer.prototype.visit = function (v, w, e) {
+    BridgeAnalyzer.prototype.visit = function (v, w, e) {
         switch (e) {
             case Graph_1.EdgeVisitEnum.tree:
                 this.low[w] = this.dfs.pre[w];
@@ -74,41 +74,41 @@ var BridgeAnalizer = /** @class */ (function (_super) {
                 break;
         }
     };
-    BridgeAnalizer.prototype.report = function () {
+    BridgeAnalyzer.prototype.report = function () {
         var _this = this;
         _super.prototype.report.call(this);
-        var label = function (node) { return _this.dfs.g.nodeLabel(node); }, biggest = Math.max.apply(null, this.dfs.g.nodeList().map(function (n) { return n.label().length; })) + 1, header = "node: " + this.dfs.g.nodeList().map(function (n) { return Utils_1.padStr(n.label(), biggest); }).join('  ');
-        console.log(this.bridges.length ? this.bridges.length + " bridge(s)" : 'no bridges');
+        var label = function (node) { return _this.dfs.g.nodeLabel(node); }, biggest = Math.max.apply(null, this.dfs.g.nodeList().map(function (n) { return n.label().length; })) + 1, header = "node: ".concat(this.dfs.g.nodeList().map(function (n) { return (0, Utils_1.padStr)(n.label(), biggest); }).join('  '));
+        console.log(this.bridges.length ? "".concat(this.bridges.length, " bridge(s)") : 'no bridges');
         this.bridges
-            .forEach(function (e) { return console.log(label(e.v) + "-" + label(e.w)); });
-        console.log(this.articulationPoints.length ? this.articulationPoints.length + " articulation point(s)" : 'no articulation points');
+            .forEach(function (e) { return console.log("".concat(label(e.v), "-").concat(label(e.w))); });
+        console.log(this.articulationPoints.length ? "".concat(this.articulationPoints.length, " articulation point(s)") : 'no articulation points');
         console.log(this.articulationPoints
             .map(function (node) { return label(node); })
             .join(', '));
         console.log(header);
-        console.log(Utils_1.fillChar('-', header.length + 1));
-        console.log("low:  " + this.low.map(function (n) { return Utils_1.formatNumber(n, biggest); }).join('  '));
+        console.log((0, Utils_1.fillChar)('-', header.length + 1));
+        console.log("low:  ".concat(this.low.map(function (n) { return (0, Utils_1.formatNumber)(n, biggest); }).join('  ')));
         if (this.dfs.g.labeled)
-            console.log("      " + this.low.map(function (n) { return Utils_1.padStr(_this.dfs.g.nodeLabel(n), biggest); }).join('  '));
+            console.log("      ".concat(this.low.map(function (n) { return (0, Utils_1.padStr)(_this.dfs.g.nodeLabel(n), biggest); }).join('  ')));
     };
-    return BridgeAnalizer;
+    return BridgeAnalyzer;
 }(UndirectedBaseAnalizer));
-exports.BridgeAnalizer = BridgeAnalizer;
-var CyclesAnalizer = /** @class */ (function (_super) {
-    tslib_1.__extends(CyclesAnalizer, _super);
-    function CyclesAnalizer() {
+exports.BridgeAnalyzer = BridgeAnalyzer;
+var CyclesAnalyzer = /** @class */ (function (_super) {
+    tslib_1.__extends(CyclesAnalyzer, _super);
+    function CyclesAnalyzer() {
         return _super.call(this, "Cycles Analizer") || this;
     }
-    Object.defineProperty(CyclesAnalizer.prototype, "count", {
+    Object.defineProperty(CyclesAnalyzer.prototype, "count", {
         get: function () { return this.cycles.length; },
         enumerable: false,
         configurable: true
     });
-    CyclesAnalizer.prototype.register = function (dfs) {
+    CyclesAnalyzer.prototype.register = function (dfs) {
         _super.prototype.register.call(this, dfs);
         this.cycles = new Array();
     };
-    CyclesAnalizer.prototype.visit = function (v, w, e) {
+    CyclesAnalyzer.prototype.visit = function (v, w, e) {
         if (e == Graph_1.EdgeVisitEnum.back) {
             var array = [v, w], p = v;
             while ((p = this.dfs.st[p]) != w)
@@ -117,16 +117,16 @@ var CyclesAnalizer = /** @class */ (function (_super) {
             this.cycles.push(array);
         }
     };
-    CyclesAnalizer.prototype.report = function () {
+    CyclesAnalyzer.prototype.report = function () {
         _super.prototype.report.call(this);
-        console.log(" cycle(s): " + this.count);
+        console.log(" cycle(s): ".concat(this.count));
         this.cycles.forEach(function (c) {
             console.log('  ' + c.join('-'));
         });
     };
-    return CyclesAnalizer;
+    return CyclesAnalyzer;
 }(UndirectedBaseAnalizer));
-exports.CyclesAnalizer = CyclesAnalizer;
+exports.CyclesAnalyzer = CyclesAnalyzer;
 //multi-analizers
 var BaseEdgeAnalizer = /** @class */ (function (_super) {
     tslib_1.__extends(BaseEdgeAnalizer, _super);
@@ -157,7 +157,7 @@ var BaseEdgeAnalizer = /** @class */ (function (_super) {
         _super.prototype.endTree.call(this, v, w);
         if (this.showTreeEnd) {
             var s = this.colSpaces[w] * this.tabs, nv = this.dfs.g.nodeLabel(v), nw = this.dfs.g.nodeLabel(w);
-            this.appendLine(Utils_1.fillChar(' ', s) + "[" + nw + "] tree analized as:(" + nv + "-" + nw + ")", '');
+            this.appendLine("".concat((0, Utils_1.fillChar)(' ', s), "[").concat(nw, "] tree analized as:(").concat(nv, "-").concat(nw, ")"), '');
         }
     };
     BaseEdgeAnalizer.prototype.visit = function (v, w, e) {
@@ -168,12 +168,12 @@ var BaseEdgeAnalizer = /** @class */ (function (_super) {
             this.colSpaces[w] = this.colSpaces[v] + 1;
             if (v == w) {
                 isRoot = true;
-                this.appendLine("component: " + ++this.components, '');
-                this.appendLine("[" + w + "] start tree", '');
+                this.appendLine("component: ".concat(++this.components), '');
+                this.appendLine("[".concat(w, "] start tree"), '');
             }
         }
         this.spaces = this.colSpaces[v] * this.tabs;
-        this.appendLine(Utils_1.fillChar(' ', isRoot ? 0 : this.spaces) + "(" + nv + "-" + nw + ") " + Graph_1.EdgeVisitEnum[e], this.showStack ? "[" + this.dfs.edges().map(function (e) { return e.v + "-" + e.w; }).join(', ') + "]" : '');
+        this.appendLine("".concat((0, Utils_1.fillChar)(' ', isRoot ? 0 : this.spaces), "(").concat(nv, "-").concat(nw, ") ").concat(Graph_1.EdgeVisitEnum[e]), this.showStack ? "[".concat(this.dfs.edges().map(function (e) { return "".concat(e.v, "-").concat(e.w); }).join(', '), "]") : '');
     };
     BaseEdgeAnalizer.prototype.report = function () {
         var _this = this;
@@ -182,43 +182,43 @@ var BaseEdgeAnalizer = /** @class */ (function (_super) {
         this.edgeList.map(function (s, ndx) {
             if (!_this.showStack)
                 return s;
-            return s + Utils_1.padStr(' ', w - s.length + 5) + _this.stackTrace[ndx];
+            return s + (0, Utils_1.padStr)(' ', w - s.length + 5) + _this.stackTrace[ndx];
         })
             .forEach(function (s) { return console.log(s); });
         if (this.showInternals) {
             this.maxLabelWidth = Math.max.apply(null, this.dfs.g.nodeList().map(function (n) { return n.label().length; })) + 1;
-            var header = "node: " + Utils_1.range(0, this.dfs.nodes).map(function (n) { return Utils_1.formatNumber(n, _this.maxLabelWidth); }).join('  ');
+            var header = "node: ".concat((0, Utils_1.range)(0, this.dfs.nodes).map(function (n) { return (0, Utils_1.formatNumber)(n, _this.maxLabelWidth); }).join('  '));
             console.log();
             console.log(header);
-            console.log(Utils_1.fillChar('-', header.length + 1));
-            console.log("pre:  " + this.dfs.pre.map(function (n) { return Utils_1.formatNumber(n, _this.maxLabelWidth); }).join('  '));
-            console.log("st:   " + this.dfs.st.map(function (n) { return Utils_1.formatNumber(n, _this.maxLabelWidth); }).join('  '));
+            console.log((0, Utils_1.fillChar)('-', header.length + 1));
+            console.log("pre:  ".concat(this.dfs.pre.map(function (n) { return (0, Utils_1.formatNumber)(n, _this.maxLabelWidth); }).join('  ')));
+            console.log("st:   ".concat(this.dfs.st.map(function (n) { return (0, Utils_1.formatNumber)(n, _this.maxLabelWidth); }).join('  ')));
         }
     };
     return BaseEdgeAnalizer;
-}(BaseAnalizer));
+}(BaseAnalyzer));
 exports.BaseEdgeAnalizer = BaseEdgeAnalizer;
-var EdgeAnalizer = /** @class */ (function (_super) {
-    tslib_1.__extends(EdgeAnalizer, _super);
-    function EdgeAnalizer(showStack, showInternals, showTreeEnd) {
+var EdgeAnalyzer = /** @class */ (function (_super) {
+    tslib_1.__extends(EdgeAnalyzer, _super);
+    function EdgeAnalyzer(showStack, showInternals, showTreeEnd) {
         var _this = _super.call(this, "Edge Analizer", showStack, showInternals, showTreeEnd) || this;
         _this.showStack = showStack;
         _this.showInternals = showInternals;
         _this.showTreeEnd = showTreeEnd;
         return _this;
     }
-    Object.defineProperty(EdgeAnalizer.prototype, "directed", {
+    Object.defineProperty(EdgeAnalyzer.prototype, "directed", {
         get: function () { return false; },
         enumerable: false,
         configurable: true
     });
-    return EdgeAnalizer;
+    return EdgeAnalyzer;
 }(BaseEdgeAnalizer));
-exports.EdgeAnalizer = EdgeAnalizer;
+exports.EdgeAnalyzer = EdgeAnalyzer;
 var BaseComponentAnalizer = /** @class */ (function (_super) {
     tslib_1.__extends(BaseComponentAnalizer, _super);
-    function BaseComponentAnalizer(name) {
-        return _super.call(this, name) || this;
+    function BaseComponentAnalizer() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     BaseComponentAnalizer.prototype.register = function (dfs) {
         _super.prototype.register.call(this, dfs);
@@ -234,25 +234,25 @@ var BaseComponentAnalizer = /** @class */ (function (_super) {
     };
     BaseComponentAnalizer.prototype.report = function () {
         _super.prototype.report.call(this);
-        var maxLabelWidth = String(this.dfs.nodes).length + 1, header = "node: " + Utils_1.range(0, this.dfs.nodes).map(function (n) { return Utils_1.formatNumber(n, maxLabelWidth); }).join('  ');
-        console.log("component(s): " + this.count);
+        var maxLabelWidth = String(this.dfs.nodes).length + 1, header = "node: ".concat((0, Utils_1.range)(0, this.dfs.nodes).map(function (n) { return (0, Utils_1.formatNumber)(n, maxLabelWidth); }).join('  '));
+        console.log("component(s): ".concat(this.count));
         console.log(header);
-        console.log(Utils_1.fillChar('-', header.length + 1));
-        console.log("comp:  " + this.components.map(function (n) { return Utils_1.formatNumber(n, maxLabelWidth); }).join('  '));
+        console.log((0, Utils_1.fillChar)('-', header.length + 1));
+        console.log("comp:  ".concat(this.components.map(function (n) { return (0, Utils_1.formatNumber)(n, maxLabelWidth); }).join('  ')));
     };
     return BaseComponentAnalizer;
-}(BaseAnalizer));
+}(BaseAnalyzer));
 exports.BaseComponentAnalizer = BaseComponentAnalizer;
-var ComponentAnalizer = /** @class */ (function (_super) {
-    tslib_1.__extends(ComponentAnalizer, _super);
-    function ComponentAnalizer() {
+var ComponentAnalyzer = /** @class */ (function (_super) {
+    tslib_1.__extends(ComponentAnalyzer, _super);
+    function ComponentAnalyzer() {
         return _super.call(this, "Component Analizer") || this;
     }
-    Object.defineProperty(ComponentAnalizer.prototype, "directed", {
+    Object.defineProperty(ComponentAnalyzer.prototype, "directed", {
         get: function () { return false; },
         enumerable: false,
         configurable: true
     });
-    return ComponentAnalizer;
+    return ComponentAnalyzer;
 }(BaseComponentAnalizer));
-exports.ComponentAnalizer = ComponentAnalizer;
+exports.ComponentAnalyzer = ComponentAnalyzer;

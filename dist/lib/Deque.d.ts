@@ -1,5 +1,5 @@
-import Queue from "./Queue";
-export default class Deque<T> extends Queue<T> {
+import { Queue } from "./Queue";
+export declare class Deque<T> extends Queue<T> {
     popback(): T | undefined;
     popfront(): T | undefined;
     pushback(t: T): void;

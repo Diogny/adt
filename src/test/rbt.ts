@@ -1,6 +1,6 @@
 import { RedBlackTree, RedBlackTreeNode, RedBlackEnum } from "../lib/RedBlackTree";
 import { IVisualBTreeConfig, BTreeVisualizer } from "./tree-utils";
-import { attr, qS, aEL, html } from "src/lib/Utils";
+import { aEL, attr, html, qS } from "dabbjs/dist/lib/dom";
 
 interface SVGBTreeNode {
 	x: number,
@@ -69,7 +69,7 @@ aEL(qS("#delete"), "click", (e: MouseEvent) => {
 }, false);
 
 function setViewBox(x: number, y: number, w: number, h: number) {
-	attr(svg, { "viewBox": `${x} ${y} ${w} ${h}` });
+	attr(<HTMLElement><unknown>svg, { "viewBox": `${x} ${y} ${w} ${h}` });
 	vbinfo.innerText = `x: ${x}, y: ${y}, width: ${w}, height: ${h}`;
 	return {
 		x: x,
@@ -162,7 +162,7 @@ function addSVGTree(caption: string) {
 		//adjust g>text
 		svgRowItems.forEach((svg: SVGGElement) => {
 			let
-				text = svg.querySelector("text.caption");
+				text = <HTMLElement>svg.querySelector("text.caption");
 			attr(text, {
 				y: maxYcaption
 			})

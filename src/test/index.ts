@@ -2,8 +2,9 @@ import { AVLTree } from "../lib/AVLTree";
 import { RedBlackTree, RedBlackTreeNode, RedBlackEnum } from "../lib/RedBlackTree";
 import { IVisualBTreeConfig, BTreeVisualizer } from "./tree-utils";
 import { generatorObjToArray } from "../lib/Graph-Utils";
-import { attr } from "src/lib/Utils";
- 
+import { attr } from "dabbjs/dist/lib/dom";
+
+
 let
 	svg = <SVGSVGElement>document.querySelector('svg'),
 	svgTree: { svg: SVGGElement, width: number, height: number },
@@ -12,7 +13,7 @@ let
 	xstart = leftpad,
 	ystart = toppad,
 	rowHeight = ystart,
-	viewbox = (<string>attr(svg, "viewBox")).split(' '),
+	viewbox = (<string>attr(<any>svg, "viewBox")).split(' '),
 	vbWidth = parseFloat(viewbox[2]) | 0,
 	vbHeight = parseFloat(viewbox[3]) | 0,
 	options: IVisualBTreeConfig<number> = {
@@ -103,7 +104,7 @@ function addSVGTree(caption: string) {
 		maxYcaption = Math.max(maxYcaption, svgTree.height);
 		svgRowItems.forEach((svg: SVGGElement) => {
 			let
-				text = svg.querySelector("text.caption");
+				text = <HTMLElement>svg.querySelector("text.caption");
 			attr(text, {
 				y: maxYcaption
 			})

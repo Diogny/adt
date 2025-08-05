@@ -1,19 +1,19 @@
-import { formatNumber } from "./Utils";
-import { BaseAnalizer, BaseEdgeAnalizer, BaseComponentAnalizer } from "./Graph-Analizers";
+import { formatNumber } from "dabbjs/dist/lib/strings";
+import { BaseAnalyzer, BaseEdgeAnalyzer, BaseComponentAnalyzer } from "./Graph-Analyzers";
 import { EdgeVisitEnum, ISearchTask } from "./Graph";
 
-export abstract class DirectedBaseAnalizer extends BaseAnalizer {
+export abstract class DirectedBaseAnalyzer extends BaseAnalyzer {
 
 	public get directed(): boolean { return true }
 
 }
 
-export class DirectedEdgeAnalizer extends BaseEdgeAnalizer {
+export class DirectedEdgeAnalyzer extends BaseEdgeAnalyzer {
 
 	public get directed(): boolean { return true }
 
 	constructor(public showStack?: boolean, public showInternals?: boolean, public showTreeEnd?: boolean) {
-		super("Directed Edge Analizer", showStack, showInternals, showTreeEnd);
+		super("Directed Edge Analyzer", showStack, showInternals, showTreeEnd);
 	}
 
 	public report() {
@@ -25,17 +25,17 @@ export class DirectedEdgeAnalizer extends BaseEdgeAnalizer {
 
 }
 
-export class DirectedComponentAnalizer extends BaseComponentAnalizer {
+export class DirectedComponentAnalyzer extends BaseComponentAnalyzer {
 
 	public get directed(): boolean { return true }
-	
+
 	constructor() {
-		super("Directed Component Analizer");
+		super("Directed Component Analyzer");
 	}
 }
 
 //works with DFS only
-export class ToposortAnalizer extends DirectedBaseAnalizer {
+export class TopoSortAnalyzer extends DirectedBaseAnalyzer {
 
 	order: number[];
 	index: number;

@@ -1,4 +1,4 @@
-export default class PriorityQueue<T> {
+export class PriorityQueue<T> {
 
 	protected __settings: {
 		items: T[],
@@ -14,7 +14,7 @@ export default class PriorityQueue<T> {
 
 	public get element(): T {
 		if (this.empty)
-			throw `priority queue is empty`;
+			throw new Error(`priority queue is empty`);
 		return this.__settings.items[1]
 	}
 

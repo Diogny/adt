@@ -1,19 +1,16 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = require("tslib");
-var http_1 = require("http");
-var path = tslib_1.__importStar(require("path"));
-var url_1 = tslib_1.__importDefault(require("url"));
-var fs = tslib_1.__importStar(require("fs"));
-var port = 5000;
+import { createServer } from 'http';
+import * as path from "path";
+import url from 'url';
+import * as fs from 'fs';
+const port = 5000;
 console.log('process.execPath', process.execPath);
 console.log(process.argv);
-var appFolder = path.resolve(path.dirname(process.argv[1]), 'www'); // path.resolve(process.argv[0], '..');
+const appFolder = path.resolve(path.dirname(process.argv[1]), 'www'); // path.resolve(process.argv[0], '..');
 console.log('app folder', appFolder);
-var server = http_1.createServer(function (request, response) {
+const server = createServer((request, response) => {
     try {
         //response.end('Hello world!');
-        var requestUrl = url_1.default.parse(request.url);
+        var requestUrl = url.parse(request.url);
         var filepath = path.join(appFolder, requestUrl.path);
         console.log('serving: ', filepath);
         var fileStream = fs.createReadStream(filepath);
@@ -32,6 +29,6 @@ var server = http_1.createServer(function (request, response) {
         console.log(e.stack);
     }
 })
-    .listen(port, function () {
-    console.log("Server listening on port " + port);
+    .listen(port, () => {
+    console.log(`Server listening on port ${port}`);
 });

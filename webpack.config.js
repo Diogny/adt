@@ -87,7 +87,7 @@ module.exports = env => {
 							{ from: './src/test/favicon.ico', to: 'favicon.ico' },
 						]
 					}),
-					new webpack.NamedModulesPlugin(),
+					//new webpack.NamedModulesPlugin(),
 					new webpack.HotModuleReplacementPlugin(),
 				],
 			},

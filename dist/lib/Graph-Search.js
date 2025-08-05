@@ -1,121 +1,73 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.bfsEngine = exports.bfsAnalysis = exports.bfs = exports.dfsEngine = exports.dfsAnalysis = exports.dfs = exports.searchGraph = void 0;
-var tslib_1 = require("tslib");
-var Graph_1 = require("./Graph");
-var Stack_1 = tslib_1.__importDefault(require("./Stack"));
-var Queue_1 = tslib_1.__importDefault(require("./Queue"));
-var Utils_1 = require("./Utils");
-function searchGraph(engine, start, full) {
-    var components, _a, _b, edge, e_1_1;
-    var e_1, _c;
-    return tslib_1.__generator(this, function (_d) {
-        switch (_d.label) {
-            case 0:
-                components = 0;
-                if (!engine.next()) return [3 /*break*/, 10];
-                _d.label = 1;
-            case 1:
-                components++;
-                start = engine.current();
-                _d.label = 2;
-            case 2:
-                _d.trys.push([2, 7, 8, 9]);
-                _a = (e_1 = void 0, tslib_1.__values(engine.search(start))), _b = _a.next();
-                _d.label = 3;
-            case 3:
-                if (!!_b.done) return [3 /*break*/, 6];
-                edge = _b.value;
-                return [4 /*yield*/, edge];
-            case 4:
-                _d.sent();
-                _d.label = 5;
-            case 5:
-                _b = _a.next();
-                return [3 /*break*/, 3];
-            case 6: return [3 /*break*/, 9];
-            case 7:
-                e_1_1 = _d.sent();
-                e_1 = { error: e_1_1 };
-                return [3 /*break*/, 9];
-            case 8:
-                try {
-                    if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
-                }
-                finally { if (e_1) throw e_1.error; }
-                return [7 /*endfinally*/];
-            case 9:
-                if (full && engine.next()) return [3 /*break*/, 1];
-                _d.label = 10;
-            case 10: return [2 /*return*/, components];
-        }
-    });
+import { EdgeVisitEnum } from "./Graph";
+import { Stack } from "./Stack";
+import { Queue } from "./Queue";
+import { enumConditional } from "./Utils";
+function* searchGraph(engine, start, full) {
+    let components = 0;
+    if (engine.next()) {
+        do {
+            components++;
+            start = engine.current();
+            for (let edge of engine.search(start)) {
+                yield edge;
+            }
+        } while (full && engine.next());
+    }
+    return components;
 }
-exports.searchGraph = searchGraph;
 function dfs(g, start, full, treeEdgesOnly, searchTreeEdgeEndCallback) {
-    var _a;
-    var enumerator = searchGraph(dfsEngine(g, start, treeEdgesOnly, searchTreeEdgeEndCallback), start, full), iterator = (_a = {
-            next: function () {
-                return enumerator.next();
-            }
+    let enumerator = searchGraph(dfsEngine(g, start, treeEdgesOnly, searchTreeEdgeEndCallback), start, full), iterator = {
+        next: () => {
+            return enumerator.next();
         },
-        _a[Symbol.iterator] = function () {
+        [Symbol.iterator]() {
             return iterator;
-        },
-        _a);
+        }
+    };
     return iterator;
 }
-exports.dfs = dfs;
 function bfs(g, start, full, treeEdgesOnly, searchTreeEdgeEndCallback) {
-    var _a;
-    var enumerator = searchGraph(bfsEngine(g, start, treeEdgesOnly, searchTreeEdgeEndCallback), start, full), iterator = (_a = {
-            next: function () {
-                return enumerator.next();
-            }
+    let enumerator = searchGraph(bfsEngine(g, start, treeEdgesOnly, searchTreeEdgeEndCallback), start, full), iterator = {
+        next: () => {
+            return enumerator.next();
         },
-        _a[Symbol.iterator] = function () {
+        [Symbol.iterator]() {
             return iterator;
-        },
-        _a);
+        }
+    };
     return iterator;
 }
-exports.bfs = bfs;
-function searchGraphAnalysis(engine, start, analizers) {
-    var enumerator = searchGraph(engine, start, true), result;
-    analizers.forEach(function (a) {
+function searchGraphAnalysis(engine, start, analyzers) {
+    let enumerator = searchGraph(engine, start, true), result;
+    analyzers.forEach(a => {
         if (engine.g.directed != a.directed)
-            throw "edge analizer direction does not match graph";
+            throw new Error(`edge analyzers direction does not match graph`);
         a.register(engine);
     });
-    var _loop_1 = function () {
-        var edge = result.value;
-        analizers.forEach(function (a) { return a.visit(edge.v, edge.w, edge.e); });
-    };
     while (!(result = enumerator.next()).done) {
-        _loop_1();
+        let edge = result.value;
+        analyzers.forEach(a => a.visit(edge.v, edge.w, edge.e));
     }
-    analizers.forEach(function (a) { return a.report(); });
+    analyzers.forEach(a => a.report());
     return result.value;
 }
-function dfsAnalysis(g, start, analizers) {
-    var endTreeEdgeCallback = function (v, w) {
-        analizers.forEach(function (a) { return a.endTree(v, w); });
+function dfsAnalysis(g, start, analyzers) {
+    let endTreeEdgeCallback = (v, w) => {
+        analyzers.forEach(a => a.endTree(v, w));
     }, engine = dfsEngine(g, start, false, endTreeEdgeCallback);
-    return searchGraphAnalysis(engine, start, analizers);
+    return searchGraphAnalysis(engine, start, analyzers);
 }
-exports.dfsAnalysis = dfsAnalysis;
-function bfsAnalysis(g, start, analizers) {
-    var endTreeEdgeCallback = function (v, w) {
-        analizers.forEach(function (a) { return a.endTree(v, w); });
+function bfsAnalysis(g, start, analyzers) {
+    let endTreeEdgeCallback = (v, w) => {
+        analyzers.forEach(a => a.endTree(v, w));
     }, engine = bfsEngine(g, start, false, endTreeEdgeCallback);
-    return searchGraphAnalysis(engine, start, analizers);
+    return searchGraphAnalysis(engine, start, analyzers);
 }
-exports.bfsAnalysis = bfsAnalysis;
 function dfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
-    var nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, startTiming = 0, timing = startTiming, postTiming = startTiming, discovered = function (node) { return pre[node] >= 0; }, enumerator = Utils_1.enumConditional(start, nodes - 1, discovered), stack = new Stack_1.default(), dfsFindAdjacents = function (v, processEdge) {
-        var result = [];
-        for (var adjacents = g.adjacentEdges(v), i = adjacents.length - 1; i >= 0; i--) {
-            var w = adjacents[i];
+    let nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, startTiming = 0, timing = startTiming, postTiming = startTiming, discovered = (node) => pre[node] >= 0, enumerator = enumConditional(start, nodes - 1, discovered), stack = new Stack(), dfsFindAdjacents = (v, processEdge) => {
+        let result = [];
+        for (let adjacents = g.adjacentEdges(v), i = adjacents.length - 1; i >= 0; i--) {
+            let w = adjacents[i];
             if (discovered(w)) {
                 !treeEdgesOnly && result.push(processEdge(v, w));
             }
@@ -123,168 +75,106 @@ function dfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
                 stack.push({ v: v, w: w, t: false });
         }
         return result;
-    }, dfsProcessNonTreeEdge = function (v, w) {
-        var edgeKind = function () {
+    }, dfsProcessNonTreeEdge = (v, w) => {
+        let edgeKind = () => {
             if (st[v] == w)
-                return Graph_1.EdgeVisitEnum.parent;
+                return EdgeVisitEnum.parent;
             else if (pre[w] < pre[v])
-                return Graph_1.EdgeVisitEnum.back;
+                return EdgeVisitEnum.back;
             else
-                return Graph_1.EdgeVisitEnum.down;
+                return EdgeVisitEnum.down;
         };
         return { v: v, w: w, e: edgeKind() };
-    }, dfsProcessNonTreeDirectedEdge = function (v, w) {
-        var edgeKind = function () {
+    }, dfsProcessNonTreeDirectedEdge = (v, w) => {
+        let edgeKind = () => {
             if (pre[v] < pre[w])
-                return Graph_1.EdgeVisitEnum.down;
+                return EdgeVisitEnum.down;
             else if (post[v] == -1 && post[w] == -1)
-                return Graph_1.EdgeVisitEnum.back;
+                return EdgeVisitEnum.back;
             else
-                return Graph_1.EdgeVisitEnum.cross;
+                return EdgeVisitEnum.cross;
         };
         return { v: v, w: w, e: edgeKind() };
-    }, dfs = function (startNode) {
-        var count, nonTreeEdges, i, edge, i;
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (discovered(startNode))
-                        return [2 /*return*/, 0];
-                    count = 1;
-                    st[startNode] = startNode;
-                    pre[startNode] = timing++;
-                    return [4 /*yield*/, { v: startNode, w: startNode, e: Graph_1.EdgeVisitEnum.tree }];
-                case 1:
-                    _a.sent();
-                    nonTreeEdges = dfsFindAdjacents(startNode, dfsProcessNonTreeEdge);
-                    if (!!treeEdgesOnly) return [3 /*break*/, 5];
-                    i = 0;
-                    _a.label = 2;
-                case 2:
-                    if (!(i < nonTreeEdges.length)) return [3 /*break*/, 5];
-                    return [4 /*yield*/, nonTreeEdges[i]];
-                case 3:
-                    _a.sent();
-                    _a.label = 4;
-                case 4:
-                    i++;
-                    return [3 /*break*/, 2];
-                case 5:
-                    if (!!stack.empty) return [3 /*break*/, 15];
-                    edge = stack.peek();
-                    if (!edge.t) return [3 /*break*/, 6];
-                    searchEndCallback && searchEndCallback(edge.v, edge.w);
-                    stack.pop();
-                    return [3 /*break*/, 14];
-                case 6:
-                    if (!discovered(edge.w)) return [3 /*break*/, 9];
-                    if (!!treeEdgesOnly) return [3 /*break*/, 8];
-                    return [4 /*yield*/, dfsProcessNonTreeEdge(edge.v, edge.w)];
-                case 7:
-                    _a.sent();
-                    _a.label = 8;
-                case 8:
-                    stack.pop();
-                    return [3 /*break*/, 14];
-                case 9:
-                    edge.t = true;
-                    pre[edge.w] = timing++;
-                    st[edge.w] = edge.v;
-                    count++;
-                    return [4 /*yield*/, { v: edge.v, w: edge.w, e: Graph_1.EdgeVisitEnum.tree }];
-                case 10:
-                    _a.sent();
-                    nonTreeEdges = dfsFindAdjacents(edge.w, dfsProcessNonTreeEdge);
-                    if (!!treeEdgesOnly) return [3 /*break*/, 14];
-                    i = 0;
-                    _a.label = 11;
-                case 11:
-                    if (!(i < nonTreeEdges.length)) return [3 /*break*/, 14];
-                    return [4 /*yield*/, nonTreeEdges[i]];
-                case 12:
-                    _a.sent();
-                    _a.label = 13;
-                case 13:
-                    i++;
-                    return [3 /*break*/, 11];
-                case 14: return [3 /*break*/, 5];
-                case 15:
-                    searchEndCallback && searchEndCallback(startNode, startNode);
-                    return [2 /*return*/, count];
+    }, dfs = function* (startNode) {
+        if (discovered(startNode))
+            return 0;
+        let count = 1;
+        st[startNode] = startNode;
+        pre[startNode] = timing++;
+        yield { v: startNode, w: startNode, e: EdgeVisitEnum.tree };
+        let nonTreeEdges = dfsFindAdjacents(startNode, dfsProcessNonTreeEdge);
+        if (!treeEdgesOnly) {
+            for (let i = 0; i < nonTreeEdges.length; i++)
+                yield nonTreeEdges[i];
+        }
+        while (!stack.empty) {
+            let edge = stack.peek();
+            if (edge.t) {
+                searchEndCallback && searchEndCallback(edge.v, edge.w);
+                stack.pop();
             }
-        });
-    }, dfsDirected = function (startNode) {
-        var count, nonTreeEdges, i, edge, i;
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (discovered(startNode))
-                        return [2 /*return*/, 0];
-                    count = 1;
-                    st[startNode] = startNode;
-                    pre[startNode] = timing++;
-                    return [4 /*yield*/, { v: startNode, w: startNode, e: Graph_1.EdgeVisitEnum.tree }];
-                case 1:
-                    _a.sent();
-                    nonTreeEdges = dfsFindAdjacents(startNode, dfsProcessNonTreeDirectedEdge);
-                    if (!!treeEdgesOnly) return [3 /*break*/, 5];
-                    i = 0;
-                    _a.label = 2;
-                case 2:
-                    if (!(i < nonTreeEdges.length)) return [3 /*break*/, 5];
-                    return [4 /*yield*/, nonTreeEdges[i]];
-                case 3:
-                    _a.sent();
-                    _a.label = 4;
-                case 4:
-                    i++;
-                    return [3 /*break*/, 2];
-                case 5:
-                    if (!!stack.empty) return [3 /*break*/, 15];
-                    edge = stack.peek();
-                    if (!edge.t) return [3 /*break*/, 6];
-                    post[edge.w] = postTiming++;
-                    searchEndCallback && searchEndCallback(edge.v, edge.w);
+            else if (discovered(edge.w)) {
+                if (!treeEdgesOnly)
+                    yield dfsProcessNonTreeEdge(edge.v, edge.w);
+                stack.pop();
+            }
+            else {
+                edge.t = true;
+                pre[edge.w] = timing++;
+                st[edge.w] = edge.v;
+                count++;
+                yield { v: edge.v, w: edge.w, e: EdgeVisitEnum.tree };
+                nonTreeEdges = dfsFindAdjacents(edge.w, dfsProcessNonTreeEdge);
+                if (!treeEdgesOnly) {
+                    for (let i = 0; i < nonTreeEdges.length; i++)
+                        yield nonTreeEdges[i];
+                }
+            }
+        }
+        searchEndCallback && searchEndCallback(startNode, startNode);
+        return count;
+    }, dfsDirected = function* (startNode) {
+        if (discovered(startNode))
+            return 0;
+        let count = 1;
+        st[startNode] = startNode;
+        pre[startNode] = timing++;
+        yield { v: startNode, w: startNode, e: EdgeVisitEnum.tree };
+        let nonTreeEdges = dfsFindAdjacents(startNode, dfsProcessNonTreeDirectedEdge);
+        if (!treeEdgesOnly) {
+            for (let i = 0; i < nonTreeEdges.length; i++)
+                yield nonTreeEdges[i];
+        }
+        while (!stack.empty) {
+            let edge = stack.peek();
+            if (edge.t) {
+                post[edge.w] = postTiming++;
+                searchEndCallback && searchEndCallback(edge.v, edge.w);
+                stack.pop();
+            }
+            else {
+                if (discovered(edge.w)) {
+                    if (!treeEdgesOnly)
+                        yield dfsProcessNonTreeDirectedEdge(edge.v, edge.w);
                     stack.pop();
-                    return [3 /*break*/, 14];
-                case 6:
-                    if (!discovered(edge.w)) return [3 /*break*/, 9];
-                    if (!!treeEdgesOnly) return [3 /*break*/, 8];
-                    return [4 /*yield*/, dfsProcessNonTreeDirectedEdge(edge.v, edge.w)];
-                case 7:
-                    _a.sent();
-                    _a.label = 8;
-                case 8:
-                    stack.pop();
-                    return [3 /*break*/, 14];
-                case 9:
+                }
+                else {
                     edge.t = true;
                     pre[edge.w] = timing++;
                     st[edge.w] = edge.v;
                     count++;
-                    return [4 /*yield*/, { v: edge.v, w: edge.w, e: Graph_1.EdgeVisitEnum.tree }];
-                case 10:
-                    _a.sent();
+                    yield { v: edge.v, w: edge.w, e: EdgeVisitEnum.tree };
                     nonTreeEdges = dfsFindAdjacents(edge.w, dfsProcessNonTreeDirectedEdge);
-                    if (!!treeEdgesOnly) return [3 /*break*/, 14];
-                    i = 0;
-                    _a.label = 11;
-                case 11:
-                    if (!(i < nonTreeEdges.length)) return [3 /*break*/, 14];
-                    return [4 /*yield*/, nonTreeEdges[i]];
-                case 12:
-                    _a.sent();
-                    _a.label = 13;
-                case 13:
-                    i++;
-                    return [3 /*break*/, 11];
-                case 14: return [3 /*break*/, 5];
-                case 15:
-                    post[startNode] = postTiming++;
-                    searchEndCallback && searchEndCallback(startNode, startNode);
-                    return [2 /*return*/, count];
+                    if (!treeEdgesOnly) {
+                        for (let i = 0; i < nonTreeEdges.length; i++)
+                            yield nonTreeEdges[i];
+                    }
+                }
             }
-        });
+        }
+        post[startNode] = postTiming++;
+        searchEndCallback && searchEndCallback(startNode, startNode);
+        return count;
     };
     g.directed && (post = new Array(nodes).fill(-1));
     return {
@@ -293,98 +183,67 @@ function dfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
         pre: pre,
         st: st,
         post: post,
-        initial: function () { return start; },
-        timing: function () { return timing; },
-        next: function () { return enumerator.next(); },
-        current: function () { return enumerator.current(); },
-        edges: function () { return stack.items; },
+        initial: () => start,
+        timing: () => timing,
+        next: () => enumerator.next(),
+        current: () => enumerator.current(),
+        edges: () => stack.items,
         search: g.directed ? dfsDirected : dfs
     };
 }
-exports.dfsEngine = dfsEngine;
 function bfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
-    var nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, startTiming = 0, timing = startTiming, discovered = function (node) { return pre[node] >= 0; }, enumerator = Utils_1.enumConditional(start, nodes - 1, discovered), queue = new Queue_1.default(), bfsFindAdjacents = function (v, processEdge) {
-        var result = [];
-        for (var adjacents = g.adjacentEdges(v), i = 0; i < adjacents.length; i++) {
-            var w = adjacents[i];
+    let nodes = g.size, pre = new Array(nodes).fill(-1), st = new Array(nodes).fill(-1), post = void 0, startTiming = 0, timing = startTiming, discovered = (node) => pre[node] >= 0, enumerator = enumConditional(start, nodes - 1, discovered), queue = new Queue(), bfsFindAdjacents = (v, processEdge) => {
+        let result = [];
+        for (let adjacents = g.adjacentEdges(v), i = 0; i < adjacents.length; i++) {
+            let w = adjacents[i];
             if (discovered(w))
                 !treeEdgesOnly && result.push(processEdge(v, w));
             else
                 queue.enqueue({ v: v, w: w });
         }
         return result;
-    }, bfsProcessNonTreeEdge = function (v, w) {
-        var edgeKind = function () {
+    }, bfsProcessNonTreeEdge = (v, w) => {
+        let edgeKind = () => {
             if (st[v] == w)
-                return Graph_1.EdgeVisitEnum.parent;
+                return EdgeVisitEnum.parent;
             else if (pre[w] < pre[v])
-                return Graph_1.EdgeVisitEnum.back;
+                return EdgeVisitEnum.back;
             else
-                return Graph_1.EdgeVisitEnum.down;
+                return EdgeVisitEnum.down;
         };
         return { v: v, w: w, e: edgeKind() };
-    }, bfs = function (startNode) {
-        var count, nonTreeEdges, i, edge, i;
-        return tslib_1.__generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    if (discovered(startNode))
-                        return [2 /*return*/, 0];
-                    count = 1;
-                    st[startNode] = startNode;
-                    pre[startNode] = timing++;
-                    return [4 /*yield*/, { v: startNode, w: startNode, e: Graph_1.EdgeVisitEnum.tree }];
-                case 1:
-                    _a.sent();
-                    nonTreeEdges = bfsFindAdjacents(startNode, bfsProcessNonTreeEdge);
-                    if (!!treeEdgesOnly) return [3 /*break*/, 5];
-                    i = 0;
-                    _a.label = 2;
-                case 2:
-                    if (!(i < nonTreeEdges.length)) return [3 /*break*/, 5];
-                    return [4 /*yield*/, nonTreeEdges[i]];
-                case 3:
-                    _a.sent();
-                    _a.label = 4;
-                case 4:
-                    i++;
-                    return [3 /*break*/, 2];
-                case 5:
-                    if (!!queue.empty) return [3 /*break*/, 14];
-                    edge = queue.dequeue();
-                    if (!discovered(edge.w)) return [3 /*break*/, 8];
-                    if (!!treeEdgesOnly) return [3 /*break*/, 7];
-                    return [4 /*yield*/, bfsProcessNonTreeEdge(edge.v, edge.w)];
-                case 6:
-                    _a.sent();
-                    _a.label = 7;
-                case 7: return [3 /*break*/, 13];
-                case 8:
-                    pre[edge.w] = timing++;
-                    st[edge.w] = edge.v;
-                    count++;
-                    return [4 /*yield*/, { v: edge.v, w: edge.w, e: Graph_1.EdgeVisitEnum.tree }];
-                case 9:
-                    _a.sent();
-                    nonTreeEdges = bfsFindAdjacents(edge.w, bfsProcessNonTreeEdge);
-                    if (!!treeEdgesOnly) return [3 /*break*/, 13];
-                    i = 0;
-                    _a.label = 10;
-                case 10:
-                    if (!(i < nonTreeEdges.length)) return [3 /*break*/, 13];
-                    return [4 /*yield*/, nonTreeEdges[i]];
-                case 11:
-                    _a.sent();
-                    _a.label = 12;
-                case 12:
-                    i++;
-                    return [3 /*break*/, 10];
-                case 13: return [3 /*break*/, 5];
-                case 14:
-                    searchEndCallback && searchEndCallback(startNode, startNode);
-                    return [2 /*return*/, count];
+    }, bfs = function* (startNode) {
+        if (discovered(startNode))
+            return 0;
+        let count = 1;
+        st[startNode] = startNode;
+        pre[startNode] = timing++;
+        yield { v: startNode, w: startNode, e: EdgeVisitEnum.tree };
+        let nonTreeEdges = bfsFindAdjacents(startNode, bfsProcessNonTreeEdge);
+        if (!treeEdgesOnly) {
+            for (let i = 0; i < nonTreeEdges.length; i++)
+                yield nonTreeEdges[i];
+        }
+        while (!queue.empty) {
+            let edge = queue.dequeue();
+            if (discovered(edge.w)) {
+                if (!treeEdgesOnly)
+                    yield bfsProcessNonTreeEdge(edge.v, edge.w);
             }
-        });
+            else {
+                pre[edge.w] = timing++;
+                st[edge.w] = edge.v;
+                count++;
+                yield { v: edge.v, w: edge.w, e: EdgeVisitEnum.tree };
+                nonTreeEdges = bfsFindAdjacents(edge.w, bfsProcessNonTreeEdge);
+                if (!treeEdgesOnly) {
+                    for (let i = 0; i < nonTreeEdges.length; i++)
+                        yield nonTreeEdges[i];
+                }
+            }
+        }
+        searchEndCallback && searchEndCallback(startNode, startNode);
+        return count;
     };
     g.directed && (post = new Array(nodes).fill(-1));
     return {
@@ -393,12 +252,12 @@ function bfsEngine(g, start, treeEdgesOnly, searchEndCallback) {
         pre: pre,
         st: st,
         post: post,
-        initial: function () { return start; },
-        timing: function () { return timing; },
-        next: function () { return enumerator.next(); },
-        current: function () { return enumerator.current(); },
-        edges: function () { return queue.items; },
+        initial: () => start,
+        timing: () => timing,
+        next: () => enumerator.next(),
+        current: () => enumerator.current(),
+        edges: () => queue.items,
         search: bfs
     };
 }
-exports.bfsEngine = bfsEngine;
+export { searchGraph, dfs, dfsAnalysis, dfsEngine, bfs, bfsAnalysis, bfsEngine, };

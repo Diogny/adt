@@ -1,26 +1,17 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.AVLTree = exports.AVLTreeNode = void 0;
-var tslib_1 = require("tslib");
-var BTree_1 = require("./BTree");
-var Stack_1 = tslib_1.__importDefault(require("./Stack"));
-var AVLTreeNode = /** @class */ (function (_super) {
-    tslib_1.__extends(AVLTreeNode, _super);
-    function AVLTreeNode(value) {
-        var _this = _super.call(this, value) || this;
-        _this.depth = 1;
-        return _this;
+import { BTreeNode, BTree } from "./BTree";
+import { Stack } from "./Stack";
+export class AVLTreeNode extends BTreeNode {
+    constructor(value) {
+        super(value);
+        this.depth = 1;
     }
-    return AVLTreeNode;
-}(BTree_1.BTreeNode));
-exports.AVLTreeNode = AVLTreeNode;
-var AVLTree = /** @class */ (function (_super) {
-    tslib_1.__extends(AVLTree, _super);
-    function AVLTree(comparer) {
-        return _super.call(this, undefined, comparer) || this;
+}
+export class AVLTree extends BTree {
+    constructor(comparer) {
+        super(undefined, comparer);
     }
-    AVLTree.prototype.insert = function (value) {
-        var stack = new Stack_1.default(), comp = 0, parent = void 0, node = this.root;
+    insert(value) {
+        let stack = new Stack(), comp = 0, parent = void 0, node = this.root;
         while (node != undefined) {
             parent = node;
             comp = this.comparer(value, node.value);
@@ -41,13 +32,13 @@ var AVLTree = /** @class */ (function (_super) {
             this.__size++;
             return true;
         }
-        insertNode(parent, node = newNode(value), comp);
+        insertNode(parent, newNode(value), comp); //node =
         balanceTree(this, stack);
         this.__size++;
         return true;
-    };
-    AVLTree.prototype.delete = function (value) {
-        var stack = new Stack_1.default(), comp = 0, parent = void 0, root = void 0, node = this.root, min = void 0, found = false;
+    }
+    delete(value) {
+        let stack = new Stack(), comp = 0, parent, root = void 0, node = this.root, min = void 0, found = false;
         while (node != undefined && !found) {
             parent = node;
             comp = this.comparer(value, node.value);
@@ -116,16 +107,14 @@ var AVLTree = /** @class */ (function (_super) {
         balanceTree(this, stack);
         this.__size--;
         return true;
-    };
-    return AVLTree;
-}(BTree_1.BTree));
-exports.AVLTree = AVLTree;
+    }
+}
 function newNode(value) {
     return new AVLTreeNode(value);
 }
-var getDepth = function (n) { return (n === null || n === void 0 ? void 0 : n.depth) || 0; };
+const getDepth = (n) => (n === null || n === void 0 ? void 0 : n.depth) || 0;
 function setDepth(node) {
-    var ldepth = getDepth(node.left), rdepth = getDepth(node.right);
+    let ldepth = getDepth(node.left), rdepth = getDepth(node.right);
     node.depth = Math.max(ldepth, rdepth) + 1;
     return rdepth - ldepth;
 }
@@ -145,7 +134,7 @@ function setChild(node, parent, comp) {
         parent.right = node;
 }
 function deleteMin(tree, node, parent, comp) {
-    var stack = new Stack_1.default();
+    let stack = new Stack();
     if (node.left)
         comp = -1;
     while (node.left != undefined) {
@@ -161,7 +150,7 @@ function deleteMin(tree, node, parent, comp) {
 }
 function balanceTree(tree, stack) {
     while (!stack.empty) {
-        var parent_1 = void 0, node = stack.pop(), balance = setDepth(node), childrenBalance = 0, root = void 0;
+        let parent = void 0, node = stack.pop(), balance = setDepth(node), childrenBalance = 0, root = void 0;
         if (node.depth > 2 && Math.abs(balance) > 1) {
             if (balance < 0) {
                 root = node.left;
@@ -171,13 +160,13 @@ function balanceTree(tree, stack) {
                     root.right = node;
                 }
                 else {
-                    parent_1 = root;
+                    parent = root;
                     root = root.right;
-                    parent_1.right = root.left;
-                    root.left = parent_1;
+                    parent.right = root.left;
+                    root.left = parent;
                     node.left = root.right;
                     root.right = node;
-                    setDepth(parent_1);
+                    setDepth(parent);
                 }
             }
             else {
@@ -188,27 +177,27 @@ function balanceTree(tree, stack) {
                     root.left = node;
                 }
                 else {
-                    parent_1 = root;
+                    parent = root;
                     root = root.left;
-                    parent_1.left = root.right;
-                    root.right = parent_1;
+                    parent.left = root.right;
+                    root.right = parent;
                     node.right = root.left;
                     root.left = node;
-                    setDepth(parent_1);
+                    setDepth(parent);
                 }
             }
             setDepth(node);
             setDepth(root);
-            parent_1 = stack.peek();
-            if (!parent_1) {
+            parent = stack.peek();
+            if (!parent) {
                 tree.root = root;
             }
             else {
-                if (tree.comparer(root.value, parent_1.value) > 0)
-                    parent_1.right = root;
+                if (tree.comparer(root.value, parent.value) > 0)
+                    parent.right = root;
                 else
-                    parent_1.left = root;
-                setDepth(parent_1);
+                    parent.left = root;
+                setDepth(parent);
             }
         }
     }

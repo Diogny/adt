@@ -1,6 +1,6 @@
-import { BaseGraph, IDFSAnalizer, EdgeCallback, EdgeVisitEnum, ISearchTask, IEdgeSearch } from "./Graph";
-import Stack from "./Stack";
-import Queue from "./Queue";
+import { BaseGraph, IDFSAnalyzer, EdgeCallback, EdgeVisitEnum, ISearchTask, IEdgeSearch } from "./Graph";
+import { Stack } from "./Stack";
+import { Queue } from "./Queue";
 import { enumConditional } from "./Utils";
 
 function* searchGraph(engine: ISearchTask, start: number, full?: boolean): Generator<IEdgeSearch, number> {
@@ -48,40 +48,40 @@ function bfs(g: BaseGraph, start: number, full?: boolean, treeEdgesOnly?: boolea
 	return iterator
 }
 
-function searchGraphAnalysis(engine: ISearchTask, start: number, analizers: IDFSAnalizer[]): number {
+function searchGraphAnalysis(engine: ISearchTask, start: number, analyzers: IDFSAnalyzer[]): number {
 	let
 		enumerator = searchGraph(engine, start, true),
 		result: IteratorResult<IEdgeSearch, number>;
-	analizers.forEach(a => {
+	analyzers.forEach(a => {
 		if (engine.g.directed != a.directed)
-			throw `edge analizer direction does not match graph`
+			throw new Error(`edge analyzers direction does not match graph`)
 		a.register(engine)
 	});
 	while (!(result = enumerator.next()).done) {
 		let
-			edge = result.value as IEdgeSearch;
-		analizers.forEach(a => a.visit(edge.v, edge.w, edge.e))
+			edge = result.value;
+		analyzers.forEach(a => a.visit(edge.v, edge.w, edge.e))
 	}
-	analizers.forEach(a => a.report());
-	return <number>result.value
+	analyzers.forEach(a => a.report());
+	return result.value
 }
 
-function dfsAnalysis(g: BaseGraph, start: number, analizers: IDFSAnalizer[]): number {
+function dfsAnalysis(g: BaseGraph, start: number, analyzers: IDFSAnalyzer[]): number {
 	let
 		endTreeEdgeCallback = (v: number, w: number) => {
-			analizers.forEach(a => a.endTree(v, w))
+			analyzers.forEach(a => a.endTree(v, w))
 		},
 		engine = dfsEngine(g, start, false, endTreeEdgeCallback);
-	return searchGraphAnalysis(engine, start, analizers)
+	return searchGraphAnalysis(engine, start, analyzers)
 }
 
-function bfsAnalysis(g: BaseGraph, start: number, analizers: IDFSAnalizer[]): number {
+function bfsAnalysis(g: BaseGraph, start: number, analyzers: IDFSAnalyzer[]): number {
 	let
 		endTreeEdgeCallback = (v: number, w: number) => {
-			analizers.forEach(a => a.endTree(v, w))
+			analyzers.forEach(a => a.endTree(v, w))
 		},
 		engine = bfsEngine(g, start, false, endTreeEdgeCallback);
-	return searchGraphAnalysis(engine, start, analizers)
+	return searchGraphAnalysis(engine, start, analyzers)
 }
 
 function dfsEngine(g: BaseGraph, start: number, treeEdgesOnly?: boolean, searchEndCallback?: EdgeCallback): ISearchTask {
@@ -154,7 +154,7 @@ function dfsEngine(g: BaseGraph, start: number, treeEdgesOnly?: boolean, searchE
 				if (edge.t) {
 					searchEndCallback && searchEndCallback(edge.v, edge.w);
 					stack.pop();
-				} else {
+				} else
 					if (discovered(edge.w)) {
 						if (!treeEdgesOnly)
 							yield dfsProcessNonTreeEdge(edge.v, edge.w);
@@ -171,7 +171,6 @@ function dfsEngine(g: BaseGraph, start: number, treeEdgesOnly?: boolean, searchE
 								yield nonTreeEdges[i];
 						}
 					}
-				}
 			}
 			searchEndCallback && searchEndCallback(startNode, startNode);
 			return count;

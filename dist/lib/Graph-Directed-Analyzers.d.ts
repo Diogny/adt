@@ -1,9 +1,9 @@
-import { BaseAnalyzer, BaseEdgeAnalizer, BaseComponentAnalizer } from "./Graph-Analizers";
+import { BaseAnalyzer, BaseEdgeAnalyzer, BaseComponentAnalyzer } from "./Graph-Analyzers";
 import { EdgeVisitEnum, ISearchTask } from "./Graph";
-export declare abstract class DirectedBaseAnalizer extends BaseAnalyzer {
+export declare abstract class DirectedBaseAnalyzer extends BaseAnalyzer {
     get directed(): boolean;
 }
-export declare class DirectedEdgeAnalyzer extends BaseEdgeAnalizer {
+export declare class DirectedEdgeAnalyzer extends BaseEdgeAnalyzer {
     showStack?: boolean | undefined;
     showInternals?: boolean | undefined;
     showTreeEnd?: boolean | undefined;
@@ -11,11 +11,11 @@ export declare class DirectedEdgeAnalyzer extends BaseEdgeAnalizer {
     constructor(showStack?: boolean | undefined, showInternals?: boolean | undefined, showTreeEnd?: boolean | undefined);
     report(): void;
 }
-export declare class DirectedComponentAnalyzer extends BaseComponentAnalizer {
+export declare class DirectedComponentAnalyzer extends BaseComponentAnalyzer {
     get directed(): boolean;
     constructor();
 }
-export declare class TopoSortAnalyzer extends DirectedBaseAnalizer {
+export declare class TopoSortAnalyzer extends DirectedBaseAnalyzer {
     order: number[];
     index: number;
     isDAG: boolean;

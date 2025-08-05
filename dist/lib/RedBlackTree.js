@@ -1,31 +1,22 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.RedBlackTree = exports.RedBlackTreeNode = exports.RedBlackEnum = void 0;
-var tslib_1 = require("tslib");
-var BTree_1 = require("./BTree");
-var Stack_1 = tslib_1.__importDefault(require("./Stack"));
-var RedBlackEnum;
+import { BTree, BTreeNode } from "./BTree";
+import { Stack } from "./Stack";
+export var RedBlackEnum;
 (function (RedBlackEnum) {
     RedBlackEnum[RedBlackEnum["red"] = 0] = "red";
     RedBlackEnum[RedBlackEnum["black"] = 1] = "black";
-})(RedBlackEnum = exports.RedBlackEnum || (exports.RedBlackEnum = {}));
-var RedBlackTreeNode = /** @class */ (function (_super) {
-    tslib_1.__extends(RedBlackTreeNode, _super);
-    function RedBlackTreeNode(value) {
-        var _this = _super.call(this, value) || this;
-        _this.color = RedBlackEnum.red;
-        return _this;
+})(RedBlackEnum || (RedBlackEnum = {}));
+export class RedBlackTreeNode extends BTreeNode {
+    constructor(value) {
+        super(value);
+        this.color = RedBlackEnum.red;
     }
-    return RedBlackTreeNode;
-}(BTree_1.BTreeNode));
-exports.RedBlackTreeNode = RedBlackTreeNode;
-var RedBlackTree = /** @class */ (function (_super) {
-    tslib_1.__extends(RedBlackTree, _super);
-    function RedBlackTree(comparer) {
-        return _super.call(this, undefined, comparer) || this;
+}
+export class RedBlackTree extends BTree {
+    constructor(comparer) {
+        super(undefined, comparer);
     }
-    RedBlackTree.prototype.insert = function (value) {
-        var stack = new Stack_1.default(), parent = void 0, node = this.root, comp = 0;
+    insert(value) {
+        let stack = new Stack(), parent = void 0, node = this.root, comp = 0;
         if (node == undefined) {
             this.root = node = newNode(value);
             node.color = RedBlackEnum.black;
@@ -50,11 +41,11 @@ var RedBlackTree = /** @class */ (function (_super) {
         balanceAfterInsert(this, node, stack);
         this.__size++;
         return true;
-    };
-    RedBlackTree.prototype.delete = function (value) {
-        var found = false, comp = 0, stack = new Stack_1.default(), parent = void 0, node = this.root, yIsNode, x, ycomp = 0, yParent, y;
+    }
+    delete(value) {
+        let found = false, comp = 0, stack = new Stack(), parent = void 0, node = this.root, yIsNode, x, ycomp = 0, yParent, y;
         while (node != undefined && !found) {
-            var nextComp = this.comparer(value, node.value);
+            let nextComp = this.comparer(value, node.value);
             if (nextComp == 0)
                 found = true;
             else {
@@ -119,11 +110,9 @@ var RedBlackTree = /** @class */ (function (_super) {
         }
         this.__size--;
         return true;
-    };
-    return RedBlackTree;
-}(BTree_1.BTree));
-exports.RedBlackTree = RedBlackTree;
-var siblingComparer = function (comp) { return comp > 0 ? -1 : 1; };
+    }
+}
+const siblingComparer = (comp) => comp > 0 ? -1 : 1;
 function setChild(parent, node, comp) {
     if (comp < 0)
         parent.left = node;
@@ -142,7 +131,7 @@ function getColor(node) {
         node.color;
 }
 function rotateLeft(x, tree, stack, pushParent) {
-    var p = stack.peek(), y = x.right;
+    let p = stack.peek(), y = x.right;
     x.right = y.left;
     y.left = x;
     pushParent && stack.push(y);
@@ -152,7 +141,7 @@ function rotateLeft(x, tree, stack, pushParent) {
         tree.root = y;
 }
 function rotateRight(x, tree, stack, pushParent) {
-    var p = stack.peek(), y = x.left;
+    let p = stack.peek(), y = x.left;
     x.left = y.right;
     y.right = x;
     pushParent && stack.push(y);
@@ -162,7 +151,7 @@ function rotateRight(x, tree, stack, pushParent) {
         tree.root = y;
 }
 function balanceAfterInsert(tree, x, stack) {
-    var t, g, p, y = x.left, comp = 0;
+    let t, g, p, y = x.left, comp = 0;
     while (stack.count >= 2 && (p = stack.pop()).color == RedBlackEnum.red) {
         //parent is RED
         g = stack.peek();
@@ -219,7 +208,7 @@ function balanceAfterInsert(tree, x, stack) {
     tree.root.color = RedBlackEnum.black;
 }
 function balanceAfterDelete(tree, x, stack, comp) {
-    var parent, y;
+    let parent, y;
     while (!stack.empty && getColor(x) == RedBlackEnum.black) {
         parent = stack.peek();
         y = getChild(parent, siblingComparer(comp));

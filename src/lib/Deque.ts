@@ -1,6 +1,6 @@
-import Queue from "./Queue";
+import { Queue } from "./Queue";
 
-export default class Deque<T> extends Queue<T>{
+export class Deque<T> extends Queue<T> {
 
 	public popback(): T | undefined { return this.pop() }
 

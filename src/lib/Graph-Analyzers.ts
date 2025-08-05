@@ -1,7 +1,8 @@
-import { IDFSAnalizer, ISearchTask, EdgeVisitEnum, IEdge } from "./Graph";
-import { fillChar, padStr, range, formatNumber } from "./Utils";
+import { IDFSAnalyzer, ISearchTask, EdgeVisitEnum, IEdge } from "./Graph";
+import { range } from "dabbjs/dist/lib/misc";
+import { fillChar, formatNumber, padStr } from "dabbjs/dist/lib/strings";
 
-export abstract class BaseAnalizer implements IDFSAnalizer {
+export abstract class BaseAnalyzer implements IDFSAnalyzer {
 
 	protected dfs: ISearchTask;
 
@@ -13,7 +14,7 @@ export abstract class BaseAnalizer implements IDFSAnalizer {
 		this.dfs = dfs;
 	}
 
-	public endTree(v: number, w: number) { }
+	public endTree(v: number, w: number) { /* */ }
 
 	abstract visit(v: number, w: number, e: EdgeVisitEnum): void;
 
@@ -24,23 +25,20 @@ export abstract class BaseAnalizer implements IDFSAnalizer {
 
 }
 
-export abstract class UndirectedBaseAnalizer extends BaseAnalizer {
+export abstract class UndirectedBaseAnalyzer extends BaseAnalyzer {
 
 	public get directed(): boolean { return false }
 
-	constructor(name: string) {
-		super(name);
-	}
 }
 
-export class BridgeAnalizer extends UndirectedBaseAnalizer {
+export class BridgeAnalyzer extends UndirectedBaseAnalyzer {
 
 	low: number[];
 	bridges: IEdge[];
 	articulationPoints: number[];
 
 	constructor() {
-		super("Bridge Analizer");
+		super("Bridge Analyzer");
 	}
 
 	public register(dfs: ISearchTask): void {
@@ -107,14 +105,14 @@ export class BridgeAnalizer extends UndirectedBaseAnalizer {
 	}
 }
 
-export class CyclesAnalizer extends UndirectedBaseAnalizer {
+export class CyclesAnalyzer extends UndirectedBaseAnalyzer {
 
 	cycles: number[][];
 
 	get count(): number { return this.cycles.length }
 
 	constructor() {
-		super("Cycles Analizer");
+		super("Cycles Analyzer");
 	}
 
 	public register(dfs: ISearchTask): void {
@@ -144,8 +142,8 @@ export class CyclesAnalizer extends UndirectedBaseAnalizer {
 
 }
 
-//multi-analizers
-export abstract class BaseEdgeAnalizer extends BaseAnalizer {
+//multi-analyzers
+export abstract class BaseEdgeAnalyzer extends BaseAnalyzer {
 
 	colSpaces: number[];
 	edgeList: string[];
@@ -229,24 +227,20 @@ export abstract class BaseEdgeAnalizer extends BaseAnalizer {
 
 }
 
-export class EdgeAnalizer extends BaseEdgeAnalizer {
+export class EdgeAnalyzer extends BaseEdgeAnalyzer {
 
 	public get directed(): boolean { return false }
 
 	constructor(public showStack?: boolean, public showInternals?: boolean, public showTreeEnd?: boolean) {
-		super("Edge Analizer", showStack, showInternals, showTreeEnd);
+		super("Edge Analyzer", showStack, showInternals, showTreeEnd);
 	}
 
 }
 
-export abstract class BaseComponentAnalizer extends BaseAnalizer {
+export abstract class BaseComponentAnalyzer extends BaseAnalyzer {
 
 	count: number;
 	components: number[];
-
-	constructor(name: string) {
-		super(name);
-	}
 
 	public register(dfs: ISearchTask): void {
 		super.register(dfs);
@@ -274,11 +268,11 @@ export abstract class BaseComponentAnalizer extends BaseAnalizer {
 	}
 }
 
-export class ComponentAnalizer extends BaseComponentAnalizer {
+export class ComponentAnalyzer extends BaseComponentAnalyzer {
 
 	public get directed(): boolean { return false }
 
 	constructor() {
-		super("Component Analizer");
+		super("Component Analyzer");
 	}
 }

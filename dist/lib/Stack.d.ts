@@ -1,4 +1,4 @@
-export default class Stack<T> {
+export declare class Stack<T> {
     protected n: T[];
     constructor();
     get count(): number;

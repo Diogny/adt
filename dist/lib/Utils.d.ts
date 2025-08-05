@@ -1,27 +1,10 @@
-export declare const toBool: (val: any) => boolean;
-export declare const pad: (t: string, e: number, ch?: any) => string;
-export declare const fillChar: (ch: string, len: number) => string;
-export declare const padStr: (s: string, width: number) => string;
 export declare const centerStr: (s: string, width: number) => string;
 export declare const centerPadStr: (str: string, width: number, leftStr: string, rightStr: string) => string;
-export declare const formatNumber: (n: number, width: number) => string;
 export declare const replaceAt: (str: string, index: number, replacement: string) => string;
-export declare const range: (s: number, e: number) => number[];
-export declare const selectMany: <TIn, TOut>(input: TIn[], selectListFn: (t: TIn) => TOut[]) => TOut[];
 export declare const matrix: <T>(rows: number, cols: number, filler: T) => T[][];
 export declare const enumConditional: (start: number, max: number, discovered: (ndx: number) => boolean) => {
     current: () => number;
     next: () => boolean;
 };
-export declare const isStr: (s: any) => boolean;
-export declare const css: (el: any, styles: any) => any;
-export declare const attr: (el: any, attrs: any) => any;
 export declare const tag: (tagName: string, id: string, nsAttrs: any) => SVGElement;
 export declare const svg: (html: string) => Element;
-export declare const html: (html: string) => ChildNode;
-export declare const aEL: (el: HTMLElement, eventName: string, fn: Function, b?: boolean | AddEventListenerOptions | undefined) => void;
-export declare const rEL: (el: HTMLElement, eventName: string, fn: Function, b?: boolean | AddEventListenerOptions | undefined) => void;
-export declare const qS: (s: string) => HTMLElement;
-export declare const qSA: (s: string) => NodeListOf<Element>;
-export declare const gEId: (id: string) => HTMLElement | null;
-export declare const ready: (fn: Function) => boolean;

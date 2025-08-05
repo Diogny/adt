@@ -1,4 +1,4 @@
-export default class PriorityQueue<T> {
+export declare class PriorityQueue<T> {
     protected __settings: {
         items: T[];
         size: number;

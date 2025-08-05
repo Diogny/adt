@@ -1,5 +1,5 @@
-import Queue from "./Queue";
-import Stack from "./Stack";
+import { Queue } from "./Queue";
+import { Stack } from "./Stack";
 
 export abstract class ValueNode<T> {
 
@@ -89,7 +89,7 @@ export abstract class BaseTree<T> {
 			result: IteratorResult<{ node: ValueNode<T>, level: number }, number>,
 			enumerator = this.levelOrderEnumerator();
 		while (!(result = enumerator.next()).done);
-		return <number>result.value
+		return result.value
 	}
 
 	public *preOrderEnumerator(node?: ValueNode<T>) {
@@ -197,7 +197,7 @@ export abstract class BaseTree<T> {
 
 }
 
-export class Tree<T> extends BaseTree<T>{
+export class Tree<T> extends BaseTree<T> {
 
 	/**
 	 * @description implements a breadth search
@@ -219,7 +219,6 @@ export class Tree<T> extends BaseTree<T>{
 				}
 			}
 		}
-		return
 	}
 
 	constructor(public root: TreeNode<T>, comparer?: (a: T, b: T) => number) {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ToposortAnalizer = exports.DirectedComponentAnalizer = exports.DirectedEdgeAnalizer = exports.DirectedBaseAnalizer = void 0;
+exports.TopoSortAnalyzer = exports.DirectedComponentAnalyzer = exports.DirectedEdgeAnalyzer = exports.DirectedBaseAnalizer = void 0;
 var tslib_1 = require("tslib");
 var Utils_1 = require("./Utils");
 var Graph_Analizers_1 = require("./Graph-Analizers");
@@ -16,75 +16,75 @@ var DirectedBaseAnalizer = /** @class */ (function (_super) {
         configurable: true
     });
     return DirectedBaseAnalizer;
-}(Graph_Analizers_1.BaseAnalizer));
+}(Graph_Analizers_1.BaseAnalyzer));
 exports.DirectedBaseAnalizer = DirectedBaseAnalizer;
-var DirectedEdgeAnalizer = /** @class */ (function (_super) {
-    tslib_1.__extends(DirectedEdgeAnalizer, _super);
-    function DirectedEdgeAnalizer(showStack, showInternals, showTreeEnd) {
+var DirectedEdgeAnalyzer = /** @class */ (function (_super) {
+    tslib_1.__extends(DirectedEdgeAnalyzer, _super);
+    function DirectedEdgeAnalyzer(showStack, showInternals, showTreeEnd) {
         var _this = _super.call(this, "Directed Edge Analizer", showStack, showInternals, showTreeEnd) || this;
         _this.showStack = showStack;
         _this.showInternals = showInternals;
         _this.showTreeEnd = showTreeEnd;
         return _this;
     }
-    Object.defineProperty(DirectedEdgeAnalizer.prototype, "directed", {
+    Object.defineProperty(DirectedEdgeAnalyzer.prototype, "directed", {
         get: function () { return true; },
         enumerable: false,
         configurable: true
     });
-    DirectedEdgeAnalizer.prototype.report = function () {
+    DirectedEdgeAnalyzer.prototype.report = function () {
         var _this = this;
         _super.prototype.report.call(this);
         if (this.showInternals) {
-            console.log("post: " + this.dfs.post.map(function (n) { return Utils_1.formatNumber(n, _this.maxLabelWidth); }).join('  '));
+            console.log("post: ".concat(this.dfs.post.map(function (n) { return (0, Utils_1.formatNumber)(n, _this.maxLabelWidth); }).join('  ')));
         }
     };
-    return DirectedEdgeAnalizer;
+    return DirectedEdgeAnalyzer;
 }(Graph_Analizers_1.BaseEdgeAnalizer));
-exports.DirectedEdgeAnalizer = DirectedEdgeAnalizer;
-var DirectedComponentAnalizer = /** @class */ (function (_super) {
-    tslib_1.__extends(DirectedComponentAnalizer, _super);
-    function DirectedComponentAnalizer() {
+exports.DirectedEdgeAnalyzer = DirectedEdgeAnalyzer;
+var DirectedComponentAnalyzer = /** @class */ (function (_super) {
+    tslib_1.__extends(DirectedComponentAnalyzer, _super);
+    function DirectedComponentAnalyzer() {
         return _super.call(this, "Directed Component Analizer") || this;
     }
-    Object.defineProperty(DirectedComponentAnalizer.prototype, "directed", {
+    Object.defineProperty(DirectedComponentAnalyzer.prototype, "directed", {
         get: function () { return true; },
         enumerable: false,
         configurable: true
     });
-    return DirectedComponentAnalizer;
+    return DirectedComponentAnalyzer;
 }(Graph_Analizers_1.BaseComponentAnalizer));
-exports.DirectedComponentAnalizer = DirectedComponentAnalizer;
+exports.DirectedComponentAnalyzer = DirectedComponentAnalyzer;
 //works with DFS only
-var ToposortAnalizer = /** @class */ (function (_super) {
-    tslib_1.__extends(ToposortAnalizer, _super);
-    function ToposortAnalizer() {
+var TopoSortAnalyzer = /** @class */ (function (_super) {
+    tslib_1.__extends(TopoSortAnalyzer, _super);
+    function TopoSortAnalyzer() {
         return _super.call(this, "Topological sort") || this;
     }
-    ToposortAnalizer.prototype.register = function (dfs) {
+    TopoSortAnalyzer.prototype.register = function (dfs) {
         _super.prototype.register.call(this, dfs);
         this.order = new Array(this.dfs.nodes).fill(-1);
         this.index = 0;
         this.isDAG = true;
     };
-    ToposortAnalizer.prototype.visit = function (v, w, e) {
+    TopoSortAnalyzer.prototype.visit = function (v, w, e) {
         if (e == Graph_1.EdgeVisitEnum.back)
             this.isDAG = false;
     };
-    ToposortAnalizer.prototype.endTree = function (v, w) {
+    TopoSortAnalyzer.prototype.endTree = function (v, w) {
         _super.prototype.endTree.call(this, v, w);
         this.isDAG && (this.order[this.index++] = w);
     };
-    ToposortAnalizer.prototype.report = function () {
+    TopoSortAnalyzer.prototype.report = function () {
         _super.prototype.report.call(this);
         if (!this.isDAG) {
             console.log("Directed Graph is not a DAG, it has cycles");
         }
         else {
             var w_1 = Math.max.apply(null, this.dfs.g.nodeList().map(function (n) { return n.label().length; })) + 1;
-            console.log("order:   " + this.order.map(function (n) { return Utils_1.formatNumber(n, w_1); }).join(' > '));
+            console.log("order:   ".concat(this.order.map(function (n) { return (0, Utils_1.formatNumber)(n, w_1); }).join(' > ')));
         }
     };
-    return ToposortAnalizer;
+    return TopoSortAnalyzer;
 }(DirectedBaseAnalizer));
-exports.ToposortAnalizer = ToposortAnalizer;
+exports.TopoSortAnalyzer = TopoSortAnalyzer;

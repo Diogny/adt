@@ -1,12 +1,12 @@
 import { BTree, BTreeNode } from "./BTree";
-import Stack from "./Stack";
+import { Stack } from "./Stack";
 
 export enum RedBlackEnum {
 	red = 0,
 	black = 1
 }
 
-export class RedBlackTreeNode<T> extends BTreeNode<T>{
+export class RedBlackTreeNode<T> extends BTreeNode<T> {
 
 	public color: RedBlackEnum;
 
@@ -164,7 +164,7 @@ function getColor<T>(node: RedBlackTreeNode<T> | undefined): RedBlackEnum {
 
 function rotateLeft<T>(x: RedBlackTreeNode<T>, tree: RedBlackTree<T>, stack: Stack<RedBlackTreeNode<T>>, pushParent?: boolean) {
 	let
-		p = <RedBlackTreeNode<T>>stack.peek(),
+		p = stack.peek(),
 		y = <RedBlackTreeNode<T>>x.right;
 	x.right = y.left;
 	y.left = x;
@@ -177,7 +177,7 @@ function rotateLeft<T>(x: RedBlackTreeNode<T>, tree: RedBlackTree<T>, stack: Sta
 
 function rotateRight<T>(x: RedBlackTreeNode<T>, tree: RedBlackTree<T>, stack: Stack<RedBlackTreeNode<T>>, pushParent?: boolean) {
 	let
-		p = <RedBlackTreeNode<T>>stack.peek(),
+		p = stack.peek(),
 		y = <RedBlackTreeNode<T>>x.left;
 	x.left = y.right;
 	y.right = x;
@@ -197,7 +197,7 @@ function balanceAfterInsert<T>(tree: RedBlackTree<T>, x: RedBlackTreeNode<T>, st
 		comp = 0;
 	while (stack.count >= 2 && (p = <RedBlackTreeNode<T>>stack.pop()).color == RedBlackEnum.red) {
 		//parent is RED
-		g = <RedBlackTreeNode<T>>stack.peek();
+		g = stack.peek();
 		comp = tree.comparer(p.value, g.value);
 		//get x's parent uncle y
 		if (comp < 0)
@@ -258,7 +258,7 @@ function balanceAfterDelete<T>(tree: RedBlackTree<T>, x: RedBlackTreeNode<T>, st
 
 	while (!stack.empty && getColor(x) == RedBlackEnum.black) {
 
-		parent = <RedBlackTreeNode<T>>stack.peek();
+		parent = stack.peek();
 
 		y = getChild(parent, siblingComparer(comp));
 
@@ -281,7 +281,7 @@ function balanceAfterDelete<T>(tree: RedBlackTree<T>, x: RedBlackTreeNode<T>, st
 				//move up
 				stack.pop();
 				x = parent;
-				parent = <RedBlackTreeNode<T>>stack.peek();
+				parent = stack.peek();
 				(parent != undefined) && (comp = tree.comparer(x.value, parent.value))
 			} else {
 				if (getColor(<RedBlackTreeNode<T>>y.right) == RedBlackEnum.black) {
@@ -318,7 +318,7 @@ function balanceAfterDelete<T>(tree: RedBlackTree<T>, x: RedBlackTreeNode<T>, st
 				//move up
 				stack.pop();
 				x = parent;
-				parent = <RedBlackTreeNode<T>>stack.peek();
+				parent = stack.peek();
 				(parent != undefined) && (comp = tree.comparer(x.value, parent.value))
 			} else {
 				if (getColor(<RedBlackTreeNode<T>>y.left) == RedBlackEnum.black) {

@@ -1,48 +1,46 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var RedBlackTree_1 = require("../lib/RedBlackTree");
-var tree_utils_1 = require("./tree-utils");
-var Utils_1 = require("src/lib/Utils");
-var ratio = window.screen.width / window.screen.height, svg = document.querySelector('svg'), vbinfo = Utils_1.qS("#canvas-info"), node = Utils_1.qS("#node-value"), cons = Utils_1.qS("#cons-out>div:nth-of-type(2)"), treeSize = Utils_1.qS("#tree-size"), leftpad = 20, toppad = 40, xstart = leftpad, ystart = toppad, rowHeight = ystart, viewbox = setViewBox(0, 0, svg.clientWidth * ratio | 0, svg.clientHeight * ratio | 0), options = void 0, svgRowItems = [], maxYcaption = Number.MIN_SAFE_INTEGER;
+import { RedBlackTree, RedBlackEnum } from "../lib/RedBlackTree";
+import { BTreeVisualizer } from "./tree-utils";
+import { aEL, attr, html, qS } from "dabbjs/dist/lib/dom";
+let ratio = window.screen.width / window.screen.height, svg = document.querySelector('svg'), vbinfo = qS("#canvas-info"), node = qS("#node-value"), cons = qS("#cons-out>div:nth-of-type(2)"), treeSize = qS("#tree-size"), leftpad = 20, toppad = 40, xstart = leftpad, ystart = toppad, rowHeight = ystart, viewbox = setViewBox(0, 0, svg.clientWidth * ratio | 0, svg.clientHeight * ratio | 0), options = void 0, svgRowItems = [], maxYcaption = Number.MIN_SAFE_INTEGER;
 clearSVG(createTree());
-Utils_1.aEL(Utils_1.qS("#clear-tree"), "click", function () {
+aEL(qS("#clear-tree"), "click", () => {
     clearSVG(createTree());
 }, false);
-Utils_1.aEL(Utils_1.qS("#load-sample"), "click", function (e) {
+aEL(qS("#load-sample"), "click", (e) => {
     clearSVG(getTreeSample());
     addSVGTree("sample tree");
 }, false);
-Utils_1.aEL(Utils_1.qS("#insert"), "click", function (e) {
-    var nodeValue = getNodeValue(), value = parseFloat(nodeValue);
+aEL(qS("#insert"), "click", (e) => {
+    let nodeValue = getNodeValue(), value = parseFloat(nodeValue);
     if (isNaN(value)) {
-        logMsg("invalid number: " + nodeValue);
+        logMsg(`invalid number: ${nodeValue}`);
     }
     else {
         if (options.tree.insert(createNode(value))) {
-            addSVGTree("added: " + value);
+            addSVGTree(`added: ${value}`);
         }
         else {
-            logMsg("could not insert: " + nodeValue);
+            logMsg(`could not insert: ${nodeValue}`);
         }
     }
 }, false);
-Utils_1.aEL(Utils_1.qS("#delete"), "click", function (e) {
-    var nodeValue = getNodeValue(), value = parseFloat(nodeValue);
+aEL(qS("#delete"), "click", (e) => {
+    let nodeValue = getNodeValue(), value = parseFloat(nodeValue);
     if (isNaN(value)) {
-        logMsg("invalid number: " + nodeValue);
+        logMsg(`invalid number: ${nodeValue}`);
     }
     else {
         if (options.tree.delete(createNode(value))) {
-            addSVGTree("deleted: " + value);
+            addSVGTree(`deleted: ${value}`);
         }
         else {
-            logMsg("could not insert: " + nodeValue);
+            logMsg(`could not insert: ${nodeValue}`);
         }
     }
 }, false);
 function setViewBox(x, y, w, h) {
-    Utils_1.attr(svg, { "viewBox": x + " " + y + " " + w + " " + h });
-    vbinfo.innerText = "x: " + x + ", y: " + y + ", width: " + w + ", height: " + h;
+    attr(svg, { "viewBox": `${x} ${y} ${w} ${h}` });
+    vbinfo.innerText = `x: ${x}, y: ${y}, width: ${w}, height: ${h}`;
     return {
         x: x,
         y: y,
@@ -51,7 +49,7 @@ function setViewBox(x, y, w, h) {
     };
 }
 function createTree() {
-    return new RedBlackTree_1.RedBlackTree(function (a, b) {
+    return new RedBlackTree((a, b) => {
         if (a.value == b.value)
             return 0;
         else if (a.value > b.value)
@@ -66,17 +64,17 @@ function createNode(value) {
     };
 }
 function getTreeSample() {
-    var t = createTree(), array = [7, 3, 18, 10, 22, 8, 11, 26, 2, 6, 13].map(function (v) { return createNode(v); });
+    let t = createTree(), array = [7, 3, 18, 10, 22, 8, 11, 26, 2, 6, 13].map(v => createNode(v));
     t.insertRange(array);
     return t;
 }
 function getNodeValue() {
-    var nodeValue = node.value;
+    let nodeValue = node.value;
     node.value = "";
     return nodeValue;
 }
 function getTreeSizeLabel() {
-    return "Size: " + options.tree.size;
+    return `Size: ${options.tree.size}`;
 }
 function clearSVG(tree) {
     svg.innerHTML = "";
@@ -94,26 +92,26 @@ function clearSVG(tree) {
         FONT_SIZE: 20,
         x: 0,
         y: 0,
-        nodeClass: function (node) { return RedBlackTree_1.RedBlackEnum[node.color]; },
-        nodeValue: function (node) { return String(node.value); }
+        nodeClass: (node) => RedBlackEnum[node.color],
+        nodeValue: (node) => String(node.value)
     };
     cons.innerHTML = "";
     treeSize.innerText = getTreeSizeLabel();
     svgRowItems = [];
 }
 function logMsg(msg) {
-    cons.appendChild(Utils_1.html("<div>" + msg + "</div>"));
+    cons.appendChild(html(`<div>${msg}</div>`));
 }
 function addSVGTree(caption) {
     treeSize.innerText = getTreeSizeLabel();
     options.caption = caption;
     options.x = xstart;
     options.y = ystart;
-    var svgTree = tree_utils_1.BTreeVisualizer(options);
+    let svgTree = BTreeVisualizer(options);
     rowHeight = Math.max(rowHeight, svgTree.height);
     if (svgTree.width + xstart > viewbox.width) {
         moveToNextRow();
-        svgTree.svg.setAttribute("transform", "translate(" + xstart + " " + ystart + ")");
+        svgTree.svg.setAttribute("transform", `translate(${xstart} ${ystart})`);
         svgRowItems = [svgTree.svg];
         maxYcaption = svgTree.height;
     }
@@ -121,9 +119,9 @@ function addSVGTree(caption) {
         svgRowItems.push(svgTree.svg);
         maxYcaption = Math.max(maxYcaption, svgTree.height);
         //adjust g>text
-        svgRowItems.forEach(function (svg) {
-            var text = svg.querySelector("text.caption");
-            Utils_1.attr(text, {
+        svgRowItems.forEach((svg) => {
+            let text = svg.querySelector("text.caption");
+            attr(text, {
                 y: maxYcaption
             });
         });

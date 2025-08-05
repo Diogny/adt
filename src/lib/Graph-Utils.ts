@@ -1,5 +1,8 @@
+import { range } from "dabbjs/dist/lib/misc";
+import { toBool } from "dabbjs/dist/lib/dab";
+import { fillChar, formatNumber } from "dabbjs/dist/lib/strings";
 import { BaseGraph } from "./Graph";
-import { range, toBool, formatNumber, fillChar, matrix, centerStr, centerPadStr, replaceAt } from "./Utils";
+import { matrix, centerStr, centerPadStr, replaceAt } from "./Utils";
 import { BaseTree, ValueNode } from "./Tree";
 
 function toMatrix(g: BaseGraph): number[][] {
@@ -23,11 +26,11 @@ function displayMatrix(matrix: number[][]) {
 	let
 		width = String(matrix.length).length + 1;
 	let
-		header = fillChar(' ', width) + '|' + range(0, matrix.length).map(n => formatNumber(n, width)).join(' ');
+		header = fillChar(' ', width) + '|' + range(0, matrix.length).map((n) => formatNumber(n, width)).join(' ');
 	console.log(header);
 	console.log(fillChar('-', header.length + 1));
-	range(0, matrix.length).forEach(v => {
-		console.log(formatNumber(v, width) + '|' + range(0, matrix.length).map(w => formatNumber(matrix[v][w], width)).join(' '))
+	range(0, matrix.length).forEach((v) => {
+		console.log(formatNumber(v, width) + '|' + range(0, matrix.length).map((w) => formatNumber(matrix[v][w], width)).join(' '))
 	})
 }
 
@@ -37,30 +40,30 @@ function displayGraphMatrix(g: BaseGraph) {
 		matrix = toMatrix(g),
 		width = Math.max.apply(null, g.nodeList().map(n => n.label().length)) + 1;
 	let
-		header = fillChar(' ', width) + '|' + range(0, g.size).map(n => formatNumber(n, width)).join(' ');
+		header = fillChar(' ', width) + '|' + range(0, g.size).map((n) => formatNumber(n, width)).join(' ');
 	console.log(header);
 	console.log(fillChar('-', header.length + 1));
-	range(0, g.size).forEach(v => {
-		console.log(formatNumber(v, width) + '|' + range(0, g.size).map(w => formatNumber(matrix[v][w], width)).join(' '))
+	range(0, g.size).forEach((v) => {
+		console.log(formatNumber(v, width) + '|' + range(0, g.size).map((w) => formatNumber(matrix[v][w], width)).join(' '))
 	})
 }
 
 function fromJSON(content: { [x: string]: any }): BaseGraph {
 	let
 		name = content["name"],
-		directed = toBool(content["directed"]),
-		weighted = toBool(content["weighted"]),
+		directed = <boolean>toBool(content["directed"]),
+		weighted = <boolean>toBool(content["weighted"]),
 		labeled = !!content["labels"],
 		labels = (labeled ? Array.from(content["labels"]) : undefined) as string[],
 		labelMap = new Map<string, number>(),
 		nodes = labeled ? 0 : parseInt(content["nodes"]),
-		edges = Array.from(content["edges"]) as { from: number | string, to: number | string, w?: number }[],
+		edges: { from: number | string, to: number | string, w?: number }[] = Array.from(content["edges"]),
 		getNode = (nodeOrLabel: number | string): { node: number, label?: string } => {
 			if (labeled) {
 				let
 					n = labelMap.get(<string>nodeOrLabel);
 				return {
-					node: n != undefined ? <number>n : -1,
+					node: n ?? -1,	// n != undefined ? n : -1,
 					label: <string>nodeOrLabel
 				}
 			} else
@@ -79,22 +82,22 @@ function fromJSON(content: { [x: string]: any }): BaseGraph {
 
 	if (labeled) {
 		if (!labels)
-			throw `invalid graph labels`
+			throw new Error(`invalid graph labels`);
 		labels.forEach((label: string, node: number) => {
 			g.addNode(label);
 			labelMap.set(label, node)
 		})
 	} else {
-		range(0, nodes).forEach(n => g.addNode())
+		range(0, nodes).forEach((n) => g.addNode())
 	}
 
 	if (!edges)
-		throw `invalid edges`;
+		throw new Error(`invalid edges`);
 	edges.forEach((e) => {
 		let
 			edge = getEdge(e);
 		if (edge.v.node == -1 || edge.w.node == -1)
-			throw `invalid edge: ${e}`;
+			throw new Error(`invalid edge`);	//: ${e}
 		if (weighted) {
 			!edge.weight && (edge.weight = 0);
 			g.connect(edge.v.node, edge.w.node, edge.weight)
@@ -195,11 +198,11 @@ function generatorValueToArray<TValue, TResult>(
 		array = new Array<TValue>(),
 		result: IteratorResult<TValue, TResult>;
 	while (!(result = enumerator.next()).done) {
-		array.push(<TValue>result.value)
+		array.push(result.value)
 	}
 	return {
 		array: array,
-		value: <TResult>result.value
+		value: result.value
 	}
 }
 
@@ -211,11 +214,11 @@ function generatorObjToArray<TValue, TValueOut, TResult>(
 		array = new Array<TValueOut>(),
 		result: IteratorResult<TValue, TResult>;
 	while (!(result = enumerator.next()).done) {
-		array.push(transformer(<TValue>result.value))
+		array.push(transformer(result.value))
 	}
 	return {
 		array: array,
-		value: <TResult>result.value
+		value: result.value
 	}
 }
 

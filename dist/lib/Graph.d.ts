@@ -58,7 +58,7 @@ export interface ISearchTask {
     timing(): number;
     search: (start: number) => Generator<IEdgeSearch, number>;
 }
-export interface IDFSAnalizer {
+export interface IDFSAnalyzer {
     name: string;
     directed: boolean;
     visit(v: number, w: number, e: EdgeVisitEnum): void;

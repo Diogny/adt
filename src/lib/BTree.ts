@@ -1,12 +1,12 @@
 import { ValueNode, BaseTree } from "./Tree";
-import Stack from "./Stack";
+import { Stack } from "./Stack";
 
-export class BTreeNode<T> extends ValueNode<T>  {
+export class BTreeNode<T> extends ValueNode<T> {
 
 	public get isLeaf(): boolean { return !this.left && !this.right }
 
 	public get children(): BTreeNode<T>[] {
-		return [this.left, this.right].filter(item => !!item) as BTreeNode<T>[]
+		return [this.left, this.right].filter(item => !!item);
 	}
 
 	constructor(value: T, public left?: BTreeNode<T>, public right?: BTreeNode<T>) {
@@ -21,7 +21,7 @@ export enum SearchBTreeTraverse {
 	Right
 }
 
-export class BTree<T> extends BaseTree<T>{
+export class BTree<T> extends BaseTree<T> {
 
 	protected __size: number;
 
@@ -122,20 +122,18 @@ export class BTree<T> extends BaseTree<T>{
 					prevComp: prevComp,
 					comp: 0
 				}
-			} else {
-				if (comp < 0) {
-					if (node.left != undefined) {
-						parent = node;
-						prevComp = comp;
-					}
-					node = <BTreeNode<T>>node.left
-				} else {
-					if (node.right != undefined) {
-						parent = node;
-						prevComp = comp;
-					}
-					node = <BTreeNode<T>>node.right
+			} else if (comp < 0) {
+				if (node.left != undefined) {
+					parent = node;
+					prevComp = comp;
 				}
+				node = <BTreeNode<T>>node.left
+			} else {
+				if (node.right != undefined) {
+					parent = node;
+					prevComp = comp;
+				}
+				node = <BTreeNode<T>>node.right
 			}
 		}
 		return { node: <any>void 0, parent: <any>void 0, prevComp: 0, comp: 0 }
@@ -154,7 +152,8 @@ export class BTree<T> extends BaseTree<T>{
 			key = this.findKey(value);
 		if (!(key.comp == 0 && key.node != undefined)) {
 			return false
-		} if (key.node.isLeaf) {
+		}
+		if (key.node.isLeaf) {
 			setChild(key.parent, void 0, key.prevComp);
 		} else
 			if (key.node.left == undefined || key.node.right == undefined) {
@@ -162,11 +161,11 @@ export class BTree<T> extends BaseTree<T>{
 			} else {
 				let
 					p: BTreeNode<T> = <any>void 0,
-					n = <BTreeNode<T>>key.node.left,
+					n = key.node.left,
 					comp = n.right == undefined ? -1 : 1;
 				while (n.right != undefined) {
 					p = n;
-					n = <BTreeNode<T>>n.right
+					n = n.right
 				}
 				key.node.value = n.value;
 				if (p == undefined)

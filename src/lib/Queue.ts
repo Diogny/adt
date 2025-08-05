@@ -1,6 +1,6 @@
-import Stack from "./Stack";
+import { Stack } from "./Stack";
 
-export default class Queue<T> extends Stack<T> {
+export class Queue<T> extends Stack<T> {
 
 	public dequeue(): T | undefined { return this.pop() }
 

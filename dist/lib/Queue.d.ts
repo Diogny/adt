@@ -1,5 +1,5 @@
-import Stack from "./Stack";
-export default class Queue<T> extends Stack<T> {
+import { Stack } from "./Stack";
+export declare class Queue<T> extends Stack<T> {
     dequeue(): T | undefined;
     enqueue(t: T): number;
     peek(): T;

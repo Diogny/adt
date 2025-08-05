@@ -1,4 +1,4 @@
-import { selectMany } from "./Utils";
+import { selectMany } from "dabbjs/dist/lib/generics";
 
 interface ILabel {
 	label(): string;
@@ -16,7 +16,7 @@ export class LabeledNode extends GraphNode {
 	constructor(id: number, public __label: string) {
 		super(id);
 		if (!__label)
-			throw `empty node label`
+			throw new Error(`empty node label`)
 	}
 
 	public label(): string { return this.__label }
@@ -39,7 +39,7 @@ export class WeightedEdge extends Edge {
 	constructor(v: number, w: number, public weight: number) {
 		super(v, w);
 		if (Number.isNaN(weight))
-			throw `invalid edge weight`
+			throw new Error(`invalid edge weight`)
 	}
 
 	public label(): string { return `(${this.v}>${this.w})::${this.weight}` }
@@ -79,7 +79,7 @@ export interface ISearchTask {
 	search: (start: number) => Generator<IEdgeSearch, number>;
 }
 
-export interface IDFSAnalizer {
+export interface IDFSAnalyzer {
 	name: string;
 	directed: boolean;
 	visit(v: number, w: number, e: EdgeVisitEnum): void;
@@ -248,15 +248,13 @@ export abstract class BaseGraph implements IGraph, ILabel {
 	public static create(name: string, directed: boolean, weighted: boolean, labeled: boolean): BaseGraph {
 		if (labeled) {
 			if (weighted)
-				throw `weighted labeled graph not supported yet!`
+				throw new Error(`weighted labeled graph not supported yet!`)
 			else
 				return directed ? new LabeledDiGraph(name) : new LabeledGraph(name);
-		} else {
-			if (weighted)
-				return directed ? new WeightedDiGraph(name) : new WeightedGraph(name);
-			else
-				return directed ? new DiGraph(name) : new Graph(name);
-		}
+		} else if (weighted)
+			return directed ? new WeightedDiGraph(name) : new WeightedGraph(name);
+		else
+			return directed ? new DiGraph(name) : new Graph(name);
 	}
 
 }

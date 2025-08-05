@@ -1,7 +1,7 @@
 import { BTreeNode, BTree } from "./BTree";
-import Stack from "./Stack";
+import { Stack } from "./Stack";
 
-export class AVLTreeNode<T> extends BTreeNode<T>{
+export class AVLTreeNode<T> extends BTreeNode<T> {
 
 	public depth: number;
 
@@ -43,7 +43,7 @@ export class AVLTree<T> extends BTree<T> {
 			this.__size++;
 			return true
 		}
-		insertNode(parent, node = newNode(value), comp);
+		insertNode(parent, newNode(value), comp);	//node =
 		balanceTree(this, stack);
 		this.__size++;
 		return true
@@ -53,7 +53,7 @@ export class AVLTree<T> extends BTree<T> {
 		let
 			stack = new Stack<AVLTreeNode<T>>(),
 			comp = 0,
-			parent: AVLTreeNode<T> = <any>void 0,
+			parent: AVLTreeNode<T>,
 			root: AVLTreeNode<T> = <any>void 0,
 			node = this.root as AVLTreeNode<T>,
 			min: AVLTreeNode<T> = <any>void 0,
@@ -74,7 +74,7 @@ export class AVLTree<T> extends BTree<T> {
 		}
 		if (!found)
 			return false;
-		parent = stack.peek() as AVLTreeNode<T>;
+		parent = stack.peek();
 		if (node.isLeaf) {
 			if (!parent) {
 				this.root = <any>void 0;
@@ -166,7 +166,7 @@ function deleteMin<T>(tree: AVLTree<T>, node: AVLTreeNode<T>, parent: AVLTreeNod
 			stack.push(node);
 	}
 	setChild(node.right, parent, comp);
-	setDepth(parent as AVLTreeNode<T>);
+	setDepth(parent);
 	balanceTree(tree, stack);
 	return node
 }
@@ -213,7 +213,7 @@ function balanceTree<T>(tree: AVLTree<T>, stack: Stack<AVLTreeNode<T>>) {
 			}
 			setDepth(node);
 			setDepth(root);
-			parent = stack.peek() as AVLTreeNode<T>;
+			parent = stack.peek();
 			if (!parent) {
 				tree.root = root;
 			} else {

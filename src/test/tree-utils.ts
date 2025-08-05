@@ -1,5 +1,6 @@
+import { attr } from "dabbjs/dist/lib/dom";
 import { BTree, BTreeNode } from "../lib/BTree";
-import { tag, attr } from "../lib/Utils";
+import { tag } from "../lib/Utils";
 
 export interface IVisualBTreeConfig<T> {
 	tree: BTree<T>,
@@ -24,7 +25,7 @@ export function BTreeVisualizer<T>(conf: IVisualBTreeConfig<T>): { svg: SVGGElem
 			transform: `translate(${conf.x | 0} ${conf.y | 0})`
 		}),
 		svgCaption = <SVGTextElement>tag("text", "", {
-			class : "caption",
+			class: "caption",
 			"font-size": conf.FONT_SIZE,
 		});
 	if (conf && conf.tree && conf.svg) {
@@ -37,7 +38,7 @@ export function BTreeVisualizer<T>(conf: IVisualBTreeConfig<T>): { svg: SVGGElem
 		svgTree.appendChild(svgCaption);
 		let
 			box = svgCaption.getBBox();
-		attr(svgCaption, {
+		attr(<any>svgCaption, {
 			x: Math.max(0, (width / 2 - box.width / 2) | 0),
 			y: height
 		});
@@ -101,7 +102,7 @@ function visualizeNode<T>(node: BTreeNode<T>, svg: SVGGElement, minx: number, ma
 
 	let
 		box = svgText.getBBox()
-	attr(svgText, {
+	attr(<any>svgText, {
 		x: circleRadius - box.width / 2 | 0,
 		y: circleRadius + box.height / 4 | 0
 	});

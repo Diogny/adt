@@ -9,10 +9,10 @@ export declare abstract class BaseAnalyzer implements IDFSAnalyzer {
     abstract visit(v: number, w: number, e: EdgeVisitEnum): void;
     report(): void;
 }
-export declare abstract class UndirectedBaseAnalizer extends BaseAnalyzer {
+export declare abstract class UndirectedBaseAnalyzer extends BaseAnalyzer {
     get directed(): boolean;
 }
-export declare class BridgeAnalyzer extends UndirectedBaseAnalizer {
+export declare class BridgeAnalyzer extends UndirectedBaseAnalyzer {
     low: number[];
     bridges: IEdge[];
     articulationPoints: number[];
@@ -22,7 +22,7 @@ export declare class BridgeAnalyzer extends UndirectedBaseAnalizer {
     visit(v: number, w: number, e: EdgeVisitEnum): void;
     report(): void;
 }
-export declare class CyclesAnalyzer extends UndirectedBaseAnalizer {
+export declare class CyclesAnalyzer extends UndirectedBaseAnalyzer {
     cycles: number[][];
     get count(): number;
     constructor();
@@ -30,7 +30,7 @@ export declare class CyclesAnalyzer extends UndirectedBaseAnalizer {
     visit(v: number, w: number, e: EdgeVisitEnum): void;
     report(): void;
 }
-export declare abstract class BaseEdgeAnalizer extends BaseAnalyzer {
+export declare abstract class BaseEdgeAnalyzer extends BaseAnalyzer {
     showStack?: boolean | undefined;
     showInternals?: boolean | undefined;
     showTreeEnd?: boolean | undefined;
@@ -48,21 +48,21 @@ export declare abstract class BaseEdgeAnalizer extends BaseAnalyzer {
     visit(v: number, w: number, e: EdgeVisitEnum): void;
     report(): void;
 }
-export declare class EdgeAnalyzer extends BaseEdgeAnalizer {
+export declare class EdgeAnalyzer extends BaseEdgeAnalyzer {
     showStack?: boolean | undefined;
     showInternals?: boolean | undefined;
     showTreeEnd?: boolean | undefined;
     get directed(): boolean;
     constructor(showStack?: boolean | undefined, showInternals?: boolean | undefined, showTreeEnd?: boolean | undefined);
 }
-export declare abstract class BaseComponentAnalizer extends BaseAnalyzer {
+export declare abstract class BaseComponentAnalyzer extends BaseAnalyzer {
     count: number;
     components: number[];
     register(dfs: ISearchTask): void;
     visit(v: number, w: number, e: EdgeVisitEnum): void;
     report(): void;
 }
-export declare class ComponentAnalyzer extends BaseComponentAnalizer {
+export declare class ComponentAnalyzer extends BaseComponentAnalyzer {
     get directed(): boolean;
     constructor();
 }
